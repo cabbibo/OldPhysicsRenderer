@@ -6,7 +6,7 @@ var ParticleUtils = {
 
     var geometry = new THREE.Geometry();
 
-    THREE.GeometryUtils.merge( geometry , mesh );
+    geometry.merge( mesh.geometry , mesh.matrix );
 
     var point = new THREE.Vector3();
     var facesLength = geometry.faces.length;
@@ -55,9 +55,9 @@ var ParticleUtils = {
         
     var geo = new THREE.BufferGeometry();
 
-    geo.addAttribute( 'position', Float32Array , size * size , 3 );
-   
-    var positions = geo.attributes.position.array;
+   // geo.addAttribute( 'position', Float32Array , size * size , 3 );
+  
+    var positions = new Float32Array(  size * size * 3 );
 
     for ( var i = 0, j = 0, l = positions.length / 3; i < l; i ++, j += 3 ) {
 
@@ -66,6 +66,9 @@ var ParticleUtils = {
       //positions[ j + 2 ] = Math.sin( (i / size) * Math.PI );
 
     }
+
+    geo.addAttribute( 'position', positions , 3 );
+
 
     return geo;
     
