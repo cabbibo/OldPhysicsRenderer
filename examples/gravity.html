@@ -11,34 +11,49 @@
 
     <script src="../lib/three.min.js"></script>
     <script src="../lib/jquery.min.js"></script>
-    <script src="../lib/TrackballControls.js"></script>
+    <script src="../lib/RotateControls.js"></script>
     <script src="../lib/ShaderLoader.js"></script>
     
     <script src="../ParticleUtils.js"></script>
-    <script src="../PhysicsRenderer.js"></script>
+    <script src="../PosVelSimulation.js"></script>
 
+    <script src="../lib/AudioController.js"></script>
+    <script src="../lib/AudioTexture.js"></script>
+    <script src="../lib/Stream.js"></script>
     <script>
 
 
+      var audio
 
-      var camera, renderer, scene , controls;
+      var camera, renderer, scene , controls, clock;
       
       var particleSystem;
       var physicsRenderer , uniforms;
 
+      var audioController = new AudioController();
+      var stream = new Stream( '../audio/magicStick.mp3' , audioController );
+
+      stream.play();
+
+      var t_audio = audioController.texture;
+
+      var time = { type:"f" , value:0.0 }
+      var cameraAngle = { type:"f" , value:0.0 }
       // Using: https://github.com/cabbibo/ShaderLoader
       // For More info: http://cabbibo.github.io/ShaderLoader/
 
       var shaders = new ShaderLoader('../shaders');
+
 
       shaders.shaderSetLoaded = function(){
         init();
         animate();
       }
 
-      shaders.load( 'fs-accel'        , 'render'  , 'fragment'    );
-      shaders.load( 'vs-render'       , 'render'  , 'vertex'      );
-      shaders.load( 'gravitySimBug1'  , 'gravitySim' , 'simulation'  );
+      shaders.load( 'fs-renderPosVel'   , 'render'  , 'fragment'    );
+      shaders.load( 'vs-renderPosVel'   , 'render'  , 'vertex'      );
+      shaders.load( 'gravityPos'  , 'posSim'  , 'simulation'  );
+      shaders.load( 'gravityVel'  , 'velSim'  , 'simulation'  );
 
 
       function init(){
@@ -49,13 +64,15 @@
 
         */
 
+        clock = new THREE.Clock();
+
         var w = window.innerWidth;
         var h = window.innerHeight;
 
         camera = new THREE.PerspectiveCamera( 65 , w/h , 1 , 2000 );
-        camera.position.z = 100;
+        camera.position.z = 50;
 
-        controls = new THREE.TrackballControls( camera );
+        controls = new THREE.RotateControls( camera );
         scene = new THREE.Scene();
 
         renderer = new THREE.WebGLRenderer();
@@ -65,40 +82,107 @@
 
         size = 512;
 
-        var sim = shaders.simulationShaders.gravitySim;
-        physicsRenderer = new PhysicsRenderer( size , sim , renderer ); 
+        var posSim = shaders.simulationShaders.posSim;
+        var velSim = shaders.simulationShaders.velSim;
+        physicsRenderer = new PosVelSimulation( size , posSim , velSim , renderer ); 
 
+        var spriteTexture = THREE.ImageUtils.loadTexture( '../img/snowflake2.png' );
         uniforms = {
           t_pos:{ type:"t" , value:null },
-          t_oPos:{ type:"t" , value:null },
-          t_ooPos:{ type:"t" , value:null },
+          t_vel:{ type:"t" , value:null },
+          t_audio:{ type:"t" , value:t_audio },
+          sprite:{ type:"t" , value:spriteTexture }
         }
         
         var mat = new THREE.ShaderMaterial({
           uniforms: uniforms,
           vertexShader: shaders.vertexShaders.render,
-          fragmentShader: shaders.fragmentShaders.render
-        })
+          fragmentShader: shaders.fragmentShaders.render,
+          transparent:true,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending
+        });
 
         var geo = ParticleUtils.createLookupGeometry( size );
 
         physicsParticles  = new THREE.ParticleSystem( geo , mat );
 
-        physicsRenderer.addBoundTexture( physicsParticles , 't_pos' , 'output' );
-        physicsRenderer.addBoundTexture( physicsParticles , 't_oPos' , 'oOutput' );
-        physicsRenderer.addBoundTexture( physicsParticles , 't_ooPos' , 'ooOutput' );
+        physicsRenderer.addBoundTexture( physicsParticles , 't_pos' , 'outputPos' );
+        physicsRenderer.addBoundTexture( physicsParticles , 't_vel' , 'outputVel' );
+
+        var audioU = { type:"t" , value: t_audio }
+
+        physicsRenderer.setPosUniform( 't_audio' , audioU );
+        physicsRenderer.setVelUniform( 't_audio' , audioU );
+        physicsRenderer.setVelUniform( 'time' , time );
+        physicsRenderer.setVelUniform( 'cameraAngle' , cameraAngle);
 
         scene.add( physicsParticles );
 
       
 
-        var mesh = new THREE.Mesh( new THREE.BoxGeometry( 20 , 1 , 20 , 20 , 1 , 20 ) );
+        var mesh = new THREE.Mesh( new THREE.BoxGeometry( 20 , 1 , 20 , 2 , 20 , 2 ) );
         mesh.position.y = 20;
         var pTexture = ParticleUtils.createPositionsTexture( size , mesh );
         physicsRenderer.reset( pTexture );
 
-        var uniform = { type:"v3" , value: new THREE.Vector3() }
-        physicsRenderer.setUniform( 'spherePos' , uniform );
+        var pTextureU = { type:"t" , value: pTexture }
+        physicsRenderer.setPosUniform( 't_start' , pTextureU );
+
+
+        var geo = new THREE.IcosahedronGeometry( 5 , 4 );
+
+        var mat = new THREE.MeshBasicMaterial({color:0x000000,side:THREE.DoubleSide});
+        var mesh = new THREE.Mesh( geo , mat );
+        scene.add( mesh );
+
+        var mesh = new THREE.Mesh( geo , mat );
+        mesh.position.x = 5;
+        mesh.position.z = -5;
+        mesh.position.y = -5;
+        scene.add( mesh );
+
+        var mesh = new THREE.Mesh( geo , mat );
+        mesh.position.x = 5;
+        mesh.position.z = 5;
+        mesh.position.y = -5;
+        scene.add( mesh );
+
+        var mesh = new THREE.Mesh( geo , mat );
+        mesh.position.x = -5;
+        mesh.position.z = 5;
+        mesh.position.y = -5;
+        scene.add( mesh );
+
+        var mesh = new THREE.Mesh( geo , mat );
+        mesh.position.x = -5;
+        mesh.position.z = -5;
+        mesh.position.y = -5;
+        scene.add( mesh );
+
+
+
+        light= new THREE.PointLight( 0xffffff , 10 , 50 );
+        light.position.set( 0 , 20 , 0 );
+
+        scene.add( light );
+
+        var texture = THREE.ImageUtils.loadTexture('../img/water.jpg');
+        var normal = THREE.ImageUtils.loadTexture('../img/waternormals.jpg' );
+        skyGeo = new THREE.BoxGeometry( 100 , 40 , 100 );
+        skyMat = new THREE.MeshPhongMaterial({
+          side:THREE.DoubleSide,
+          color:0x331111,
+          map: texture,
+          specularMap: normal,
+          normalMap: normal,
+          //blending:THREE.AdditiveBlending,
+          //transparent:true,
+          //depthWrite:false
+        });
+        skybox = new THREE.Mesh( skyGeo , skyMat );
+
+        scene.add( skybox );
        
       }
 
@@ -108,6 +192,9 @@
 
         physicsRenderer.update();
 
+        time.value += clock.getDelta();
+        cameraAngle.value = camera.angle;
+        audioController.update();
         requestAnimationFrame( animate );
         controls.update();
         renderer.render( scene , camera );
