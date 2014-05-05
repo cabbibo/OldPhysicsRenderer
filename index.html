@@ -2,6 +2,39 @@
 
   <head>
     <style>
+
+      html{ background:#000 }
+      body{ 
+        margin: 0px;
+        font-family:"GeoSans";
+        font-size:12px;
+      }
+
+      h1{
+        position:absolute;
+        bottom:5px;
+        right:25px;
+      } 
+      a{ 
+        color:#FF717E;
+        text-decoration:none;
+        opacity:.7
+      }
+
+      a:hover{
+        color:#FF717E;
+        opacity:1;
+      }
+
+      #demo{
+        position:fixed;
+      }
+
+
+      @font-face {
+        font-family: "GeoSans";
+        src: url("lib/GeosansLight.ttf");
+      }
       #container{ position:absolute; left:0px; top:0px; }
       body{ margin:0px; }
     </style>
@@ -9,6 +42,9 @@
 
   <body>
 
+    <h1><a href="http://www.panthaduprince.com/" target="_blank">
+      Pantha du Prince - Saturn Strobe
+    </a></h1>
     <script src="lib/underscore.js"></script>
     <script src="lib/three.min.js"></script>
     <script src="lib/jquery.min.js"></script>
@@ -48,9 +84,9 @@
 
       var oCamPos;
 
-     // audioController.mute.gain.value = 0.0;
+      //audioController.mute.gain.value = 0.0;
       var stream = new Stream( 'audio/saturnStrobe.mp3' , audioController );
-      stream.play();
+      //stream.play();
 
       //var userAudio = new UserAudio( audioController );
 
@@ -72,6 +108,7 @@
       shaders.shaderSetLoaded = function(){
         init();
         animate();
+        stream.play();
       }
 
       shaders.load( 'fs-render'   , 'render'  , 'fragment'    );
