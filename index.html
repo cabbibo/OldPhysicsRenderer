@@ -22,10 +22,11 @@
     <script src="lib/AudioTexture.js"></script>
     <script src="lib/Stream.js"></script>
     <script src="lib/UserAudio.js"></script>
+    <script src="lib/sphereUpdateFunctions.js"></script>
     <script>
 
 
-      var audio
+      var audio;
 
       var camera, renderer, scene , controls, clock;
       
@@ -40,16 +41,24 @@
           physicsParticleSystems  = [];
 
 
+      var numOfSpheres = 28;
+
+
       var audioController = new AudioController();
 
       var oCamPos;
 
-      audioController.mute.gain.value = 0;
-     // var stream = new Stream( '../audio/saturnStrobe.mp3' , audioController );
+     // audioController.mute.gain.value = 0.0;
+      var stream = new Stream( '../audio/saturnStrobe.mp3' , audioController );
+      stream.play();
 
-      var userAudio = new UserAudio( audioController );
-      //stream.play();
+      //var userAudio = new UserAudio( audioController );
 
+      /*userAudio.onStreamCreated = function(){
+        console.log('hello');
+        init();
+        animate();
+      }*/
       var t_audio = audioController.texture;
 
       var time = { type:"f" , value:0.0 }
@@ -60,10 +69,10 @@
       var shaders = new ShaderLoader('../shaders/room' , '../shaders' );
 
 
-      /*shaders.shaderSetLoaded = function(){
+      shaders.shaderSetLoaded = function(){
         init();
         animate();
-      }*/
+      }
 
       shaders.load( 'fs-render'   , 'render'  , 'fragment'    );
       shaders.load( 'vs-render'   , 'render'  , 'vertex'      );
@@ -75,12 +84,21 @@
       shaders.load( 'fs-sphere'    , 'sphere'   , 'fragment'    );
       shaders.load( 'vs-sphere'    , 'sphere'   , 'vertex'      );
 
-      userAudio.onStreamCreated = function(){
-        console.log('hello');
-        init();
-        animate();
-      }
+     
 
+      for( var i = 0; i < numOfSpheres; i++ ){
+
+        var x = (Math.random() -.5 ) * 20;
+        var y = (Math.random()-.5 )* 10;
+        var z = (Math.random()-.5 )* 20;
+        var pos = new THREE.Vector3( x , y , z );
+
+        var vel = new THREE.Vector3(0,0,0);
+        pos.vel = new THREE.Vector3(0,0,0);
+        spherePositions.push( pos );
+        sphereVelocities.push( vel );
+
+      }
       function init(){
 
         /*
@@ -98,6 +116,10 @@
         camera.position.z = 50;
 
         controls = new THREE.TrackballControls( camera );
+        controls.minDistance = 10;
+        controls.maxDistance = 300;
+        controls.dynamicDampingFactor = .1;
+        controls.noPan = true;
         scene = new THREE.Scene();
         //scene.fog = new THREE.Fog( 0x000000 , 1 , 100);
 
@@ -107,7 +129,7 @@
 
         document.body.appendChild( renderer.domElement );
 
-        size = 32;
+        size = 64;
 
 
         var posSim = shaders.simulationShaders.posSim;
@@ -116,14 +138,14 @@
 
         var spriteTextures = [
 
-        THREE.ImageUtils.loadTexture( '../img/snowflake2.png' ),
+        //THREE.ImageUtils.loadTexture( '../img/snowflake2.png' ),
         THREE.ImageUtils.loadTexture( '../img/flare.png' ),
-        THREE.ImageUtils.loadTexture( '../img/sprite.png' ),
+        //THREE.ImageUtils.loadTexture( '../img/sprite.png' ),
 
 
         ]
 
-        for( var i = 0; i < 50; i++ ){
+        for( var i = 0; i < numOfSpheres; i++ ){
 
           var s = spriteTextures[ Math.floor( Math.random() * spriteTextures.length ) ];
 
@@ -133,7 +155,10 @@
             t_vel:{ type:"t" , value:null },
             t_audio:{ type:"t" , value:t_audio },
             sprite:{ type:"t" , value:s },
-            color:{ type:"v3" , value:c }
+            color:{ type:"v3" , value:c },
+            uPos:{ type:"v3" , value:spherePositions[i] },
+            uVel:{ type:"v3" , value:sphereVelocities[i] },
+            id:{ type:"f" , value: i/numOfSpheres }
           }
           
           var mat = new THREE.ShaderMaterial({
@@ -150,25 +175,47 @@
 
 
           physicsRenderer = new PosVelSimulation( size , posSim , velSim , renderer );
+          //physicsRenderer.addDebugScene( scene );
+          physicsRenderer.debugScene.scale.multiplyScalar( .1 );
+
+          var side = Math.ceil( Math.sqrt( numOfSpheres ) );
+
+          physicsRenderer.debugScene.position.x = side* 50 * (((i % side)/side)+(.5/side)-.5);
+          physicsRenderer.debugScene.position.y = side *50 * ((Math.floor( i / side )/side)+(.5/side)-.5);
+          physicsRenderer.debugScene.position.z = -100;
+
 
           physicsRenderer.addBoundTexture( physicsParticles , 't_pos' , 'outputPos' );
           physicsRenderer.addBoundTexture( physicsParticles , 't_vel' , 'outputVel' );
 
           var audioU = { type:"t" , value: t_audio }
 
-          var audioLookup = { type:"f" , value: i / 50 }
+          var audioLookup = { type:"f" , value: i / numOfSpheres }
 
           physicsRenderer.setPosUniform( 't_audio' , audioU );
           physicsRenderer.setVelUniform( 't_audio' , audioU );
+          
           physicsRenderer.setVelUniform( 'time' , time );
           physicsRenderer.setVelUniform( 'cameraAngle' , cameraAngle);
 
           physicsRenderer.setPosUniform( 'audioLookup' , audioLookup );
 
+          var uVel = { type:"v3" , value:sphereVelocities[i] };
+          var uPos = { type:"v3" , value:spherePositions[i] };
+
+          console.log( uVel.value );
+          physicsRenderer.setPosUniform( 'uPos' , uPos );
+          physicsRenderer.setPosUniform( 'uVel' , uVel );
+          physicsRenderer.setVelUniform( 'uPos' , uPos );
+          physicsRenderer.setVelUniform( 'uVel' , uVel );
+
+
+
           scene.add( physicsParticles );
 
           physicsRenderers.push( physicsRenderer );
           physicsParticleSystems.push( physicsParticles );
+          //physicsRenderer.reset( audioController.texture );
 
         }
         console.log( physicsRenderers );
@@ -178,11 +225,12 @@
         var normal = THREE.ImageUtils.loadTexture('../img/waternormals.jpg' );
 
        var floorTexture = THREE.ImageUtils.loadTexture(
-           '../img/matcap_dark.jpg'
+           '../img/matcap.jpg'
+
         );
 
         var normalTexture = THREE.ImageUtils.loadTexture(
-          '../img/normals/largeCrag.jpg'
+        '../img/normals/moss_normal_map.jpg'
         );
 
         var color = new THREE.Vector3( .5, .4 , 0.);
@@ -198,7 +246,7 @@
           useSSS:{ type:"f" , value:1},
           useScreen:{ type:"f" , value:0},
           time:time,
-          center:{type:"v3", value: new THREE.Vector3()}
+          center:{type:"v3", value: new THREE.Vector3(-70 , 0, 0 )}
         }
 
 
@@ -234,18 +282,28 @@
           //depthWrite:false
         });*/
 
-        var geo = new THREE.PlaneGeometry( 200 , 200 , 200 , 200 );
+        var geo = new THREE.SphereGeometry( 20 , 200 , 200 , 200);
         skybox = new THREE.Mesh( geo , material );
-        skybox.rotation.x = Math.PI / 2;
-        skybox.position.y = -20;
+        skybox.rotation.x = -Math.PI / 2;
+        skybox.position.y = -70;
+        skybox.scale.x = 3;
+        skybox.scale.y = 3;
+        skybox.scale.z = .01;
         scene.add( skybox );
 
+        var geo = new THREE.SphereGeometry( 20 , 200 , 200 , 200);
         skybox = new THREE.Mesh( geo , material );
         skybox.rotation.x = Math.PI / 2;
-        skybox.position.y = 20;
+        skybox.position.y = 50;
+        skybox.scale.x = 3;
+        skybox.scale.y = 3;
+        skybox.scale.z = .3;
         //scene.add( skybox );
 
-        for( var i= 0; i < 50; i++ ){
+
+        //scene.add( skybox );
+
+        for( var i= 0; i < numOfSpheres; i++ ){
           var light = new THREE.PointLight( 0xffffff , .1 , 10 );
           scene.add( light );
           light.position.x = (Math.random() -.5 ) * 100;
@@ -261,17 +319,10 @@
         var texture = THREE.ImageUtils.loadTexture('../img/water.jpg');
         var normal = THREE.ImageUtils.loadTexture('../img/waternormals.jpg' );
         console.log( physicsRenderers );
-        for( var i = 0; i < 50; i++ ){
+        for( var i = 0; i < numOfSpheres; i++ ){
 
-          var x = (Math.random() -.5 ) * 20;
-          var y = (Math.random()-.5 )* 10;
-          var z = (Math.random()-.5 )* 20;
-          var pos = new THREE.Vector3( x , y , z );
-
-          var vel = new THREE.Vector3(0,0,0);
-          pos.vel = new THREE.Vector3(0,0,0);
-          spherePositions.push( pos );
-          sphereVelocities.push( vel );
+          var pos = spherePositions[i];
+          var vel = sphereVelocities[i];
 
 
           var u = {
@@ -279,7 +330,7 @@
             uPos: { type:"v3" , value : pos },
             uVel: { type:"v3" , value : vel },
             t_audio:{ type:"t" , value: audioController.texture },
-            audioLookup:{ type:"f", value: i / 50 }
+            audioLookup:{ type:"f", value: i / numOfSpheres }
 
           }
           var mat = new THREE.ShaderMaterial({
@@ -287,9 +338,10 @@
             uniforms: u,
             vertexShader:shaders.vertexShaders.sphere,
             fragmentShader:shaders.fragmentShaders.sphere,
-            blending:THREE.AdditiveBlending,
-            transparent:true,
-            depthWrite:false
+            side:THREE.DoubleSide
+            //blending:THREE.AdditiveBlending,
+            //transparent:true,
+            //depthWrite:false
           });
           
           var sphere = new THREE.Mesh( geo , mat );
@@ -298,15 +350,6 @@
 
           spheres.push( sphere );
           scene.add( sphere );
-
-           var uVel = { type:"v3" , value:sphereVelocities[i] };
-        var uPos = { type:"v3" , value:spherePositions[i] };
-
-        physicsRenderers[i].setPosUniform( 'uPos' , uPos );
-        physicsRenderers[i].setPosUniform( 'uVel' , uVel );
-        physicsRenderers[i].setVelUniform( 'uPos' , uPos );
-        physicsRenderers[i].setVelUniform( 'uVel' , uVel );
-
 
           var light = new THREE.PointLight( 0xffffff , .1 , 10 );
           scene.add( light );
@@ -320,7 +363,12 @@
        
       }
 
-      function updateSpheres(){
+      function updateSpherePosVel(){
+
+        sphereUpdateFunctions.twitch();
+
+      }
+      function updateSphereParameters(){
 
         var camVel = oCamPos.sub( camera.position );
 
@@ -331,50 +379,10 @@
         //console.log( spherePositions[0] );
         for( var i = 0; i < spherePositions.length; i++ ){
 
-          var s1 = spherePositions[i];
-          var v1 = sphereVelocities[i];
+
 
           var index = Math.floor((i / 100 ) * count);
           var audioValue = audio[ index ];
-          for( var j = 0; j < spherePositions.length; j++ ){
-
-            if( i != j ){
-
-              var s2 = spherePositions[j];
-
-              var dif = s1.clone().sub( s2 );
-              var f = dif.length();
-
-              var l = f - 50;
-
-              v1.sub(dif.normalize().multiplyScalar( l / 1000));
-  
-            }
-          }
-
-
-          v1.sub( s1.clone().normalize().multiplyScalar(.3));
-          v1.add( s1.clone().normalize().multiplyScalar(.3 * ( audioValue / 256 ) ));
-          var tmp = new THREE.Vector3( Math.sin( v1.x *19) , Math.sin( v1.y*16 ) , Math.sin( v1.z * 17 ) );
-          v1.add(tmp.multiplyScalar( .1 ));
-          //v1.add( camVel.clone().multiplyScalar(  1 / ( 100 + (.01 * ( 50 - i) ))) );
-          //var aScalar = .95 +  * (  audioValue / 256 );
-
-          //v1.multiplyScalar( aScalar
-
-
-          tmp.set( 0 , 1 , 0 );
-          //tmp.multiplyScalar( 
-         // v1.add( 
-
-          s1.add( v1.clone().multiplyScalar( .0 + ( audioValue / 100 )));
-
-          var aScalar = .9 + .1 * (  audioValue / 256 );
-          v1.multiplyScalar( .9 );
-
-          /*spheres[i].material.color.r = .3 * audioValue / 256 ;
-          spheres[i].material.color.g = .1 * Math.sin(audioValue/100);
-          spheres[i].material.color.b = .9 * Math.cos(audioValue/100);*/
 
           lights[i].distance = audioValue / 3; //audioValue;
           lights[i].intensity = (audioValue / 256 ) * (audioValue / 256 ) * 10;
@@ -397,21 +405,28 @@
 
       function animate(){
 
-        for( var i = 0; i < 50; i++ ){
+         oCamPos = camera.position.clone();
+
+        controls.update();
+        //updateSpherePosVel();
+        updateSphereParameters();
+        for( var i = 0; i < numOfSpheres; i++ ){
+
 
           physicsRenderers[i].update();
 
         }
 
+          updateSpherePosVel();
+
+
         time.value += clock.getDelta();
         cameraAngle.value = camera.angle;
-        oCamPos = camera.position.clone();
+        //oCamPos = camera.position.clone();
         audioController.update();
         requestAnimationFrame( animate );
-        controls.update();
+        //controls.update();
        
-        updateSpheres();
-
         renderer.render( scene , camera );
 
       }

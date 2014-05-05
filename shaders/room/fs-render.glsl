@@ -1,5 +1,8 @@
 uniform sampler2D t_audio;
 uniform sampler2D sprite;
+uniform float id;
+uniform vec3 uPos;
+uniform vec3 uVel;
 
 uniform vec3 color;
 varying vec2 vUv;
@@ -31,8 +34,10 @@ void main(){
 
   gl_FragColor = vec4( color + vec3( normalize(s * a * normalize( vVel ) * normalize( vPos )).xyz), s.w * s.x );
 
-  vec3 shimmer = vec3( 0.3 , 1.0 , .8 ) - a.xyz * .5;
-  gl_FragColor = vec4( shimmer , s.w * s.x * .1);
+
+  vec3 cTest = smoothstep( vec3( 1. , 1. , 1. ), vec3( id , 1. - id , cos( id)), vec3( .0 , 2. , 1. ) );
+  vec3 shimmer = vec3( (.8+ (.2 * a.y)) * 5.3 ,(.8+ (.2 * a.x)) * .6 , .1 );// - a.xyz * 5.;
+  gl_FragColor = vec4( shimmer * (1. / vPos.w ) , (.5 / vPos.w ) * s.w * s.x * .6);
 
 
 }

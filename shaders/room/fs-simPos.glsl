@@ -92,18 +92,26 @@ void main(){
 
   vec4 vel = texture2D( t_vel , vUv );
   vec4 pos = texture2D( t_pos , vUv );
-  vec4 a   = texture2D( t_audio , vec2(( vUv.x ) * .1 + audioLookup , 0.0 ) );
+  vec4 a   = texture2D( t_audio , vec2((( vUv.x ) * .5)-.25 + audioLookup , 0.0 ) );
 
-  if( a.x * pos.w > 1.){
+  //vec4 start  = texture2D( t_start , vUv );
 
-    pos.xyz = uPos;
-    vel.xyz = vec3(0.,0.,0.);
+  if( pos.w == 10. ){
+
     pos.w = 0.;
 
   }
-
   pos.w += delta * ( .9 + (rand( vUv ) * .5 ) );
 
+  if( pos.w * a.w > 1.){
+
+    pos.xyz = uPos.xyz;
+    vel.xyz = vec3(0.,0.,0.);
+    pos.w = 10.;
+
+  }
+
+  
   vec3 finalPoint = pos.xyz + vel.xyz * delta * ( a.w );
   /*if( hitPoint.w != 0. ){
     finalPoint = hitPoint.xyz+10.0*hitVel*delta;

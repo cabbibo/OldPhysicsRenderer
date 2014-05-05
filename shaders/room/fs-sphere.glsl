@@ -14,6 +14,12 @@ varying vec4 vAudioNormal;
 void main(){
 
 
-  gl_FragColor= vec4( vAudioMatch.x , 0. , sin( vAudioMatch.y * 10. )  , vAudioMatch.w*.9 );
+  if( vMatch > 0.0 ){
+  discard;
+  }
+
+  vec3 c =vec3( vAudioMatch.x , 0. , sin( vAudioMatch.y * 10. ));
+  vec3 c2 = c * vec3( 1.0 , .5 , 0.0 );
+  gl_FragColor= vec4( c2 , vAudioMatch.w + .9 );
 
 }

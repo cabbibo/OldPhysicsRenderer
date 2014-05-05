@@ -2,6 +2,7 @@ uniform sampler2D t_vel;
 uniform sampler2D t_pos;
 uniform sampler2D t_audio;
 
+uniform sampler2D t_start;
 uniform float cameraAngle;
 uniform float time;
 uniform float delta;
@@ -42,32 +43,21 @@ $curl
 void main(){
   
 
-  vec4 vel = texture2D( t_vel , vUv );
-  vec4 pos = texture2D( t_pos , vUv );
-  vec4 a   = texture2D( t_audio , vec2( vUv.x , 0.0 ) );
-  
+  vec4 vel    = texture2D( t_vel , vUv );
+  vec4 pos    = texture2D( t_pos , vUv );
+  vec4 a      = texture2D( t_audio , vec2( vUv.x , 0.0 ) );
+  vec4 start  = texture2D( t_start , vUv );
 
-  if( pos.xyz == uPos ){
 
-    vel.xyz = vec3(uVel);
-    //vel.xyz = uVel;//* rand( vUv );
+
+  if( pos.w == 10. || pos.w == 0. ){
+    vel.xyz= 20. * normalize( vec3( .0 , -1. , 0.) + .9 *uVel  + 1.5 *vec3( uVel.xy , 0.0 ) );
   }
 
-  vec3 c = curlNoise( pos.xyz  * .01 );
+  vel.xyz += curlNoise( pos.xyz  * .1 ) * .1;
+  vel.y += a.x* 1.5 ;
 
-  if( vel.y < -20. ){
-    vec3 refl = reflect( vec3( 0. , 1. , 0. ) , normalize(vel.xyz) );
-    vel.xyz = refl * length( vel.xyz );
-    //vel.xyz *= 1.;
-  }
-
-  vel.xyz *= .9 + ( a.x * .1);
-
-  //vel.xyz *= .95;
-  gl_FragColor = vec4( vel.xyz  , vel.w );
-
-
-
+  gl_FragColor = vec4( vel.xyz , vel.w );
 
 
 }

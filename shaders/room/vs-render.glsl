@@ -19,9 +19,11 @@ void main(){
   vec3 pos = vPos.xyz;
 
   
+  
   vec4 mvPos = modelViewMatrix * vec4( pos , 1.0 );
 
-  gl_PointSize = min( 100. , abs(normalize( vVel.xyz ).y) * 100. * vAudio.x* vAudio.x* vAudio.x);
+  gl_PointSize = min( 100. ,3.+ 10. * abs(vAudio.x* vAudio.x* vAudio.x));
+  //gl_PointSize = 10.;
   gl_Position = projectionMatrix * mvPos;
 
 }
