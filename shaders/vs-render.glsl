@@ -6,6 +6,9 @@ varying vec4 vPos;
 
 varying vec2 vUv;
 
+const float size = 1. / 21.;
+const float hSize = size / 2.;
+
 void main(){
 
   vUv = position.xy;
@@ -15,6 +18,23 @@ void main(){
 
   vec3 pos = vPos.xyz;
   vec4 mvPos = modelViewMatrix * vec4( pos , 1.0 );
+
+ 
+  if( vUv.x < size + hSize ){
+    gl_PointSize = 20.;
+  }else{
+
+    if( vUv.x < size * 5. + hSize ){
+
+      gl_PointSize =  10. ;   
+
+    }else{
+
+      gl_PointSize = 5.;
+    }
+
+  }
+
   gl_Position = projectionMatrix * mvPos;
 
 }

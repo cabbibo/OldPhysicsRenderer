@@ -375,13 +375,18 @@
             uniforms: u,
             vertexShader:shaders.vertexShaders.sphere,
             fragmentShader:shaders.fragmentShaders.sphere,
-            side:THREE.DoubleSide
+            side:THREE.DoubleSide,
+
+            "directionalLightDirection" : { type: "fv", value: [] },
+		"directionalLightColor" : { type: "fv", value: [] },
             //blending:THREE.AdditiveBlending,
             //transparent:true,
             //depthWrite:false
           });
-          
-          var sphere = new THREE.Mesh( geo , mat );
+
+          THREE.MeshBasicMaterial = mat;
+
+          var sphere = new THREE.Mesh( geo , THREE.MeshBasicMaterial );
           sphere.position = pos;
 
 
