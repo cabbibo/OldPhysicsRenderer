@@ -46,7 +46,7 @@ function PosVelSimulation( size , posShader , velShader , renderer ){
   
   this.camera = new THREE.OrthographicCamera( - 0.5, 0.5, 0.5, - 0.5, 0, 1 );
   this.scene = new THREE.Scene();
-  this.mesh = new THREE.Mesh( new THREE.PlaneGeometry( 1, 1 ) );
+  this.mesh = new THREE.Mesh( new THREE.PlaneGeometry( 1, 1 ) , new THREE.MeshBasicMaterial() );
   this.scene.add( this.mesh );
   
 }
@@ -149,6 +149,8 @@ PosVelSimulation.prototype.createSimulationProgram = function(sim){
 
   });
 
+  console.log( 'PROGRAM' );
+  console.log( program );
   return program;
 
 }
@@ -231,6 +233,11 @@ PosVelSimulation.prototype.render = function ( scene, camera, target ) {
 
 PosVelSimulation.prototype.pass = function ( shader , target ) {
   this.mesh.material = shader;
+
+  console.log( target );
+  console.log( this.mesh.material );
+  this.mesh.material.needsUpdate = true;
+
   this.renderer.render( this.scene, this.camera, target, false );
 };
 

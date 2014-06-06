@@ -1,5 +1,7 @@
 function PhysicsRenderer( size , shader , renderer ){
 
+  console.log( 'THIS' );
+  console.log( this );
   // First Make sure everything Works
   this.checkCompatibility( renderer );
   this.renderer = renderer;

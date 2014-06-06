@@ -377,16 +377,16 @@
             fragmentShader:shaders.fragmentShaders.sphere,
             side:THREE.DoubleSide,
 
-            "directionalLightDirection" : { type: "fv", value: [] },
-		"directionalLightColor" : { type: "fv", value: [] },
+           // "directionalLightDirection" : { type: "fv", value: [] },
+		    //"directionalLightColor" : { type: "fv", value: [] },
             //blending:THREE.AdditiveBlending,
             //transparent:true,
             //depthWrite:false
           });
 
-          THREE.MeshBasicMaterial = mat;
+          //THREE.MeshBasicMaterial = mat;
 
-          var sphere = new THREE.Mesh( geo , THREE.MeshBasicMaterial );
+          var sphere = new THREE.Mesh( geo , mat );//THREE.MeshBasicMaterial );
           sphere.position = pos;
 
 
