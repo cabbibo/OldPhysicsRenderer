@@ -42,6 +42,8 @@
 
       var timer = 0;
 
+      var furryTails = [];
+
       var shaders = new ShaderLoader('../shaders');
 
       shaders.shaderSetLoaded = function(){
@@ -83,17 +85,79 @@
         controls = new THREE.TrackballControls( camera , container );
         container.appendChild( renderer.domElement );
 
-
-        
         var lineGeo = createLineGeo(); 
+        
+        /*
+
+          Setting up attraction / repulsion uniforms
+
+        */
+
+      
+
+        var d_spA = { type:"f" , value: 1.1 }
+        var f_spA = { type:"f" , value: .1  }
+
+        var d_bA = { type:"f" , value: .1 }
+        var f_bA = { type:"f" , value: .4  }
+      
+        var d_bR = { type:"f" , value: 1.1 }
+        var f_bR = { type:"f" , value: .01  }
+        
+        var d_sA = { type:"f" , value: 1.1 }
+        var f_sA = { type:"f" , value: .1  }
+        
+        var d_sR = { type:"f" , value: 3.1 }
+        var f_sR = { type:"f" , value: .01  }
+        
+        var d_sSA = { type:"f" , value: 1.1 }
+        var f_sSA = { type:"f" , value: .1  }
+        
+        var d_sSR = { type:"f" , value: 3.1 }
+        var f_sSR = { type:"f" , value: .01  }
+
+
+        var allUniforms = {
+  
+          dist_spineAttract     : d_spA,
+          force_spineAttract    : f_spA ,
+          dist_bundleAttract    : d_bA,
+          force_bundleAttract   : f_bA,
+          dist_bundleRepel      : d_bR,
+          force_bundleRepel     : f_bR,
+          dist_subAttract       : d_sA,
+          force_subAttract      : f_sA,
+          dist_subRepel         : d_sR,
+          force_subRepel        : f_sR,
+          dist_subSubAttract    : d_sSA,
+          force_subSubAttract   : f_sSA,
+          dist_subSubRepel      : d_sSR,
+          force_subSubRepel     : f_sSR,
+          dT                    :  dT
+
+        }
+
+        gui.add( d_spA, 'value' , 0 , 10  ).name( 'dist_spineAttract' );
+        gui.add( f_spA, 'value' , 0 , .5  ).name( 'force_spineAttract' );
+        
+        gui.add( d_bA,  'value' , 0 , 10  ).name( 'dist_bundleAttract' );
+        gui.add( f_bA,  'value' , 0 , .5  ).name( 'force_bundleAttract' );
+        gui.add( d_bR,  'value' , 0 , 10  ).name( 'dist_bundleRepel' );
+        gui.add( f_bR,  'value' , 0 , .05 ).name( 'force_bundleRepel' );
+        
+        gui.add( d_sA,  'value' , 0 , 10  ).name( 'dist_subAttract' );
+        gui.add( f_sA,  'value' , 0 , .5  ).name( 'force_subAttract' );
+        gui.add( d_sR,  'value' , 0 , 10  ).name( 'dist_subRepel' );
+        gui.add( f_sR,  'value' , 0 , .2  ).name( 'force_subRepel' );
+        
+        gui.add( d_sSA, 'value' , 0 , 10  ).name( 'dist_subSubAttract' );
+        gui.add( f_sSA, 'value' , 0 , .5  ).name( 'force_subSubAttract' );
+        gui.add( d_sSR, 'value' , 0 , 10  ).name( 'dist_subSubRepel' );
+        gui.add( f_sSR, 'value' , 0 , .2  ).name( 'force_subSubRepel' );
 
 
 
-        size = 32;
-
-        var sim = shaders.simulationShaders.tailSim;
-        physicsRenderer = new PhysicsRenderer( size , sim , renderer ); 
-
+        for( var i = 0; i < 100; i++ ){
         leader = new THREE.Vector3();
 
         var mesh = new THREE.Mesh(
@@ -104,138 +168,19 @@
         mesh.position = leader;
         scene.add( mesh );
 
+        furryTail = new FurryTail(
+          leader,
+          lineGeo,
+          allUniforms,
+          shaders.simulationShaders.tailSim,
+          renderer
+        );
 
-        var leaderU = { type:"v3" , value: leader } 
-        physicsRenderer.setUniform( 'leader' , leaderU );
-        physicsRenderer.setUniform( 'dT' , dT );
+        furryTail.addToScene();
 
-
-        /*
-
-          Setting up attraction / repulsion uniforms
-
-        */
-
-  
-        var dist_spineAttract = { type:"f" , value: 1.1 }
-        var force_spineAttract = { type:"f" , value: .1  }
-
-        var dist_bundleAttract = { type:"f" , value: .1 }
-        var force_bundleAttract = { type:"f" , value: .4  }
-      
-        var dist_bundleRepel = { type:"f" , value: 1.1 }
-        var force_bundleRepel = { type:"f" , value: .01  }
-        
-        var dist_subAttract = { type:"f" , value: 1.1 }
-        var force_subAttract = { type:"f" , value: .1  }
-        
-        var dist_subRepel = { type:"f" , value: 3.1 }
-        var force_subRepel = { type:"f" , value: .01  }
-        
-        var dist_subSubAttract = { type:"f" , value: 1.1 }
-        var force_subSubAttract = { type:"f" , value: .1  }
-        
-        var dist_subSubRepel = { type:"f" , value: 3.1 }
-        var force_subSubRepel = { type:"f" , value: .01  }
-
-
-        physicsRenderer.setUniform( 'dist_spineAttract' , dist_spineAttract );
-        physicsRenderer.setUniform( 'force_spineAttract' , force_spineAttract );
-        
-        physicsRenderer.setUniform( 'dist_bundleAttract' , dist_bundleAttract );
-        physicsRenderer.setUniform( 'force_bundleAttract' , force_bundleAttract );
-        physicsRenderer.setUniform( 'dist_bundleRepel' , dist_bundleRepel );
-        physicsRenderer.setUniform( 'force_bundleRepel' , force_bundleRepel );
-        
-        physicsRenderer.setUniform( 'dist_subAttract' , dist_subAttract );
-        physicsRenderer.setUniform( 'force_subAttract' , force_subAttract );
-        physicsRenderer.setUniform( 'dist_subRepel' , dist_subRepel );
-        physicsRenderer.setUniform( 'force_subRepel' , force_subRepel );
-        
-        physicsRenderer.setUniform( 'dist_subSubAttract' , dist_subSubAttract );
-        physicsRenderer.setUniform( 'force_subSubAttract' , force_subSubAttract );
-        physicsRenderer.setUniform( 'dist_subSubRepel' , dist_subSubRepel );
-        physicsRenderer.setUniform( 'force_subSubRepel' , force_subSubRepel );
-
-        gui.add( dist_spineAttract, 'value' , 0 , 10 ).name( 'dist_spineAttract' );
-        gui.add( force_spineAttract, 'value' , 0 , .5 ).name( 'force_spineAttract' );
-        
-        gui.add( dist_bundleAttract, 'value' , 0 , 10 ).name( 'dist_bundleAttract' );
-        gui.add( force_bundleAttract, 'value' , 0 , .5 ).name( 'force_bundleAttract' );
-        gui.add( dist_bundleRepel, 'value' , 0 , 10 ).name( 'dist_bundleRepel' );
-        gui.add( force_bundleRepel, 'value' , 0 , .05 ).name( 'force_bundleRepel' );
-        
-        gui.add( dist_subAttract, 'value'  , 0 , 10  ).name( 'dist_subAttract' );
-        gui.add( force_subAttract, 'value' , 0 , .5 ).name( 'force_subAttract' );
-        gui.add( dist_subRepel, 'value'  , 0 , 10 ).name( 'dist_subRepel' );
-        gui.add( force_subRepel, 'value'  , 0 , .2 ).name( 'force_subRepel' );
-        
-        gui.add( dist_subSubAttract, 'value'  , 0 , 10 ).name( 'dist_subSubAttract' );
-        gui.add( force_subSubAttract, 'value'  , 0 , .5 ).name( 'force_subSubAttract' );
-        gui.add( dist_subSubRepel, 'value'  , 0 , 10 ).name( 'dist_subSubRepel' );
-        gui.add( force_subSubRepel, 'value' , 0 , .2 ).name( 'force_subSubRepel' );
-
-        uniforms = {
-          t_pos:{ type:"t" , value:null },
-          t_oPos:{ type:"t" , value:null },
-          t_ooPos:{ type:"t" , value:null },
+        furryTails.push( furryTail );
         }
-
-        var mat = new THREE.ShaderMaterial({
-          uniforms: uniforms,
-          vertexShader: shaders.vertexShaders.render,
-          fragmentShader: shaders.fragmentShaders.render
-        })
-
-        var geo = ParticleUtils.createLookupGeometry( size );
-
-        physicsParticles  = new THREE.ParticleSystem( geo , mat );
-
-        physicsRenderer.addBoundTexture( physicsParticles , 't_pos' , 'output' );
-        physicsRenderer.addBoundTexture( physicsParticles , 't_oPos' , 'oOutput' );
-        physicsRenderer.addBoundTexture( physicsParticles , 't_ooPos' , 'ooOutput' );
-
-        scene.add( physicsParticles );
-
-        var mesh = new THREE.Mesh( new THREE.SphereGeometry( 5 ) );
-
-        var pTexture = ParticleUtils.createPositionsTexture( size , mesh );
-        physicsRenderer.reset( pTexture );
-
-        physicsRenderer.debugScene.scale.multiplyScalar( .1 );
-        physicsRenderer.debugScene.position.y = 20;
-        physicsRenderer.addDebugScene( scene );
-
-
-
-
-        var lineMat = new THREE.LineBasicMaterial({ color:0xffffff });
-
-
-        var uniforms = {
-
-          lookup:{ type:"t" , value:null }
-
-        }
-
-        var lineMat = new THREE.ShaderMaterial({
-
-          uniforms: uniforms,
-          vertexShader: shaders.vertexShaders.lineRender,
-          fragmentShader: shaders.fragmentShaders.lineRender
-
-        });
-
-
-        line = new THREE.Line( lineGeo , lineMat );
-        line.type = THREE.LinePieces;
-
-
-        physicsRenderer.addBoundTexture( line , 'lookup' , 'output' );
         
-        scene.add( line );
-
-        var lineGeo = new THREE.BufferGeometry();
         document.addEventListener( 'keydown' , function(e){
 
           console.log( e.which );
@@ -256,15 +201,23 @@
         dT.value = clock.getDelta();
 
         timer += dT.value;
+
         
         if( !paused ){
-          
-          leader.x = 20 *  Math.cos( timer);
-          leader.y = 20 * Math.sin( timer);
-          leader.z = 30 * Math.sin( timer / 1.68);
 
-          physicsRenderer.update();
-          
+          for( var i = 0; i < furryTails.length; i++ ){
+            
+            var furryTail = furryTails[i];
+
+            var offset = timer * 1 +( i / 10 );
+            furryTail.leader.x = 20 *  Math.cos( offset );
+            furryTail.leader.y = 20 * Math.sin( offset );
+            furryTail.leader.z = 30 * Math.sin( offset  / 1.68);
+
+            furryTail.update();
+
+          }
+
         }
 
         //physicsRenderer.update();

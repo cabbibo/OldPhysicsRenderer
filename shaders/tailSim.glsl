@@ -33,10 +33,6 @@ uniform float dist_subSubRepel;         //.1
 uniform float force_subSubAttract;      //1
 uniform float force_subSubRepel;        //1
 
-
-
-
-
 varying vec2 vUv;
 
 
@@ -62,11 +58,9 @@ vec3 springForce( vec3 toPos , vec3 fromPos , float staticLength ){
 
   return 10000. * springDif;
 
-
-
-
-
 }
+
+$simplex
 
 void main(){
 
@@ -80,6 +74,10 @@ void main(){
   vec3 vel = oPos.xyz - pos.xyz;
 
   vec3  force = vec3(0.);
+
+  // Waveyness
+  // ( as object moves through simplex noise field, will look different )
+  float w = 1. + snoise( pos * .01 );
 
   float mIx = floor( (vUv.x -hSize ) / size );
   float mIy = floor( (vUv.y -hSize) / size );
@@ -96,7 +94,7 @@ void main(){
     if( mI.y < 1.){
 
       vec3 attract = springForce( leader.xyz , pos.xyz , dist_spineAttract );
-      force += attract * force_spineAttract;
+      force += attract * force_spineAttract * w;
 
     
     // Every other vertabrae in the spine
@@ -121,7 +119,7 @@ void main(){
  
       // Attract to the column
       vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_subAttract );
-      force += attract * force_subAttract;
+      force += attract * force_subAttract * w;
 
       // Get the 'index' of this verta 
       // in the 4 first level sub objects
@@ -142,7 +140,7 @@ void main(){
 
           vec3 attract = springForce(  pos.xyz , otherPos.xyz , dist_subRepel );
 
-          force -= attract * force_subRepel;  
+          force -= attract * force_subRepel * w;  
         
         }
       }
