@@ -2,16 +2,21 @@
 varying vec2 vUv;
 varying vec4 vPos;
 
-const float size = 1. / 21.;
+const float size = 1. / 32.;
 const float hSize = size / 2.;
 
 void main(){
 
 
+  float mIx = floor( (vUv.x + hSize ) / size );
+  float mIy = floor( (vUv.y + hSize) / size );
+
+  // Main Index
+  vec2 mI = vec2( mIx , mIy );
 
   vec3 c = vec3( 0. );
 
-  if( vUv.x < size + hSize ){
+  if( mI.x < size ){
     c.r = 1.;
   }else{
 
@@ -33,6 +38,8 @@ void main(){
     }
 
   }
+
+  //float c = mod(( vUv.y -hSize ) / size , 2. );
 
   gl_FragColor = vec4( c , 1.0 ); 
 }
