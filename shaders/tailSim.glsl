@@ -18,7 +18,7 @@ const float springDistance1 = 1.1;
 const float springDistance2 = 5.1;
 const float springDistance2_repel = 5.1;
 const float springDistance3 = 1.1;
-const float springDistance3_repel = 3.1;
+const float springDistance3_repel = .1;
 
 const float maxVel = 200.;
 

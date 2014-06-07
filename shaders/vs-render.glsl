@@ -26,16 +26,16 @@ void main(){
   vec2 mI = vec2( mIx , mIy );
  
   if( mI.x < 1. ){
-    gl_PointSize = 2.;
+    gl_PointSize = 10.;
   }else{
 
     if( vUv.x < size * 5. - hSize ){
 
-      gl_PointSize =  1. ;   
+      gl_PointSize =  5. ;   
 
     }else{
 
-      gl_PointSize = .5;
+      gl_PointSize = 3.;
     }
 
   }
