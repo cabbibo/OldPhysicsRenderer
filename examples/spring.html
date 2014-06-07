@@ -38,7 +38,7 @@
       var audioController = new AudioController();
       
       
-      /*
+      
       audioController.mute.gain.value = 0.0;
 
       var userAudio = new UserAudio( audioController );
@@ -46,7 +46,7 @@
       userAudio.onStreamCreated = function(){
         init();
         animate();
-      }*/
+      }
 
       var stream = new Stream( '../../audio/you.mp3' , audioController );
       //stream.play();
@@ -75,9 +75,9 @@
       var shaders = new ShaderLoader('../shaders');
 
       shaders.shaderSetLoaded = function(){
-        init();
+       /* init();
         animate();
-        stream.play();
+        stream.play();*/
       }
 
       shaders.load( 'fs-spring' , 'render'  , 'fragment'    );
