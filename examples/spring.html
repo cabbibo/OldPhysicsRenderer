@@ -2,20 +2,26 @@
 
   <head>
     <style>
-      #container{ position:absolute; left:0px; top:0px; }
+      #container{ position:absolute; left:0px; top:0px; z-index:0; width:100%; height:100%; display:block; overflow:hidden}
       body{ margin:0px; }
     </style>
   </head>
 
   <body>
+    <div id="container"></div>
+
 
     <script src="../lib/three.js"></script>
     <script src="../lib/jquery.min.js"></script>
     <script src="../lib/TrackballControls.js"></script>
     <script src="../lib/ShaderLoader.js"></script>
+    <script src="../lib/dat.gui.min.js"></script>
     
     <script src="../ParticleUtils.js"></script>
     <script src="../PhysicsRenderer.js"></script>
+
+    <script src="js/createLineGeo.js"></script>
+    <script src="js/furryTail.js"></script>
 
     <script>
 
@@ -24,7 +30,9 @@
 
 
       var camera, renderer, scene , controls , clock;
-      
+
+      var gui = new dat.GUI({});
+
       var particleSystem;
       var physicsRenderer , uniforms;
 
@@ -33,8 +41,6 @@
       var dT = { type:"f" , value:0 }
 
       var timer = 0;
-      // Using: https://github.com/cabbibo/ShaderLoader
-      // For More info: http://cabbibo.github.io/ShaderLoader/
 
       var shaders = new ShaderLoader('../shaders');
 
@@ -64,7 +70,7 @@
         camera = new THREE.PerspectiveCamera( 65 , w/h , 1 , 200000 );
         camera.position.z = 100;
 
-        controls = new THREE.TrackballControls( camera );
+        //controls = new THREE.TrackballControls( camera );
         scene = new THREE.Scene();
 
         clock = new THREE.Clock();
@@ -73,7 +79,15 @@
         renderer = new THREE.WebGLRenderer();
         renderer.setSize( window.innerWidth, window.innerHeight );
 
-        document.body.appendChild( renderer.domElement );
+        var container = document.getElementById('container' );
+        controls = new THREE.TrackballControls( camera , container );
+        container.appendChild( renderer.domElement );
+
+
+        
+        var lineGeo = createLineGeo(); 
+
+
 
         size = 32;
 
@@ -94,8 +108,73 @@
         var leaderU = { type:"v3" , value: leader } 
         physicsRenderer.setUniform( 'leader' , leaderU );
         physicsRenderer.setUniform( 'dT' , dT );
+
+
+        /*
+
+          Setting up attraction / repulsion uniforms
+
+        */
+
+  
+        var dist_spineAttract = { type:"f" , value: 1.1 }
+        var force_spineAttract = { type:"f" , value: .1  }
+
+        var dist_bundleAttract = { type:"f" , value: .1 }
+        var force_bundleAttract = { type:"f" , value: .4  }
+      
+        var dist_bundleRepel = { type:"f" , value: 1.1 }
+        var force_bundleRepel = { type:"f" , value: .01  }
         
+        var dist_subAttract = { type:"f" , value: 1.1 }
+        var force_subAttract = { type:"f" , value: .1  }
         
+        var dist_subRepel = { type:"f" , value: 3.1 }
+        var force_subRepel = { type:"f" , value: .01  }
+        
+        var dist_subSubAttract = { type:"f" , value: 1.1 }
+        var force_subSubAttract = { type:"f" , value: .1  }
+        
+        var dist_subSubRepel = { type:"f" , value: 3.1 }
+        var force_subSubRepel = { type:"f" , value: .01  }
+
+
+        physicsRenderer.setUniform( 'dist_spineAttract' , dist_spineAttract );
+        physicsRenderer.setUniform( 'force_spineAttract' , force_spineAttract );
+        
+        physicsRenderer.setUniform( 'dist_bundleAttract' , dist_bundleAttract );
+        physicsRenderer.setUniform( 'force_bundleAttract' , force_bundleAttract );
+        physicsRenderer.setUniform( 'dist_bundleRepel' , dist_bundleRepel );
+        physicsRenderer.setUniform( 'force_bundleRepel' , force_bundleRepel );
+        
+        physicsRenderer.setUniform( 'dist_subAttract' , dist_subAttract );
+        physicsRenderer.setUniform( 'force_subAttract' , force_subAttract );
+        physicsRenderer.setUniform( 'dist_subRepel' , dist_subRepel );
+        physicsRenderer.setUniform( 'force_subRepel' , force_subRepel );
+        
+        physicsRenderer.setUniform( 'dist_subSubAttract' , dist_subSubAttract );
+        physicsRenderer.setUniform( 'force_subSubAttract' , force_subSubAttract );
+        physicsRenderer.setUniform( 'dist_subSubRepel' , dist_subSubRepel );
+        physicsRenderer.setUniform( 'force_subSubRepel' , force_subSubRepel );
+
+        gui.add( dist_spineAttract, 'value' , 0 , 10 ).name( 'dist_spineAttract' );
+        gui.add( force_spineAttract, 'value' , 0 , .5 ).name( 'force_spineAttract' );
+        
+        gui.add( dist_bundleAttract, 'value' , 0 , 10 ).name( 'dist_bundleAttract' );
+        gui.add( force_bundleAttract, 'value' , 0 , .5 ).name( 'force_bundleAttract' );
+        gui.add( dist_bundleRepel, 'value' , 0 , 10 ).name( 'dist_bundleRepel' );
+        gui.add( force_bundleRepel, 'value' , 0 , .05 ).name( 'force_bundleRepel' );
+        
+        gui.add( dist_subAttract, 'value'  , 0 , 10  ).name( 'dist_subAttract' );
+        gui.add( force_subAttract, 'value' , 0 , .5 ).name( 'force_subAttract' );
+        gui.add( dist_subRepel, 'value'  , 0 , 10 ).name( 'dist_subRepel' );
+        gui.add( force_subRepel, 'value'  , 0 , .2 ).name( 'force_subRepel' );
+        
+        gui.add( dist_subSubAttract, 'value'  , 0 , 10 ).name( 'dist_subSubAttract' );
+        gui.add( force_subSubAttract, 'value'  , 0 , .5 ).name( 'force_subSubAttract' );
+        gui.add( dist_subSubRepel, 'value'  , 0 , 10 ).name( 'dist_subSubRepel' );
+        gui.add( force_subSubRepel, 'value' , 0 , .2 ).name( 'force_subSubRepel' );
+
         uniforms = {
           t_pos:{ type:"t" , value:null },
           t_oPos:{ type:"t" , value:null },
@@ -129,118 +208,6 @@
 
 
 
-        var lineGeo = new THREE.BufferGeometry();
-
-        var lineGeo = new THREE.BufferGeometry();
-
-		lineGeo.addAttribute( 'position', new Float32Array( 32 * 32 * 3 ), 3 );
-		lineGeo.addAttribute( 'color'   , new Float32Array( 32 * 32 * 3 ), 3 );
-        var positions = lineGeo.getAttribute( 'position' ).array;
-        var colors = lineGeo.getAttribute( 'color' ).array;
-
-        var size = 1 / 32;
-        var hSize = size / 2;
-
-        for( var i = 0; i < 32; i ++ ){
-
-          var index = i * 3;
-
-          var p1 = index * 2;
-          var p2 = index * 2 + 3;
-
-          positions[ p1 ] = 0 * size ;
-          positions[ p1 + 1 ] = i * size ;
-          positions[ p1 + 2 ] = 1;
-
-          positions[ p2 ] = 0 * size ;
-          positions[ p2 + 1 ] = (i + 1) * size;
-          positions[ p2 + 2 ] = 1;
-
-          colors[ p1 ]      = .3 ;
-          colors[ p1 + 1 ]  = .3;
-          colors[ p1 + 2 ]  = .3;
-
-          colors[ p2 ]      = .6;
-          colors[ p2 + 1 ]  = .6;
-          colors[ p2 + 2 ]  = .6;
-
-          for( var j = 0; j < 4; j++ ){
-
-            // Start these positions after all of our indices
-            var startingIndex = 32 * 3;
-
-            var columnStartingIndex = startingIndex + ( 32 * 3 * j);
-
-            var index = (i * 3) + columnStartingIndex;
-
-            var p1 = index * 2;
-            var p2 = index * 2 + 3;
-            
-
-            positions[ p1 ] = 0 * size;
-            positions[ p1 + 1 ] = i * size ;
-            positions[ p1 + 2 ] = 1;
-
-            positions[ p2 ]     = ( j + 1) * size;
-            positions[ p2 + 1 ] = i  * size;
-            positions[ p2 + 2 ] = .1;
-
-            colors[ p1 ]      = .3;
-            colors[ p1 + 1 ]  = .3;
-            colors[ p1 + 2 ]  = .3;
-
-            colors[ p2 ]      = .6;
-            colors[ p2 + 1 ]  = .6;
-            colors[ p2 + 2 ]  = .6;
-
-            //positions[ i + 3 ] = Math.random() * 20;
-        
-          }
-
-
-          for( var j = 0; j < 3; j ++ ){
-            for( var k = 0; k < 4; k++ ){
-
-              var startingIndex = 5 * 32 * 3;
-              var groupStartingIndex = startingIndex + ( 32 * 3 * 4 * (j) );
-              var columnStartingIndex = groupStartingIndex + ( 32 * 3 * k );
-
-              var index = ( i *3 ) + columnStartingIndex;
-
-              console.log( p1 );
-              console.log( p2 );
-              
-              var p1 = index * 2;
-              var p2 = index * 2 + 3;
-
-              positions[ p1 ] = ( j + 1 ) * size;
-              positions[ p1 + 1 ] = i * size;
-              positions[ p1 + 2 ] = .1;
-
-              positions[ p2 ]     = ( (j * 4) + 5 + k) * size;
-              positions[ p2 + 1 ] = i * size;
-              positions[ p2 + 2 ] = .1;
-
-
-              colors[ p1 ]      = Math.floor( (k+1) /4 ) ;
-              colors[ p1 + 1 ]  = j / 4;
-              colors[ p1 + 2 ]  = 0;
-
-              colors[ p2 ]      = 0;
-              colors[ p2 + 1 ]  = j /4 ;
-              colors[ p2 + 2 ]  = 0;
-
-
-
-
-
-
-            }
-          }
-
-        }
-
-        console.log( positions );
 
         var lineMat = new THREE.LineBasicMaterial({ color:0xffffff });
 

@@ -27,7 +27,7 @@ void main(){
       c.g = mod(( vUv.y + hSize) / size , 2. );
       
 
-    }else{
+    }else if( vUv.x < size * 20. + hSize ) {
 
      // c.r = 1.;
       c.g  = .4;
@@ -35,6 +35,14 @@ void main(){
       c.b = mod(( vUv.y + hSize) / size , 2. ) - .5;
       
    
+    }else{
+
+
+      c.g = 1.;
+      c.r = 1.;
+      c.b = 1.;
+      //discard;
+
     }
 
   }

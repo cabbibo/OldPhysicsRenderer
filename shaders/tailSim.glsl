@@ -2,10 +2,40 @@
 uniform sampler2D t_oPos;
 uniform sampler2D t_pos;
 
-
 uniform float dT;
 
 uniform vec3 leader;
+
+// Spine
+uniform float dist_spineAttract;         // 1.1;
+uniform float force_spineAttract;        // 1.;
+
+// SpineBundle
+uniform float dist_bundleAttract;   // .1;
+uniform float dist_bundleRepel;     // .4;
+
+uniform float force_bundleAttract;  // .1;
+uniform float force_bundleRepel;    // .4;
+
+
+// Sub
+uniform float dist_subAttract;          //5.1
+uniform float dist_subRepel;            //5.1
+
+uniform float force_subAttract;         //1
+uniform float force_subRepel;           //.1
+
+
+// Sub Sub
+uniform float dist_subSubAttract;       //1.1
+uniform float dist_subSubRepel;         //.1
+
+uniform float force_subSubAttract;      //1
+uniform float force_subSubRepel;        //1
+
+
+
+
 
 varying vec2 vUv;
 
@@ -65,8 +95,8 @@ void main(){
     // We are connected to the leader
     if( mI.y < 1.){
 
-      vec3 attract = springForce( leader.xyz , pos.xyz , springDistance1 );
-      force += attract * .1 ;
+      vec3 attract = springForce( leader.xyz , pos.xyz , dist_spineAttract );
+      force += attract * force_spineAttract;
 
     
     // Every other vertabrae in the spine
@@ -75,8 +105,8 @@ void main(){
 
       vec4 otherPos = texture2D( t_pos , vec2( vUv.x , vUv.y - size ) ); 
       
-      vec3 attract = springForce( otherPos.xyz , pos.xyz , springDistance1 );
-      force += .1 * attract ;
+      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_spineAttract );
+      force += attract * force_spineAttract;
 
     }
 
@@ -90,8 +120,8 @@ void main(){
       vec4 otherPos = texture2D( t_pos , vec2( hSize , vUv.y ) );
  
       // Attract to the column
-      vec3 attract = springForce( otherPos.xyz , pos.xyz , springDistance2 );
-      force += attract * .3;
+      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_subAttract );
+      force += attract * force_subAttract;
 
       // Get the 'index' of this verta 
       // in the 4 first level sub objects
@@ -110,9 +140,9 @@ void main(){
 
           vec4 otherPos = texture2D( t_pos , vec2( lookup , vUv.y ) );
 
-          vec3 attract = springForce(  pos.xyz , otherPos.xyz , springDistance2_repel );
+          vec3 attract = springForce(  pos.xyz , otherPos.xyz , dist_subRepel );
 
-          force -= attract *.01;  
+          force -= attract * force_subRepel;  
         
         }
       }
@@ -132,9 +162,9 @@ void main(){
 
       vec4 otherPos = texture2D( t_pos , vec2( lookup , vUv.y ) );
 
-      vec3 attract = springForce( otherPos.xyz , pos.xyz , springDistance3 );
+      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_subSubAttract );
 
-      force += .5 * attract;
+      force += attract * force_subSubAttract;
 
       int indexInChunk = index - int( chunk * 4. );
 
@@ -146,21 +176,52 @@ void main(){
 
           vec4 otherPos = texture2D( t_pos , vec2( lookup , vUv.y ) );
 
-          vec3 attract = springForce( pos.xyz , otherPos.xyz  , springDistance3_repel  * 10.);
+          vec3 attract = springForce( pos.xyz , otherPos.xyz  , dist_subSubRepel );
 
-          force -= .01 * attract ;           
+          force -= attract * force_subSubRepel;           
         }
 
       }
 
 
+     
+    // Bundle around spine
+    }else{
+
+      vec4 otherPos = texture2D( t_pos , vec2( hSize , vUv.y ) );
+
+
+      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_bundleAttract );
+
+      force +=  attract * force_bundleAttract;
+
+      int index = int( ( vUv.x - (21.* size) ) / size );
       
+
+      for( int i = 0; i < 11; i++ ){
+
+        if( i-index != 0 ){
+
+          float lookup = ( float(i) * size ) + ( size * 21. + hSize );
+
+          vec4 otherPos = texture2D( t_pos , vec2( lookup , vUv.y ) );
+
+          vec3 attract = springForce( pos.xyz , otherPos.xyz  , dist_bundleRepel );
+
+          force -= attract * force_bundleRepel ;  
+
+        }
+
+
+      }
+
+
     }
 
 
   }
 
-  vec3 dampeningForce = vel * -.3;
+  vec3 dampeningForce = vel * -.1;
   
   force += dampeningForce;
   
