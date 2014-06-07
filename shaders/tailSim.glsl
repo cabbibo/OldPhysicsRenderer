@@ -39,13 +39,6 @@ varying vec2 vUv;
 const float size = 1. / 32.;
 const float hSize = size / 2.;
 
-
-const float springDistance1 = 1.1;
-const float springDistance2 = 5.1;
-const float springDistance2_repel = 5.1;
-const float springDistance3 = 1.1;
-const float springDistance3_repel = .1;
-
 const float maxVel = 200.;
 
 vec3 springForce( vec3 toPos , vec3 fromPos , float staticLength ){
@@ -77,7 +70,8 @@ void main(){
 
   // Waveyness
   // ( as object moves through simplex noise field, will look different )
-  float w = 1. + snoise( pos * .01 );
+  // TODO
+ // float w = 1. + snoise( pos * .01 );
 
   float mIx = floor( (vUv.x -hSize ) / size );
   float mIy = floor( (vUv.y -hSize) / size );
@@ -94,7 +88,7 @@ void main(){
     if( mI.y < 1.){
 
       vec3 attract = springForce( leader.xyz , pos.xyz , dist_spineAttract );
-      force += attract * force_spineAttract * w;
+      force += attract * force_spineAttract;
 
     
     // Every other vertabrae in the spine
@@ -119,7 +113,7 @@ void main(){
  
       // Attract to the column
       vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_subAttract );
-      force += attract * force_subAttract * w;
+      force += attract * force_subAttract;
 
       // Get the 'index' of this verta 
       // in the 4 first level sub objects
@@ -140,7 +134,7 @@ void main(){
 
           vec3 attract = springForce(  pos.xyz , otherPos.xyz , dist_subRepel );
 
-          force -= attract * force_subRepel * w;  
+          force -= attract * force_subRepel;  
         
         }
       }
@@ -186,7 +180,8 @@ void main(){
     // Bundle around spine
     }else{
 
-      vec4 otherPos = texture2D( t_pos , vec2( hSize , vUv.y ) );
+
+       vec4 otherPos = texture2D( t_pos , vec2( hSize , vUv.y ) );
 
 
       vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_bundleAttract );
@@ -219,9 +214,9 @@ void main(){
 
   }
 
-  vec3 dampeningForce = vel * -.1;
+  /*vec3 dampeningForce = vel * -.1;
   
-  force += dampeningForce;
+  force += dampeningForce;*/
   
   vel += force * dT;
 

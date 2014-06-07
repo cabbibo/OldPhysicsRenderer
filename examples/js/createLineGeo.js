@@ -27,12 +27,12 @@
       positions[ p2 + 2 ] = 1;
 
       colors[ p1 ]      = .3 ;
-      colors[ p1 + 1 ]  = .3;
-      colors[ p1 + 2 ]  = .3;
+      colors[ p1 + 1 ]  = .1;
+      colors[ p1 + 2 ]  = .9;
 
       colors[ p2 ]      = .6;
-      colors[ p2 + 1 ]  = .6;
-      colors[ p2 + 2 ]  = .6;
+      colors[ p2 + 1 ]  = .2;
+      colors[ p2 + 2 ]  = 1.3;
 
       // Sub
       for( var j = 0; j < 4; j++ ){
@@ -56,13 +56,13 @@
         positions[ p2 + 1 ] = i  * size;
         positions[ p2 + 2 ] = .1;
 
-        colors[ p1 ]      = .3;
-        colors[ p1 + 1 ]  = .3;
-        colors[ p1 + 2 ]  = .3;
+        colors[ p1 ]      = .3 ;
+        colors[ p1 + 1 ]  = .1;
+        colors[ p1 + 2 ]  = .9;
 
         colors[ p2 ]      = .6;
-        colors[ p2 + 1 ]  = .6;
-        colors[ p2 + 2 ]  = .6;
+        colors[ p2 + 1 ]  = .2;
+        colors[ p2 + 2 ]  = 1.3;
 
         //positions[ i + 3 ] = Math.random() * 20;
     
@@ -91,14 +91,13 @@
           positions[ p2 + 2 ] = .1;
 
 
-          colors[ p1 ]      = Math.floor( (k+1) /4 ) ;
-          colors[ p1 + 1 ]  = j / 4;
-          colors[ p1 + 2 ]  = 0;
+        colors[ p1 ]      = .3 ;
+        colors[ p1 + 1 ]  = .9;
+        colors[ p1 + 2 ]  = .4;
 
-          colors[ p2 ]      = 0;
-          colors[ p2 + 1 ]  = .5;
-          colors[ p2 + 2 ]  = 0;
-
+        colors[ p2 ]      = .3;
+        colors[ p2 + 1 ]  = 1.4;
+        colors[ p2 + 2 ]  = .9;
         }
       }
 
@@ -121,13 +120,13 @@
         positions[ p2 + 1 ] = i * size;
         positions[ p2 + 2 ] = .1;
 
-        colors[ p1 ]      = 1 ;
-        colors[ p1 + 1 ]  = .6;
-        colors[ p1 + 2 ]  = 0;
+        colors[ p1 ]      = 1.3;
+        colors[ p1 + 1 ]  = .8;
+        colors[ p1 + 2 ]  = .3;
 
-        colors[ p2 ]      = 0;
-        colors[ p2 + 1 ]  = .8;
-        colors[ p2 + 2 ]  = .5;
+        colors[ p2 ]      = 1.3;
+        colors[ p2 + 1 ]  = .6;
+        colors[ p2 + 2 ]  = .4;
 
 
 

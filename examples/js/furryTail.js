@@ -8,6 +8,8 @@
     this.leader       = leader;
     this.renderer     = renderer; 
 
+    this.speed        = Math.random();
+    this.radius        = (Math.random() + .5 ) * 50;
     this.physicsRenderer = new PhysicsRenderer( 
       this.size,
       this.sim,
@@ -24,7 +26,10 @@
     var mat = new THREE.ShaderMaterial({
       uniforms: uniforms,
       vertexShader: shaders.vertexShaders.render,
-      fragmentShader: shaders.fragmentShaders.render
+      fragmentShader: shaders.fragmentShaders.render,
+      /*blending: THREE.AdditiveBlending,
+      transparent: true,
+      depthwrite: false*/
     })
 
     var geo = ParticleUtils.createLookupGeometry( this.size );
@@ -39,21 +44,33 @@
 
 
     var uniforms = {
-      lookup:{ type:"t" , value:null }
+      t_pos:{ type:"t" , value:null },
+      t_oPos:{ type:"t" , value:null },
+      t_ooPos:{ type:"t" , value:null },
+      t_audio:{ type:"t" , value:t_audio },
     }
 
     var lineMat = new THREE.ShaderMaterial({
       uniforms: uniforms,
       vertexShader: shaders.vertexShaders.lineRender,
-      fragmentShader: shaders.fragmentShaders.lineRender
+      fragmentShader: shaders.fragmentShaders.lineRender,
+     /* blending: THREE.AdditiveBlending,
+      transparent: true,
+      depthwrite: false*/
+    
     });
 
     this.line = new THREE.Line( lineGeo , lineMat );
     this.line.type = THREE.LinePieces;
     
-    this.physicsRenderer.addBoundTexture( this.line , 'lookup' , 'output' );
+    pR.addBoundTexture( this.line , 't_pos' , 'output' );
+    pR.addBoundTexture( this.line , 't_oPos' , 'oOutput' );
+    pR.addBoundTexture( this.line , 't_ooPos' , 'ooOutput' );
 
 
+    var mesh = new THREE.Mesh( new THREE.SphereGeometry( 5 ) );
+    var pTexture = ParticleUtils.createPositionsTexture( this.size , mesh );
+    this.physicsRenderer.reset( pTexture );
     this.applyUniforms();
 
   }
@@ -61,7 +78,7 @@
 
   FurryTail.prototype.addToScene = function(){
 
-    scene.add( this.physicsParticles );
+    //scene.add( this.physicsParticles );
     scene.add( this.line );
 
 
@@ -70,6 +87,13 @@
   FurryTail.prototype.update = function(){
 
     this.physicsRenderer.update();
+
+  }
+
+
+  FurryTail.prototype.addDebugScene = function(){
+
+    this.physicsRenderer.addDebugScene( scene );
 
   }
 

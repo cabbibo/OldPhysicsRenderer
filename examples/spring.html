@@ -16,7 +16,14 @@
     <script src="../lib/TrackballControls.js"></script>
     <script src="../lib/ShaderLoader.js"></script>
     <script src="../lib/dat.gui.min.js"></script>
-    
+
+    <script src="../lib/AudioController.js"></script>
+    <script src="../lib/AudioTexture.js"></script>
+    <script src="../lib/Stream.js"></script>
+    <script src="../lib/UserAudio.js"></script>
+    <script src="../lib/underscore.js"></script>
+
+
     <script src="../ParticleUtils.js"></script>
     <script src="../PhysicsRenderer.js"></script>
 
@@ -28,8 +35,26 @@
 
       var paused = false;
 
+      var audioController = new AudioController();
+      //audioController.mute.gain.value = 0.0;
 
+      //var userAudio = new UserAudio( audioController );
+      
+      /*userAudio.onStreamCreated = function(){
+        init();
+        animate();
+      }*/
+
+      var stream = new Stream( '../../audio/saturnStrobe.mp3' , audioController );
+      //stream.play();
+
+
+      
+      var t_audio = audioController.texture;
+      console.log( t_audio );
+      
       var camera, renderer, scene , controls , clock;
+
 
       var gui = new dat.GUI({});
 
@@ -49,6 +74,7 @@
       shaders.shaderSetLoaded = function(){
         init();
         animate();
+        stream.play();
       }
 
       shaders.load( 'fs-spring' , 'render'  , 'fragment'    );
@@ -78,7 +104,7 @@
         clock = new THREE.Clock();
 
 
-        renderer = new THREE.WebGLRenderer();
+        renderer = new THREE.WebGLRenderer({autoclear:false});
         renderer.setSize( window.innerWidth, window.innerHeight );
 
         var container = document.getElementById('container' );
@@ -101,7 +127,7 @@
         var d_bA = { type:"f" , value: .1 }
         var f_bA = { type:"f" , value: .4  }
       
-        var d_bR = { type:"f" , value: 1.1 }
+        var d_bR = { type:"f" , value: 10.1 }
         var f_bR = { type:"f" , value: .01  }
         
         var d_sA = { type:"f" , value: 1.1 }
@@ -157,11 +183,11 @@
 
 
 
-        for( var i = 0; i < 100; i++ ){
+        for( var i = 0; i < 30; i++ ){
         leader = new THREE.Vector3();
 
         var mesh = new THREE.Mesh(
-          new THREE.IcosahedronGeometry( .5 , 1 ),
+          new THREE.IcosahedronGeometry( .4 , 1),
           new THREE.MeshNormalMaterial()
         );
 
@@ -178,8 +204,11 @@
 
         furryTail.addToScene();
 
+        //furryTail.addDebugScene( scene );
         furryTails.push( furryTail );
         }
+
+        window.addEventListener( 'resize', onResize , false );
         
         document.addEventListener( 'keydown' , function(e){
 
@@ -202,6 +231,7 @@
 
         timer += dT.value;
 
+        audioController.update();
         
         if( !paused ){
 
@@ -209,10 +239,10 @@
             
             var furryTail = furryTails[i];
 
-            var offset = timer * 1 +( i / 10 );
-            furryTail.leader.x = 20 *  Math.cos( offset );
-            furryTail.leader.y = 20 * Math.sin( offset );
-            furryTail.leader.z = 30 * Math.sin( offset  / 1.68);
+            var offset = timer * 1 +( i / 10 )* furryTail.speed;
+            furryTail.leader.x += .01 *furryTail.radius *  Math.cos( offset ) ;
+            furryTail.leader.y += .01 * furryTail.radius * Math.sin( offset );
+            furryTail.leader.z += .01 * furryTail.radius  * Math.sin( offset  / 1.68);
 
             furryTail.update();
 
@@ -227,6 +257,16 @@
         renderer.render( scene , camera );
 
       }
+
+       function onResize() {
+        windowHalfX = window.innerWidth / 2;
+        windowHalfY = window.innerHeight / 2;
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+
 
     </script>
 
