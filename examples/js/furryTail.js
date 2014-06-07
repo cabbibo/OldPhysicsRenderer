@@ -16,20 +16,23 @@
       this.renderer 
     );
 
+    var sprite = THREE.ImageUtils.loadTexture( '../img/flare.png');
 
     var uniforms = {
       t_pos:{ type:"t" , value:null },
       t_oPos:{ type:"t" , value:null },
       t_ooPos:{ type:"t" , value:null },
+      t_sprite:{ type:"t", value:sprite},
+      t_audio:{ type:"t" , value:audioController.texture }
     }
 
     var mat = new THREE.ShaderMaterial({
       uniforms: uniforms,
       vertexShader: shaders.vertexShaders.render,
       fragmentShader: shaders.fragmentShaders.render,
-      /*blending: THREE.AdditiveBlending,
+      //blending: THREE.AdditiveBlending,
       transparent: true,
-      depthwrite: false*/
+      depthWrite: false
     })
 
     var geo = ParticleUtils.createLookupGeometry( this.size );
@@ -78,7 +81,7 @@
 
   FurryTail.prototype.addToScene = function(){
 
-    //scene.add( this.physicsParticles );
+    scene.add( this.physicsParticles );
     scene.add( this.line );
 
 

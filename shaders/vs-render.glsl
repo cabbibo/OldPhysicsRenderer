@@ -24,18 +24,20 @@ void main(){
 
   // Main Index
   vec2 mI = vec2( mIx , mIy );
- 
+
+  gl_PointSize =  1000. / length(modelViewMatrix[3].xyz);
+
   if( mI.x < 1. ){
-    gl_PointSize = 10.;
+    gl_PointSize *= 3.;
   }else{
 
     if( vUv.x < size * 5. - hSize ){
 
-      gl_PointSize =  5. ;   
+      gl_PointSize *=  2. ;   
 
     }else{
 
-      gl_PointSize = 3.;
+      gl_PointSize *= 1.;
     }
 
   }

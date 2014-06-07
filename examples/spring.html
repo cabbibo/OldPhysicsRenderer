@@ -36,11 +36,14 @@
       var paused = false;
 
       var audioController = new AudioController();
-      //audioController.mute.gain.value = 0.0;
-
-      //var userAudio = new UserAudio( audioController );
       
-      /*userAudio.onStreamCreated = function(){
+      
+      /*
+      audioController.mute.gain.value = 0.0;
+
+      var userAudio = new UserAudio( audioController );
+      
+      userAudio.onStreamCreated = function(){
         init();
         animate();
       }*/
@@ -183,7 +186,7 @@
 
 
 
-        for( var i = 0; i < 30; i++ ){
+        for( var i = 0; i < 100; i++ ){
         leader = new THREE.Vector3();
 
         var mesh = new THREE.Mesh(

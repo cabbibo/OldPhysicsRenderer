@@ -26,6 +26,6 @@ void main(){
   vec4 aColor = texture2D( t_audio , vec2( iNViewDot * facingRatio , 0.0));
 
 
-  gl_FragColor = vec4( aColor.xyz * .9 + vColor * .5 , 1.0 );
+  gl_FragColor = vec4( aColor.xyz * aColor.xyz * aColor.xyz * .9 + vColor * .5 , 1.0 );
 
 }
