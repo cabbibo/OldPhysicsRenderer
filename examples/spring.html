@@ -46,6 +46,8 @@
       shaders.load( 'fs-spring' , 'render'  , 'fragment'    );
       shaders.load( 'vs-render' , 'render'  , 'vertex'      );
       shaders.load( 'tailSim'   , 'tailSim' , 'simulation'  );
+      shaders.load( 'fs-lineRender' , 'lineRender' , 'fragment' );
+      shaders.load( 'vs-lineRender' , 'lineRender' , 'vertex' );
 
 
       function init(){
@@ -125,6 +127,101 @@
         physicsRenderer.debugScene.position.y = 20;
         physicsRenderer.addDebugScene( scene );
 
+
+
+        var lineGeo = new THREE.BufferGeometry();
+
+        var lineGeo = new THREE.BufferGeometry();
+
+		lineGeo.addAttribute( 'position', new Float32Array( 32 * 32 * 3 ), 3 );
+        var positions = lineGeo.getAttribute( 'position' ).array;
+
+        var size = 1 / 32;
+        var hSize = size / 2;
+
+        for( var i = 0; i < 32; i ++ ){
+
+          var index = i * 3;
+
+          var p1 = index * 2;
+          var p2 = index * 2 + 3;
+          positions[ p1 ] = 0 * size ;
+          positions[ p1 + 1 ] = i * size ;
+          positions[ p1 + 2 ] = 1;
+
+          positions[ p2 ] = 0 * size ;
+          positions[ p2 + 1 ] = (i + 1) * size;
+          positions[ p2 + 2 ] = 1;
+
+          for( var j = 0; j < 4; j++ ){
+
+            // Start these positions after all of our indices
+            var startingIndex = 32 * 3;
+
+            var columnStartingIndex = startingIndex + ( 32 * 3 * j);
+
+            var index = (i * 3) + columnStartingIndex;
+
+            var p1 = index * 2;
+            var p2 = index * 2 + 3;
+
+
+            positions[ p1 ] = 0 * size ;
+            positions[ p1 + 1 ] = i * size ;
+            positions[ p1 + 2 ] = 1;
+
+            positions[ p2 ]     = ( j + 1) * size ;
+            positions[ p2 + 1 ] = i  * size;
+            positions[ p2 + 2 ] = .1;
+
+
+            //positions[ i + 3 ] = Math.random() * 20;
+        
+          }
+
+
+          for( var j = 0; j < 4; j ++ ){
+            for( var k = 0; k < 4; k++ ){
+
+              var startingIndex = 5 * 32 * 3;
+
+
+
+
+            }
+          }
+
+        }
+
+        console.log( positions );
+
+        var lineMat = new THREE.LineBasicMaterial({ color:0xffffff });
+
+
+        var uniforms = {
+
+          lookup:{ type:"t" , value:null }
+
+        }
+
+        var lineMat = new THREE.ShaderMaterial({
+
+          uniforms: uniforms,
+          vertexShader: shaders.vertexShaders.lineRender,
+          fragmentShader: shaders.fragmentShaders.lineRender
+
+        });
+
+
+        line = new THREE.Line( lineGeo , lineMat );
+        line.type = THREE.LinePieces;
+
+
+        physicsRenderer.addBoundTexture( line , 'lookup' , 'output' );
+        
+        scene.add( line );
+
+        var lineGeo = new THREE.BufferGeometry();
         document.addEventListener( 'keydown' , function(e){
 
           console.log( e.which );
@@ -148,9 +245,9 @@
         
         if( !paused ){
           
-          leader.x = 80 *  Math.cos( timer);
-          leader.y = 80 * Math.sin( timer);
-          leader.z = 150 * Math.sin( timer);
+          leader.x = 8 *  Math.cos( timer);
+          leader.y = 8 * Math.sin( timer);
+          leader.z = 15 * Math.sin( timer);
 
           physicsRenderer.update();
           
