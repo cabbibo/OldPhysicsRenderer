@@ -34,22 +34,29 @@
       this.renderer 
     );
 
-    var sprite = THREE.ImageUtils.loadTexture( '../img/flare.png');
+    var sprite = THREE.ImageUtils.loadTexture( '../img/cabbibo.png');
 
-    var uniforms = {
+
+    var color1 = new THREE.Vector3( Math.random() , Math.random() , Math.random() );
+    var color2 = new THREE.Vector3( Math.random() , Math.random() , Math.random() );
+    var color3 = new THREE.Vector3( Math.random() , Math.random() , Math.random() );
+    var color4 = new THREE.Vector3( Math.random() , Math.random() , Math.random() );
+    
+    this.particleUniforms = {
       t_pos:{ type:"t" , value:null },
       t_oPos:{ type:"t" , value:null },
       t_ooPos:{ type:"t" , value:null },
       t_sprite:{ type:"t", value:sprite},
       t_audio:{ type:"t" , value:audioController.texture },
-      color1: { type:"c" , value:new THREE.Color( 0xff0000 ) },
-      color2: { type:"c" , value:new THREE.Color( 0xcccc55 ) },
-      color3: { type:"c" , value:new THREE.Color( 0x0000ff ) },
+      color1: { type:"v3" , value:color1 },
+      color2: { type:"v3" , value:color2 },
+      color3: { type:"v3" , value:color3 },
+      color4: { type:"v3" , value:color4 },
 
     }
 
     var mat = new THREE.ShaderMaterial({
-      uniforms: uniforms,
+      uniforms: this.particleUniforms,
       vertexShader: shaders.vertexShaders.render,
       fragmentShader: shaders.fragmentShaders.render,
       //blending: THREE.AdditiveBlending,
@@ -68,15 +75,15 @@
     pR.addBoundTexture( this.physicsParticles , 't_ooPos' , 'ooOutput' );
 
 
-    var uniforms = {
+    this.lineUniforms = {
       t_pos:{ type:"t" , value:null },
       t_oPos:{ type:"t" , value:null },
       t_ooPos:{ type:"t" , value:null },
       t_audio:{ type:"t" , value:audioController.texture },
-      color1: { type:"v3" , value:new THREE.Vector3(1 , 0 , 0) },
-      color2: { type:"v3" , value:new THREE.Vector3( .9 , .5 , 0) },
-      color3: { type:"v3" , value:new THREE.Vector3( 0,0,1) },
-      color4: { type:"v3" , value:new THREE.Vector3( .5 , .5 , .5) },
+      color1: { type:"v3" , value:color1 },
+      color2: { type:"v3" , value:color2 },
+      color3: { type:"v3" , value:color3 },
+      color4: { type:"v3" , value:color4 },
     }
 
 
@@ -95,53 +102,70 @@
 
     */
 
-    folder.add( c , 'spineColor' ).onFinishChange( function( value ){
+    folder.addColor( c , 'spineColor' ).onChange( function( value ){
 
       var col = new THREE.Color( value );
       console.log( col );
 
-      this.color1.value.x = col.r;
-      this.color1.value.y = col.g;
-      this.color1.value.z = col.b;
+      this.particleUniforms.color1.value.x = col.r;
+      this.particleUniforms.color1.value.y = col.g;
+      this.particleUniforms.color1.value.z = col.b;
+      
+      this.lineUniforms.color1.value.x = col.r;
+      this.lineUniforms.color1.value.y = col.g;
+      this.lineUniforms.color1.value.z = col.b;
             
-    }.bind( uniforms ));
+    }.bind( this ));
 
-    folder.add( c , 'subColor' ).onFinishChange( function( value ){
+    folder.addColor( c , 'subColor' ).onChange( function( value ){
 
       var col = new THREE.Color( value );
       console.log( col );
 
-      this.color2.value.x = col.r;
-      this.color2.value.y = col.g;
-      this.color2.value.z = col.b;
+      this.particleUniforms.color2.value.x = col.r;
+      this.particleUniforms.color2.value.y = col.g;
+      this.particleUniforms.color2.value.z = col.b;
+      
+      this.lineUniforms.color2.value.x = col.r;
+      this.lineUniforms.color2.value.y = col.g;
+      this.lineUniforms.color2.value.z = col.b;
             
-    }.bind( uniforms ));
-    folder.add( c , 'subSubColor' ).onFinishChange( function( value ){
+    }.bind( this ));
+
+    folder.addColor( c , 'subSubColor' ).onChange( function( value ){
 
       var col = new THREE.Color( value );
       console.log( col );
 
-      this.color3.value.x = col.r;
-      this.color3.value.y = col.g;
-      this.color3.value.z = col.b;
+      this.particleUniforms.color3.value.x = col.r;
+      this.particleUniforms.color3.value.y = col.g;
+      this.particleUniforms.color3.value.z = col.b;
+      
+      this.lineUniforms.color3.value.x = col.r;
+      this.lineUniforms.color3.value.y = col.g;
+      this.lineUniforms.color3.value.z = col.b;
             
-    }.bind( uniforms ));
-    folder.add( c , 'bundleColor' ).onFinishChange( function( value ){
+    }.bind( this ));
+    folder.addColor( c , 'bundleColor' ).onChange( function( value ){
 
       var col = new THREE.Color( value );
       console.log( col );
+      
+      this.particleUniforms.color4.value.x = col.r;
+      this.particleUniforms.color4.value.y = col.g;
+      this.particleUniforms.color4.value.z = col.b;
 
-      this.color4.value.x = col.r;
-      this.color4.value.y = col.g;
-      this.color4.value.z = col.b;
+      this.lineUniforms.color4.value.x = col.r;
+      this.lineUniforms.color4.value.y = col.g;
+      this.lineUniforms.color4.value.z = col.b;
             
-    }.bind( uniforms ));
+    }.bind( this ));
 
     var lineMat = new THREE.ShaderMaterial({
-      uniforms: uniforms,
+      uniforms: this.lineUniforms,
       vertexShader: shaders.vertexShaders.lineRender,
       fragmentShader: shaders.fragmentShaders.lineRender,
-     /* blending: THREE.AdditiveBlending,
+      /*blending: THREE.AdditiveBlending,
       transparent: true,
       depthwrite: false*/
     
@@ -172,7 +196,7 @@
 
   FurryTail.prototype.addToScene = function(){
 
-    //scene.add( this.physicsParticles );
+    scene.add( this.physicsParticles );
     scene.add( this.line );
 
 
