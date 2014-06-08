@@ -1,6 +1,7 @@
 
 uniform sampler2D t_oPos;
 uniform sampler2D t_pos;
+uniform sampler2D t_audio; // TODO: FINISH
 
 uniform float dT;
 
@@ -66,6 +67,7 @@ void main(){
   // Get our velocity
   vec3 vel = oPos.xyz - pos.xyz;
 
+  vec4 audioForce = texture2D( t_audio , vec2( vUv.y , 0.0 ) );
   vec3  force = vec3(0.);
 
   // Waveyness

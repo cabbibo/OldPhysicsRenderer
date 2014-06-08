@@ -48,7 +48,7 @@
         animate();
       }
 
-      var stream = new Stream( '../../audio/you.mp3' , audioController );
+      var stream = new Stream( '../../audio/saturnStrobe.mp3' , audioController );
       //stream.play();
 
 
@@ -58,7 +58,9 @@
       
       var camera, renderer, scene , controls , clock;
 
+      var center = new THREE.Vector3();
 
+      var colors = [];
       var gui = new dat.GUI({});
 
       var particleSystem;
@@ -115,14 +117,23 @@
         container.appendChild( renderer.domElement );
 
         var lineGeo = createLineGeo(); 
-        
+
+
+
+        /*
+
+
+          Setting up Color Uniforms
+
+        */
+
+
+
         /*
 
           Setting up attraction / repulsion uniforms
 
         */
-
-      
 
         var d_spA = { type:"f" , value: 1.1 }
         var f_spA = { type:"f" , value: .1  }
@@ -186,29 +197,29 @@
 
 
 
-        for( var i = 0; i < 100; i++ ){
-        leader = new THREE.Vector3();
+        for( var i = 0; i < 5; i++ ){
+          leader = new THREE.Vector3();
 
-        var mesh = new THREE.Mesh(
-          new THREE.IcosahedronGeometry( .4 , 1),
-          new THREE.MeshNormalMaterial()
-        );
+          var mesh = new THREE.Mesh(
+            new THREE.IcosahedronGeometry( .4 , 1),
+            new THREE.MeshNormalMaterial()
+          );
 
-        mesh.position = leader;
-        scene.add( mesh );
+          mesh.position = leader;
+          scene.add( mesh );
 
-        furryTail = new FurryTail(
-          leader,
-          lineGeo,
-          allUniforms,
-          shaders.simulationShaders.tailSim,
-          renderer
-        );
+          furryTail = new FurryTail(
+            leader,
+            lineGeo,
+            allUniforms,
+            shaders.simulationShaders.tailSim,
+            renderer
+          );
 
-        furryTail.addToScene();
+          furryTail.addToScene();
 
-        //furryTail.addDebugScene( scene );
-        furryTails.push( furryTail );
+          //furryTail.addDebugScene( scene );
+          furryTails.push( furryTail );
         }
 
         window.addEventListener( 'resize', onResize , false );
@@ -229,25 +240,60 @@
 
       function animate(){
 
+        //console.log( 
 
         dT.value = clock.getDelta();
 
         timer += dT.value;
 
         audioController.update();
-        
+
+
         if( !paused ){
+
+          center.x = Math.sin( timer ) * 80;
+          center.y = Math.cos( timer ) * 80;
+          center.z = Math.cos( timer / 1.542) * 100;
 
           for( var i = 0; i < furryTails.length; i++ ){
             
             var furryTail = furryTails[i];
 
-            var offset = timer * 1 +( i / 10 )* furryTail.speed;
-            furryTail.leader.x += .01 *furryTail.radius *  Math.cos( offset ) ;
-            furryTail.leader.y += .01 * furryTail.radius * Math.sin( offset );
-            furryTail.leader.z += .01 * furryTail.radius  * Math.sin( offset  / 1.68);
+            var l = audioController.analyzer.array.length;
+            var index = Math.floor( ( i  / furryTails.length ) * l );
 
-            furryTail.update();
+
+            var audio = audioController.analyzer.array[ index ] / 256;
+           
+            var offset = audio * timer * 1 +( i / 10 )* furryTail.speed;
+
+            var dif = center.clone().sub( furryTail.position );
+            var force = dif.multiplyScalar( .001 );  
+            
+            for( var j = i;  j < furryTails.length; j++ ){
+
+              var p1 = furryTail.position;
+              var p2 = furryTails[j].position;
+              var dif = p2.clone().sub( p1 );
+
+              if( dif.length() < 10 ){
+
+                force.sub( dif.multiplyScalar( .01  ));
+
+              }else{
+
+                force.add( dif.multiplyScalar( .0001  ));
+
+
+              }
+
+            }
+
+
+            //furryTail.velocity = new THREE.Vector3( 0 , 0 ,1 );
+            furryTail.update( force , audio );
+
+            //furryTail.leader.position.copy( furryTail.position );
 
           }
 

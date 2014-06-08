@@ -26,13 +26,13 @@
       positions[ p2 + 1 ] = (i + 1) * size;
       positions[ p2 + 2 ] = 1;
 
-      colors[ p1 ]      = .3 ;
-      colors[ p1 + 1 ]  = .1;
-      colors[ p1 + 2 ]  = .9;
+      colors[ p1 ]      = i;
+      colors[ p1 + 1 ]  = 0;
+      colors[ p1 + 2 ]  = 0;
 
-      colors[ p2 ]      = .6;
-      colors[ p2 + 1 ]  = .2;
-      colors[ p2 + 2 ]  = 1.3;
+      colors[ p2 ]      = i + 1;
+      colors[ p2 + 1 ]  = 0;
+      colors[ p2 + 2 ]  = 0;
 
       // Sub
       for( var j = 0; j < 4; j++ ){
@@ -56,13 +56,13 @@
         positions[ p2 + 1 ] = i  * size;
         positions[ p2 + 2 ] = .1;
 
-        colors[ p1 ]      = .3 ;
-        colors[ p1 + 1 ]  = .1;
-        colors[ p1 + 2 ]  = .9;
+        colors[ p1 ]      = (i +1) / size;
+        colors[ p1 + 1 ]  = 0;
+        colors[ p1 + 2 ]  = 0;
 
-        colors[ p2 ]      = .6;
-        colors[ p2 + 1 ]  = .2;
-        colors[ p2 + 2 ]  = 1.3;
+        colors[ p2 ]      = (i +1) / size;
+        colors[ p2 + 1 ]  = 1;
+        colors[ p2 + 2 ]  = 0;
 
         //positions[ i + 3 ] = Math.random() * 20;
     
@@ -91,13 +91,14 @@
           positions[ p2 + 2 ] = .1;
 
 
-        colors[ p1 ]      = .3 ;
-        colors[ p1 + 1 ]  = .9;
-        colors[ p1 + 2 ]  = .4;
+          colors[ p1 ]      = i;
+          colors[ p1 + 1 ]  = 1;
+          colors[ p1 + 2 ]  = 0;
 
-        colors[ p2 ]      = .3;
-        colors[ p2 + 1 ]  = 1.4;
-        colors[ p2 + 2 ]  = .9;
+          colors[ p2 ]      = i;
+          colors[ p2 + 1 ]  = 2;
+          colors[ p2 + 2 ]  = 0;
+
         }
       }
 
@@ -120,13 +121,13 @@
         positions[ p2 + 1 ] = i * size;
         positions[ p2 + 2 ] = .1;
 
-        colors[ p1 ]      = 1.3;
-        colors[ p1 + 1 ]  = .8;
-        colors[ p1 + 2 ]  = .3;
+        colors[ p1 ]      =  i;
+        colors[ p1 + 1 ]  =  0;
+        colors[ p1 + 2 ]  =  0;
 
-        colors[ p2 ]      = 1.3;
-        colors[ p2 + 1 ]  = .6;
-        colors[ p2 + 2 ]  = .4;
+        colors[ p2 ]      =  i;
+        colors[ p2 + 1 ]  =  3;
+        colors[ p2 + 2 ]  =  0;
 
 
 

@@ -3,6 +3,11 @@ uniform sampler2D t_oPos;
 uniform sampler2D t_ooPos;
 
 
+uniform vec3 color1;
+uniform vec3 color2;
+uniform vec3 color3;
+uniform vec3 color4;
+
 attribute vec3 color;
 
 varying vec3 vPos;
@@ -35,7 +40,18 @@ void main(){
   vVel = vel;
   vPos = pos.xyz;
 
-  vColor = color;
+
+  if( color.g < .1 ){
+  
+    vColor = color1;//color1.xyz;
+
+  }else if( color.g < 1.1 ){
+    vColor = color2;
+  }else if( color.g < 2.1 ){
+   vColor = color3;
+  }else if( color.g < 3.1 ){
+    vColor = color4;
+  }  
   vC = position.z;
 
   vView = modelViewMatrix[3].xyz;

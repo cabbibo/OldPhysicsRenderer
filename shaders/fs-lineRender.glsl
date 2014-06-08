@@ -10,7 +10,6 @@ varying vec3 vNorm;
 varying vec3 vView;
 varying vec3 vLightDir;
 
-
 void main(){
 
   vec3 nNormal = vNorm;
@@ -26,6 +25,7 @@ void main(){
   vec4 aColor = texture2D( t_audio , vec2( iNViewDot * facingRatio , 0.0));
 
 
-  gl_FragColor = vec4( aColor.xyz * aColor.xyz * aColor.xyz * .9 + vColor * .5 , 1.0 );
+  vec3 aC = ((aColor.xyz * aColor.xyz * aColor.xyz) - .2) * 1.4 ;
+  gl_FragColor = vec4(  vColor  + aC, 1.0 );
 
 }
