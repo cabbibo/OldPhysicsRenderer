@@ -30,6 +30,7 @@
     <script src="js/createLineGeo.js"></script>
     <script src="js/FurryGroup.js"></script>
     <script src="js/FurryTail.js"></script>
+    <script src="js/Cloth.js"></script>
 
     <script>
 
@@ -71,7 +72,7 @@
 
       var dT = { type:"f" , value:0 }
 
-      var timer = 0;
+      var timer = { type:"f" , value:0 };
 
       var furryTails = [];
 
@@ -88,6 +89,8 @@
       shaders.load( 'tailSim'   , 'tailSim' , 'simulation'  );
       shaders.load( 'fs-lineRender' , 'lineRender' , 'fragment' );
       shaders.load( 'vs-lineRender' , 'lineRender' , 'vertex' );
+      shaders.load( 'vs-iri' , 'iri' , 'vertex' );
+      shaders.load( 'fs-iri' , 'iri' , 'fragment' );
 
 
       function init(){
@@ -124,8 +127,10 @@
           new THREE.MeshNormalMaterial()
         );
 
+
         scene.add( center );
 
+        var cloth = new Cloth();
 
         groups = [];
 
@@ -189,7 +194,7 @@
 
         dT.value = clock.getDelta();
 
-        timer += dT.value;
+        timer.value += dT.value;
 
         audioController.update();
 
@@ -197,9 +202,9 @@
 
         if( !centerPaused ){
 
-          center.position.x = Math.sin( timer/20 ) * 120;
-          center.position.y = Math.cos( timer/10 ) * 120;
-          center.position.z = Math.cos( timer / 15.542) * 100;
+          center.position.x = Math.sin( timer.value /20 ) * 120;
+          center.position.y = Math.cos( timer.value /10 ) * 120;
+          center.position.z = Math.cos( timer.value / 15.542) * 100;
 
         }
 
