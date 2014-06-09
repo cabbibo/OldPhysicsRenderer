@@ -1,9 +1,11 @@
 
 uniform sampler2D t_oPos;
 uniform sampler2D t_pos;
-uniform sampler2D t_audio; // TODO: FINISH
-
+uniform sampler2D t_audio; 
 uniform float dT;
+
+uniform float audioPower;
+uniform float audioAmount;
 
 uniform vec3 leader;
 
@@ -67,8 +69,20 @@ void main(){
   // Get our velocity
   vec3 vel = oPos.xyz - pos.xyz;
 
-  vec4 audioForce = texture2D( t_audio , vec2( vUv.y , 0.0 ) );
   vec3  force = vec3(0.);
+  
+  vec4 audioForce = texture2D( t_audio , vec2( vUv.y , 0.0 ) );
+  vec2 aL , aL3;
+  aL.y = length( audioForce);
+  aL3.y = aL.y * aL.y * aL.y;
+
+  float aF = min( pow( aL.y , audioPower ) , 4.0);
+  aF *= audioAmount;
+  aF += ( 1. - audioAmount );
+
+  audioForce = texture2D( t_audio , vec2( vUv.x , 0.0 ) );
+  aL.x = length( audioForce );
+  aL3.x = aL.x * aL.x * aL.x;
 
   // Waveyness
   // ( as object moves through simplex noise field, will look different )
@@ -114,14 +128,14 @@ void main(){
       vec4 otherPos = texture2D( t_pos , vec2( hSize , vUv.y ) );
  
       // Attract to the column
-      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_subAttract );
+      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_subAttract * aF );
       force += attract * force_subAttract;
 
       // Get the 'index' of this verta 
       // in the 4 first level sub objects
       int index = int( (vUv.x - hSize ) / size );
 
-
+ 
 
       // Loop through all the other objects in this level
       for( int i = 0; i < 4; i++ ){
@@ -134,7 +148,7 @@ void main(){
 
           vec4 otherPos = texture2D( t_pos , vec2( lookup , vUv.y ) );
 
-          vec3 attract = springForce(  pos.xyz , otherPos.xyz , dist_subRepel );
+          vec3 attract = springForce(  pos.xyz , otherPos.xyz , dist_subRepel * aF );
 
           force -= attract * force_subRepel;  
         
@@ -156,7 +170,7 @@ void main(){
 
       vec4 otherPos = texture2D( t_pos , vec2( lookup , vUv.y ) );
 
-      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_subSubAttract );
+      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_subSubAttract * aF  );
 
       force += attract * force_subSubAttract;
 
@@ -170,7 +184,7 @@ void main(){
 
           vec4 otherPos = texture2D( t_pos , vec2( lookup , vUv.y ) );
 
-          vec3 attract = springForce( pos.xyz , otherPos.xyz  , dist_subSubRepel );
+          vec3 attract = springForce( pos.xyz , otherPos.xyz  , dist_subSubRepel * aF  );
 
           force -= attract * force_subSubRepel;           
         }
@@ -186,7 +200,7 @@ void main(){
        vec4 otherPos = texture2D( t_pos , vec2( hSize , vUv.y ) );
 
 
-      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_bundleAttract );
+      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_bundleAttract * aF  );
 
       force +=  attract * force_bundleAttract;
 
@@ -201,18 +215,15 @@ void main(){
 
           vec4 otherPos = texture2D( t_pos , vec2( lookup , vUv.y ) );
 
-          vec3 attract = springForce( pos.xyz , otherPos.xyz  , dist_bundleRepel );
+          vec3 attract = springForce( pos.xyz , otherPos.xyz  , dist_bundleRepel * aF  );
 
-          force -= attract * force_bundleRepel ;  
+          force -= attract * force_bundleRepel;  
 
         }
 
-
       }
 
-
     }
-
 
   }
 

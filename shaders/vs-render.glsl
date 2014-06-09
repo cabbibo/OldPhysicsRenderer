@@ -3,6 +3,8 @@ uniform sampler2D t_oPos;
 uniform sampler2D t_ooPos;
 uniform sampler2D t_audio;
 
+uniform float particleSize;
+
 uniform vec3 color1;
 uniform vec3 color2;
 uniform vec3 color3;
@@ -46,7 +48,7 @@ void main(){
   vec3 lightDir = normalize( lightPos -  (modelViewMatrix * vec4( vPos.xyz , 1.0 )).xyz );
 
 
-  gl_PointSize =  1000. / length( mvPos.xyz );
+  gl_PointSize =  particleSize * 1000. / length( mvPos.xyz );
 
   if( mI.x < 1. ){
     gl_PointSize *= 3.;
@@ -86,7 +88,6 @@ void main(){
   float facingRatio = abs( dot(  vNorm , refl) );
 
   vec4 aColor = texture2D( t_audio , vec2( iNViewDot * facingRatio , 0.0));
-
 
   vColor += ((aColor.xyz * aColor.xyz * aColor.xyz) - .2) * 1.4;
 

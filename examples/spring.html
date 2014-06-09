@@ -28,12 +28,13 @@
     <script src="../PhysicsRenderer.js"></script>
 
     <script src="js/createLineGeo.js"></script>
-    <script src="js/furryTail.js"></script>
+    <script src="js/FurryGroup.js"></script>
+    <script src="js/FurryTail.js"></script>
 
     <script>
 
 
-      var paused = false;
+      var centerPaused, movementPaused , physicsPaused = false;
 
       var audioController = new AudioController();
       
@@ -58,7 +59,7 @@
       
       var camera, renderer, scene , controls , clock;
 
-      var center = new THREE.Vector3();
+      var center;
 
       var colors = [];
       var gui = new dat.GUI({});
@@ -118,110 +119,40 @@
 
         var lineGeo = createLineGeo(); 
 
+        center = new THREE.Mesh( 
+          new THREE.IcosahedronGeometry( 10 , 0 ),
+          new THREE.MeshNormalMaterial()
+        );
+
+        scene.add( center );
 
 
-        /*
+        groups = [];
 
+        for( var i = 0; i < 4; i++ ){
 
-          Setting up Color Uniforms
+          var bait = center.clone();
+          bait.scale.multiplyScalar( .3 );
+          scene.add( bait );
 
-        */
+          var numOf = 1 + Math.floor( Math.random() * 10 );
+          var f = new FurryGroup( 'PUPPY '+i , numOf, {
 
+            center: center,
+            bait: bait
 
+          });
 
-        /*
+          groups.push( f );
 
-          Setting up attraction / repulsion uniforms
+        }
 
-        */
+        for( var i = 0; i < groups.length; i++ ){
 
-        var d_spA = { type:"f" , value: 1.1 }
-        var f_spA = { type:"f" , value: .1  }
+          groups[i].updateBrethren();
 
-        var d_bA = { type:"f" , value: .1 }
-        var f_bA = { type:"f" , value: .4  }
+        }
       
-        var d_bR = { type:"f" , value: 10.1 }
-        var f_bR = { type:"f" , value: .01  }
-        
-        var d_sA = { type:"f" , value: 1.1 }
-        var f_sA = { type:"f" , value: .1  }
-        
-        var d_sR = { type:"f" , value: 3.1 }
-        var f_sR = { type:"f" , value: .01  }
-        
-        var d_sSA = { type:"f" , value: 1.1 }
-        var f_sSA = { type:"f" , value: .1  }
-        
-        var d_sSR = { type:"f" , value: 3.1 }
-        var f_sSR = { type:"f" , value: .01  }
-
-
-        var allUniforms = {
-  
-          dist_spineAttract     : d_spA,
-          force_spineAttract    : f_spA ,
-          dist_bundleAttract    : d_bA,
-          force_bundleAttract   : f_bA,
-          dist_bundleRepel      : d_bR,
-          force_bundleRepel     : f_bR,
-          dist_subAttract       : d_sA,
-          force_subAttract      : f_sA,
-          dist_subRepel         : d_sR,
-          force_subRepel        : f_sR,
-          dist_subSubAttract    : d_sSA,
-          force_subSubAttract   : f_sSA,
-          dist_subSubRepel      : d_sSR,
-          force_subSubRepel     : f_sSR,
-          dT                    :  dT
-
-        }
-
-        gui.add( d_spA, 'value' , 0 , 10  ).name( 'dist_spineAttract' );
-        gui.add( f_spA, 'value' , 0 , .5  ).name( 'force_spineAttract' );
-        
-        gui.add( d_bA,  'value' , 0 , 10  ).name( 'dist_bundleAttract' );
-        gui.add( f_bA,  'value' , 0 , .5  ).name( 'force_bundleAttract' );
-        gui.add( d_bR,  'value' , 0 , 10  ).name( 'dist_bundleRepel' );
-        gui.add( f_bR,  'value' , 0 , .05 ).name( 'force_bundleRepel' );
-        
-        gui.add( d_sA,  'value' , 0 , 10  ).name( 'dist_subAttract' );
-        gui.add( f_sA,  'value' , 0 , .5  ).name( 'force_subAttract' );
-        gui.add( d_sR,  'value' , 0 , 10  ).name( 'dist_subRepel' );
-        gui.add( f_sR,  'value' , 0 , .2  ).name( 'force_subRepel' );
-        
-        gui.add( d_sSA, 'value' , 0 , 10  ).name( 'dist_subSubAttract' );
-        gui.add( f_sSA, 'value' , 0 , .5  ).name( 'force_subSubAttract' );
-        gui.add( d_sSR, 'value' , 0 , 10  ).name( 'dist_subSubRepel' );
-        gui.add( f_sSR, 'value' , 0 , .2  ).name( 'force_subSubRepel' );
-
-
-
-        for( var i = 0; i < 20; i++ ){
-          leader = new THREE.Vector3();
-
-          var mesh = new THREE.Mesh(
-            new THREE.IcosahedronGeometry( .4 , 1),
-            new THREE.MeshNormalMaterial()
-          );
-
-          mesh.position = leader;
-          scene.add( mesh );
-
-          furryTail = new FurryTail(
-            leader,
-            lineGeo,
-            allUniforms,
-            shaders.simulationShaders.tailSim,
-            renderer
-          );
-
-          furryTail.addToScene();
-
-          //furryTail.addDebugScene( scene );
-          furryTails.push( furryTail );
-        }
-
         window.addEventListener( 'resize', onResize , false );
         
         document.addEventListener( 'keydown' , function(e){
@@ -229,9 +160,23 @@
           console.log( e.which );
           if( e.which == 32 ){
 
-            paused = !paused;
+            centerPaused = !centerPaused;
 
           }
+
+          if( e.which == 45 ){
+
+            physicsPaused = !physicsPaused;
+
+          }
+
+          if( e.which == 90 ){
+
+            movementPaused = !movementPaused;
+
+          }
+
+
 
         });
       }
@@ -249,53 +194,43 @@
         audioController.update();
 
 
-        if( !paused ){
 
-          center.x = Math.sin( timer ) * 80;
-          center.y = Math.cos( timer ) * 80;
-          center.z = Math.cos( timer / 1.542) * 100;
+        if( !centerPaused ){
+
+          center.position.x = Math.sin( timer ) * 8;
+          center.position.y = Math.cos( timer ) * 8;
+          center.position.z = Math.cos( timer / 1.542) * 10;
+
+        }
+
+        if( !physicsPaused ){
+
 
           for( var i = 0; i < furryTails.length; i++ ){
-            
+
             var furryTail = furryTails[i];
-
-            var l = audioController.analyzer.array.length;
-            var index = Math.floor( ( i  / furryTails.length ) * l );
-
-
-            var audio = audioController.analyzer.array[ index ] / 256;
-           
-            var offset = audio * timer * 1 +( i / 10 )* furryTail.speed;
-
-            var dif = center.clone().sub( furryTail.position );
-            var force = dif.multiplyScalar( .001 );  
-            
-            for( var j = i;  j < furryTails.length; j++ ){
-
-              var p1 = furryTail.position;
-              var p2 = furryTails[j].position;
-              var dif = p2.clone().sub( p1 );
-
-              if( dif.length() < 10 ){
-
-                force.sub( dif.multiplyScalar( .01  ));
-
-              }else{
-
-                force.add( dif.multiplyScalar( .0001  ));
-
-
-              }
-
-            }
-
-
-            //furryTail.velocity = new THREE.Vector3( 0 , 0 ,1 );
-            furryTail.update( force , audio );
-
-            //furryTail.leader.position.copy( furryTail.position );
+            furryTail.updateTail();
 
           }
+
+        }
+
+        if( !movementPaused ){
+
+          for( var i = 0; i < groups.length; i++ ){
+
+            groups[i].updatePhysics();
+
+
+          }
+
+          for( var i = 0; i < furryTails.length; i++ ){
+
+            var furryTail = furryTails[i];
+            furryTail.updatePhysics();
+
+          }
+
 
         }
 
