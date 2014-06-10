@@ -95,11 +95,7 @@
       renderer 
     );
 
-    this.physicsRenderer.setUniform( 't_audio' , {
-      type:"t",
-      value:this.audio.texture
-    });
-
+   
     this.particleUniforms.t_sprite.value = this.particleSprite;
 
     if( this.particleUniforms.t_audio){

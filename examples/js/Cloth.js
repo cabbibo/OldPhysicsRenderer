@@ -2,7 +2,32 @@
   function Cloth(){
 
 
-    this.size = 64;
+    this.size = 32;
+    this.sim = shaders.simulationShaders.jellySim;
+
+    this.physicsRenderer = new PhysicsRenderer(
+      this.size,
+      this.sim,
+      renderer
+    );
+
+    this.physicsRenderer.setUniform( 't_audio' , {
+      type:"t",
+      value:audioController.texture
+    });
+
+
+    this.physicsRenderer.setUniform( 'leader' , { 
+      type:"v3" , 
+      value:new THREE.Vector3() 
+    });
+
+    console.log( dT );
+    this.physicsRenderer.setUniform( 'dT' , { 
+      type:"f" , 
+      value:dT
+    });
+
 
     var path = "../img/skybox/";
     var format = '.jpg';
@@ -25,6 +50,9 @@
       tIri:{ type:"t" , value: tIri },
       lightPos: { type:"v3" , value: new THREE.Vector3( 1 , 1 , 1 ) },
       tNormal:{type:"t",value:tNormal},
+      t_pos:{ type:"t" , value:null },
+      t_oPos:{ type:"t" , value:null },
+      t_ooPos:{ type:"t" , value:null },
       time:timer
 
     }
@@ -32,24 +60,36 @@
     var material = new THREE.ShaderMaterial({
 
       uniforms: uniforms,
-      vertexShader: shaders.vertexShaders.iri,
-      fragmentShader: shaders.fragmentShaders.iri,
+      vertexShader: shaders.vertexShaders.jelly,
+      fragmentShader: shaders.fragmentShaders.jelly,
       side: THREE.DoubleSide
 
     });
     
-    var geo = new THREE.PlaneGeometry( 100 , 100 , 100 , 100 );
-
-    var mesh = new THREE.Mesh( geo , material );
-
-    //scene.add( mesh );
-
-
     var geo = this.createGeo( this.size );
 
-    var mesh = new THREE.Mesh( geo , material );
-    scene.add( mesh );
+    var m = new THREE.MeshNormalMaterial();
+    this.mesh = new THREE.Mesh( geo , material );
+    scene.add( this.mesh );
 
+    var pR = this.physicsRenderer;
+    
+    pR.addBoundTexture( this.mesh , 't_pos' , 'output' );
+    pR.addBoundTexture( this.mesh , 't_oPos' , 'oOutput' );
+    pR.addBoundTexture( this.mesh , 't_ooPos' , 'ooOutput' );
+
+    var mesh = new THREE.Mesh( new THREE.CubeGeometry( 5 , 5 , 5) );
+    var pTexture = ParticleUtils.createFlatTexture( this.size );
+    this.physicsRenderer.reset( pTexture );
+   
+    console.log( this );
+
+ 
+  }
+
+  Cloth.prototype.update = function(){
+
+    this.physicsRenderer.update();
 
   }
 

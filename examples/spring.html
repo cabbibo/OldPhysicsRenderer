@@ -75,6 +75,7 @@
       var timer = { type:"f" , value:0 };
 
       var furryTails = [];
+      var cloth;
 
       var shaders = new ShaderLoader('../shaders');
 
@@ -87,10 +88,13 @@
       shaders.load( 'fs-spring' , 'render'  , 'fragment'    );
       shaders.load( 'vs-render' , 'render'  , 'vertex'      );
       shaders.load( 'tailSim'   , 'tailSim' , 'simulation'  );
+      shaders.load( 'jellySim'  , 'jellySim' , 'simulation'  );
       shaders.load( 'fs-lineRender' , 'lineRender' , 'fragment' );
       shaders.load( 'vs-lineRender' , 'lineRender' , 'vertex' );
       shaders.load( 'vs-iri' , 'iri' , 'vertex' );
       shaders.load( 'fs-iri' , 'iri' , 'fragment' );
+      shaders.load( 'vs-jelly' , 'jelly' , 'vertex' );
+      shaders.load( 'fs-jelly' , 'jelly' , 'fragment' );
 
 
       function init(){
@@ -130,7 +134,7 @@
 
         scene.add( center );
 
-        var cloth = new Cloth();
+        cloth = new Cloth();
 
         groups = [];
 
@@ -198,6 +202,7 @@
 
         audioController.update();
 
+        cloth.update();
 
 
         if( !centerPaused ){

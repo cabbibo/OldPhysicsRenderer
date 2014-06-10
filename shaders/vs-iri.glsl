@@ -5,6 +5,10 @@
 
   uniform sampler2D   tNoise;
   
+  uniform sampler2D t_pos;
+  uniform sampler2D t_oPos;
+  uniform sampler2D t_ooPos;
+  
 
   varying vec3 vView;
   varying vec3 vNormal;
@@ -47,14 +51,17 @@
   void main(void)
   {
 
-    vPos = position;
-    vUv = uv;
+    vec3 pos = texture2D( t_pos , position.xy ).xyz;
+    vPos = pos;
+    
+    //vPos = position.xyz;
+    vUv = position.xy;
 
     
-    vec3 actual = newCoord( position , vUv );
+    //vec3 actual = newCoord( pos , vUv );
 
-    vec3 tPos = texture2D( tNoise , position.xy ).xyz;
-    vec3 nPos = normalize( vec3( position.xy , length( tPos )));
+   // vec3 tPos = texture2D( tNoise , position.xy ).xyz;
+    //vec3 nPos = normalize( vec3( position.xy , length( tPos )));
 
 
 
@@ -64,8 +71,8 @@
 
     //float distanceToEdge = pow( (.5 -  abs(vUv.x - .5 ) ) * (.5 -  abs(vUv.y - .5 ) ) , .5 );
 
-    vPos = nPos;
-    vPos = position;// + normal * vDisplacement * distanceToEdge * 4.;
+    //vPos = nPos;
+   // vPos = position;// + normal * vDisplacement * distanceToEdge * 4.;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4( vPos , 1.0 );
     vUv = uv;
