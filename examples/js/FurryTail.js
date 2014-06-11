@@ -46,6 +46,8 @@
     this.setParams( this.params );
     
 
+    this.cloth = new Cloth( this.leader );
+
     this.lineUniforms = {
       t_pos:{ type:"t" , value:null },
       t_oPos:{ type:"t" , value:null },
@@ -214,6 +216,7 @@
 
   FurryTail.prototype.updateTail = function(){
     this.physicsRenderer.update();
+    this.cloth.update();
   }
 
 

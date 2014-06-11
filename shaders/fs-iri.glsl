@@ -42,7 +42,7 @@
 
     vec3 tNorm = texture2D( tNormal , vUv ).xyz;
 
-    tNorm = normalize( tNorm  );
+    tNorm = normalize( tNorm  ) * 1.;
     
     
     vec3 newNormal = normalize( vNormal + tNorm );
@@ -67,7 +67,7 @@
 
     vec3 colorRefl = abs(nReflection * .5 + vec3( .5 ));
     vec3 colorNorm =abs( nNormal * .5 + vec3( .5 ));
-     gl_FragColor.rgb = textureCube( tReflection , nReflection ).rgb * textureCube( tReflection , nReflection ).rgb *textureCube( tReflection , nReflection ).rgb * 1.5 * lookup_table_color ;
+     gl_FragColor.rgb = textureCube( tReflection , nReflection ).rgb * textureCube( tReflection , nReflection ).rgb *textureCube( tReflection , nReflection ).rgb * 1.5 * lookup_table_color * lookup_table_color *  lookup_table_color ;
      gl_FragColor.a = 1.;//vDisplacement*.1 + .9;
 
      /*gl_FragColor += texture2D( tNormal , vUv );

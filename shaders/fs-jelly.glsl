@@ -1,10 +1,11 @@
 
 varying vec3 vPos;
 varying vec2 vUv;
+varying vec3 vNorm;
 
 void main(){
 
 
-  gl_FragColor = vec4( vUv.x , vUv.y , 1. , 1. );
+  gl_FragColor = vec4( abs(vNorm) , 1. );
 
 }

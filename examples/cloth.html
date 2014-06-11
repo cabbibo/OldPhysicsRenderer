@@ -1,5 +1,6 @@
 <html>
 
+
   <head>
     <style>
       #container{ position:absolute; left:0px; top:0px; z-index:0; width:100%; height:100%; display:block; overflow:hidden}
@@ -23,16 +24,14 @@
     <script src="../lib/UserAudio.js"></script>
     <script src="../lib/underscore.js"></script>
 
-
     <script src="../ParticleUtils.js"></script>
     <script src="../PhysicsRenderer.js"></script>
 
-    <script src="js/createLineGeo.js"></script>
-    <script src="js/FurryGroup.js"></script>
-    <script src="js/FurryTail.js"></script>
+
     <script src="js/Cloth.js"></script>
 
-    <script>
+
+     <script>
 
 
       var centerPaused, movementPaused , physicsPaused = false;
@@ -85,17 +84,12 @@
         stream.play();*/
       }
 
-      shaders.load( 'fs-spring' , 'render'  , 'fragment'    );
-      shaders.load( 'vs-render' , 'render'  , 'vertex'      );
-      shaders.load( 'tailSim'   , 'tailSim' , 'simulation'  );
-      shaders.load( 'jellySim'  , 'jellySim' , 'simulation'  );
-      shaders.load( 'fs-lineRender' , 'lineRender' , 'fragment' );
-      shaders.load( 'vs-lineRender' , 'lineRender' , 'vertex' );
       shaders.load( 'vs-iri' , 'iri' , 'vertex' );
       shaders.load( 'fs-iri' , 'iri' , 'fragment' );
       shaders.load( 'vs-jelly' , 'jelly' , 'vertex' );
       shaders.load( 'fs-jelly' , 'jelly' , 'fragment' );
 
+      shaders.load( 'jellySim'  , 'jellySim' , 'simulation'  );
 
       function init(){
 
@@ -116,7 +110,6 @@
 
         clock = new THREE.Clock();
 
-
         renderer = new THREE.WebGLRenderer({autoclear:false});
         renderer.setSize( window.innerWidth, window.innerHeight );
 
@@ -124,7 +117,6 @@
         controls = new THREE.TrackballControls( camera , container );
         container.appendChild( renderer.domElement );
 
-        var lineGeo = createLineGeo(); 
 
         center = new THREE.Mesh( 
           new THREE.IcosahedronGeometry( 10 , 0 ),
@@ -134,34 +126,8 @@
 
         scene.add( center );
 
-        //cloth = new Cloth();
+        cloth = new Cloth( center );
 
-        groups = [];
-
-        for( var i = 0; i < 1; i++ ){
-
-          var bait = center.clone();
-          bait.scale.multiplyScalar( .3 );
-          scene.add( bait );
-
-          var numOf = 1 //+ Math.floor( Math.random() * 10 );
-          var f = new FurryGroup( 'PUPPY '+i , numOf, {
-
-            center: center,
-            bait: bait
-
-          });
-
-          groups.push( f );
-
-        }
-
-        for( var i = 0; i < groups.length; i++ ){
-
-          groups[i].updateBrethren();
-
-        }
-      
         window.addEventListener( 'resize', onResize , false );
         
         document.addEventListener( 'keydown' , function(e){
@@ -202,45 +168,15 @@
 
         audioController.update();
 
-        //cloth.update();
-
+        if( !physicsPaused ){
+          cloth.update();
+        }
 
         if( !centerPaused ){
 
-          center.position.x = Math.sin( timer.value /20 ) * 120;
-          center.position.y = Math.cos( timer.value /10 ) * 120;
-          center.position.z = Math.cos( timer.value / 15.542) * 100;
-
-        }
-
-        if( !physicsPaused ){
-
-
-          for( var i = 0; i < furryTails.length; i++ ){
-
-            var furryTail = furryTails[i];
-            furryTail.updateTail();
-
-          }
-
-        }
-
-        if( !movementPaused ){
-
-          for( var i = 0; i < groups.length; i++ ){
-
-            groups[i].updatePhysics();
-
-
-          }
-
-          for( var i = 0; i < furryTails.length; i++ ){
-
-            var furryTail = furryTails[i];
-            furryTail.updatePhysics();
-
-          }
-
+          center.position.x = Math.sin( timer.value * 1.73 ) * 12;
+          center.position.y = Math.cos( timer.value * 1.3 ) * 12;
+          center.position.z = Math.cos( timer.value * 2) * 10;
 
         }
 

@@ -1,9 +1,10 @@
 
-  function Cloth(){
+  function Cloth( leader ){
 
 
     this.size = 32;
     this.sim = shaders.simulationShaders.jellySim;
+    this.leader = leader;
 
     this.physicsRenderer = new PhysicsRenderer(
       this.size,
@@ -19,10 +20,9 @@
 
     this.physicsRenderer.setUniform( 'leader' , { 
       type:"v3" , 
-      value:new THREE.Vector3() 
+      value:this.leader.position
     });
 
-    console.log( dT );
     this.physicsRenderer.setUniform( 'dT' , { 
       type:"f" , 
       value:dT
@@ -40,8 +40,8 @@
     var tReflection = THREE.ImageUtils.loadTextureCube( urls );
 
     var tNoise  = THREE.ImageUtils.loadTexture( '../img/noiseLookup.jpg' ); 
-    var tIri    = THREE.ImageUtils.loadTexture( '../img/iriLookup1.png' );
-    var tNormal = THREE.ImageUtils.loadTexture( '../img/normals/sand.png' );
+    var tIri    = THREE.ImageUtils.loadTexture( '../img/iriLookup.png' );
+    var tNormal = THREE.ImageUtils.loadTexture( '../img/normals/moss_normal_map.jpg' );
     var uniforms = {
 
       
@@ -60,8 +60,8 @@
     var material = new THREE.ShaderMaterial({
 
       uniforms: uniforms,
-      vertexShader: shaders.vertexShaders.jelly,
-      fragmentShader: shaders.fragmentShaders.jelly,
+      vertexShader: shaders.vertexShaders.iri,
+      fragmentShader: shaders.fragmentShaders.iri,
       side: THREE.DoubleSide
 
     });
@@ -79,8 +79,9 @@
     pR.addBoundTexture( this.mesh , 't_ooPos' , 'ooOutput' );
 
     var mesh = new THREE.Mesh( new THREE.CubeGeometry( 5 , 5 , 5) );
-    var pTexture = ParticleUtils.createFlatTexture( this.size );
+    var pTexture = this.createPosTexture( this.size );
     this.physicsRenderer.reset( pTexture );
+   
    
     console.log( this );
 
@@ -90,6 +91,38 @@
   Cloth.prototype.update = function(){
 
     this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    /*this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();
+    this.physicsRenderer.update();*/
 
   }
 
@@ -98,7 +131,7 @@
 
     var geo = new THREE.BufferGeometry();
 
-    var subSize = (size-1) * (size-1);
+    var subSize = (size) * (size-1);
     geo.addAttribute( 'position', new Float32Array( subSize * 6 * 3 ), 3 ); 
     geo.addAttribute( 'normal', new Float32Array( subSize * 6 * 3 ), 3 ); 
   
@@ -106,11 +139,17 @@
     var normals = geo.getAttribute( 'normal' ).array;
 
     var uvArray = [];
-    for( var i = 0; i < size-1; i++ ){
+    for( var i = 0; i < size; i++ ){
       for( var j = 0; j < size-1; j++ ){
 
-        var x = (i+.5) / size;
-        var y = (j+.5) / size;
+        if( i < size-1){
+          var x = (i+.5) / size;
+          var y = (j+.5) / size;
+        }else{
+          console.log('asd');
+          var x = 10000; //.5 / size;
+          var y = (j+.5) / size;
+        }
 
         uvArray.push( [ x , y ] );
       }
@@ -126,55 +165,113 @@
 
       var index = i * 6 * 3;
      // var i = //TODO: index
+     //
+     
+      if( x != 10000 ){
 
-      positions[ index + 0 ] = x - (.5 / size); 
-      positions[ index + 1 ] = y + (.5 / size); 
-      positions[ index + 2 ] = 0; 
+        positions[ index + 0 ] = x - (.5 / size); 
+        positions[ index + 1 ] = y + (.5 / size); 
+        positions[ index + 2 ] = 0; 
 
-      positions[ index + 3 ] = x - ( .5 / size );
-      positions[ index + 4 ] = y - ( .5 / size) ; 
-      positions[ index + 5 ] = 0;
+        positions[ index + 3 ] = x - ( .5 / size );
+        positions[ index + 4 ] = y - ( .5 / size) ; 
+        positions[ index + 5 ] = 0;
 
-      positions[ index + 6 ] = x + (.5 / size); 
-      positions[ index + 7 ] = y + (.5 / size); 
-      positions[ index + 8 ] = 0; 
+        positions[ index + 6 ] = x + (.5 / size); 
+        positions[ index + 7 ] = y + (.5 / size); 
+        positions[ index + 8 ] = 0; 
 
-      positions[ index + 9 ] = x + (.5 / size); 
-      positions[ index + 10 ] = y + (.5 / size); 
-      positions[ index + 11 ] = 0; 
+        positions[ index + 9 ] = x + (.5 / size); 
+        positions[ index + 10 ] = y + (.5 / size); 
+        positions[ index + 11 ] = 0; 
 
-      positions[ index + 12 ] = x - ( .5 / size );
-      positions[ index + 13 ] = y - ( .5 / size) ; 
-      positions[ index + 14 ] = 0;
+        positions[ index + 12 ] = x - ( .5 / size );
+        positions[ index + 13 ] = y - ( .5 / size) ; 
+        positions[ index + 14 ] = 0;
 
-      positions[ index + 15 ] = x + (.5 / size); 
-      positions[ index + 16 ] = y - (.5 / size); 
-      positions[ index + 17 ] = 0;
+        positions[ index + 15 ] = x + (.5 / size); 
+        positions[ index + 16 ] = y - (.5 / size); 
+        positions[ index + 17 ] = 0;
 
 
-      normals[ index + 0 ] = x - (.5 / size); 
-      normals[ index + 1 ] = y + (.5 / size); 
-      normals[ index + 2 ] = 0; 
+        normals[ index + 0 ] = x - (.5 / size); 
+        normals[ index + 1 ] = y + (.5 / size); 
+        normals[ index + 2 ] = 0; 
 
-      normals[ index + 3 ] = x - ( .5 / size );
-      normals[ index + 4 ] = y - ( .5 / size) ; 
-      normals[ index + 5 ] = 0;
+        normals[ index + 3 ] = x - ( .5 / size );
+        normals[ index + 4 ] = y - ( .5 / size) ; 
+        normals[ index + 5 ] = 0;
 
-      normals[ index + 6 ] = x + (.5 / size); 
-      normals[ index + 7 ] = y + (.5 / size); 
-      normals[ index + 8 ] = 0; 
+        normals[ index + 6 ] = x + (.5 / size); 
+        normals[ index + 7 ] = y + (.5 / size); 
+        normals[ index + 8 ] = 0; 
 
-      normals[ index + 9 ] = x + (.5 / size); 
-      normals[ index + 10 ] = y + (.5 / size); 
-      normals[ index + 11 ] = 0; 
+        normals[ index + 9 ] = x + (.5 / size); 
+        normals[ index + 10 ] = y + (.5 / size); 
+        normals[ index + 11 ] = 0; 
 
-      normals[ index + 12 ] = x - ( .5 / size );
-      normals[ index + 13 ] = y - ( .5 / size) ; 
-      normals[ index + 14 ] = 0;
+        normals[ index + 12 ] = x - ( .5 / size );
+        normals[ index + 13 ] = y - ( .5 / size) ; 
+        normals[ index + 14 ] = 0;
 
-      normals[ index + 15 ] = x + (.5 / size); 
-      normals[ index + 16 ] = y - (.5 / size); 
-      normals[ index + 17 ] = 0; 
+        normals[ index + 15 ] = x + (.5 / size); 
+        normals[ index + 16 ] = y - (.5 / size); 
+        normals[ index + 17 ] = 0; 
+
+      }else{
+
+        positions[ index + 0 ] = 1 - (.5 / size); 
+        positions[ index + 1 ] = y + (.5 / size); 
+        positions[ index + 2 ] = 0; 
+
+        positions[ index + 3 ] = 1 - ( .5 / size );
+        positions[ index + 4 ] = y - ( .5 / size) ; 
+        positions[ index + 5 ] = 0;
+
+        positions[ index + 6 ] = 0 + (.5 / size); 
+        positions[ index + 7 ] = y + (.5 / size); 
+        positions[ index + 8 ] = 0; 
+
+        positions[ index + 9 ] = 0 + (.5 / size); 
+        positions[ index + 10 ] = y + (.5 / size); 
+        positions[ index + 11 ] = 0; 
+
+        positions[ index + 12 ] = 1 - ( .5 / size );
+        positions[ index + 13 ] = y - ( .5 / size) ; 
+        positions[ index + 14 ] = 0;
+
+        positions[ index + 15 ] = 0 + (.5 / size); 
+        positions[ index + 16 ] = y - (.5 / size); 
+        positions[ index + 17 ] = 0;
+
+
+        normals[ index + 0 ] = 1 - (.5 / size); 
+        normals[ index + 1 ] = y + (.5 / size); 
+        normals[ index + 2 ] = 0; 
+
+        normals[ index + 3 ] = 1 - ( .5 / size );
+        normals[ index + 4 ] = y - ( .5 / size) ; 
+        normals[ index + 5 ] = 0;
+
+        normals[ index + 6 ] = 0 + (.5 / size); 
+        normals[ index + 7 ] = y + (.5 / size); 
+        normals[ index + 8 ] = 0; 
+
+        normals[ index + 9 ] = 0 + (.5 / size); 
+        normals[ index + 10 ] = y + (.5 / size); 
+        normals[ index + 11 ] = 0; 
+
+        normals[ index + 12 ] = 1 - ( .5 / size );
+        normals[ index + 13 ] = y - ( .5 / size) ; 
+        normals[ index + 14 ] = 0;
+
+        normals[ index + 15 ] = 0 + (.5 / size); 
+        normals[ index + 16 ] = y - (.5 / size); 
+        normals[ index + 17 ] = 0; 
+
+
+
+      }
       
       /*
       positions[ i + 3 ] = x + ( .5 / size );
@@ -189,4 +286,55 @@
     return geo;
   
   
-  }
+  };
+
+
+  Cloth.prototype.createPosTexture = function( size ){
+
+
+    var data = new Float32Array( size * size * 4 );
+
+    for ( var i = 0, l = data.length; i < l; i += 4 ) {
+
+      var y = Math.floor( (i/4) / size );
+      var x = (i/4)  - (y * size);
+
+
+      var theta = 2 * Math.PI * ( x / size );
+
+      var r =( .1 * Math.random() + .9) * 1;
+      var posX = r * Math.cos( theta );
+      var posZ = r * Math.sin( theta );
+
+      /*var face = geometry.faces[ Math.floor( Math.random() * facesLength ) ];
+
+      var vertex1 = geometry.vertices[ face.a ];
+      var vertex2 = geometry.vertices[ Math.random() > 0.5 ? face.b : face.c ];
+
+      point.subVectors( vertex2, vertex1 );
+      point.multiplyScalar( Math.random() );
+      point.add( vertex1 );*/
+
+      data[ i ] = posX;
+      data[ i + 1 ] = posZ;
+      data[ i + 2 ] = -(1 - (y/size))*100;
+      data[ i + 3 ] = 1;
+
+    }
+
+    var positionsTexture = new THREE.DataTexture(
+      data, 
+      size, 
+      size, 
+      THREE.RGBAFormat, 
+      THREE.FloatType 
+    );
+
+    positionsTexture.minFilter = THREE.NearestFilter;
+    positionsTexture.magFilter = THREE.NearestFilter;
+    positionsTexture.generateMipmaps = false;
+    positionsTexture.needsUpdate = true;
+
+    return positionsTexture;
+
+  };

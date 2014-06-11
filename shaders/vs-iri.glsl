@@ -21,42 +21,61 @@
   varying vec3 vLightDir;
   varying float vDisplacement;
 
-
-  $simplex
-
-  float fractNoise( vec2 v ){
-
-    vec2 value = vec2( abs(v.x - .5 ) * 2. , abs( v.y - .5 ) * 2. );
-    float s1 = snoise( value * .9  + vec2(  time * 3. , time * .2 ));
-    float s2 = snoise( value * 2.9 + vec2( time * .4  , time * .9 ))*.5;
-    float s3 = snoise( value * 5.9 + vec2(  time * 1. , time * .56 ))*.2;
-    float s4 = snoise( value * 20.09+ vec2( time * .8 , time * 1.1 ) )*.01;
-    float s5 = snoise( value * 10.9 + vec2(  time * 2., time * 4.0 ))*.04;
+    const float size = 1. / 32.;
+  const float hSize = size / 2.;
 
 
-    return s1+s2+s3+s4+s5;
-
-  }
-
-
-  vec3 newCoord( vec3 pos, vec2 value ){
-
-    float displace = fractNoise( value );
-
-
-    return pos + vec3( 0. , 0. , (( displace * .03 ) + 1. ) );
-
-  }
-  
+    
   void main(void)
   {
 
-    vec3 pos = texture2D( t_pos , position.xy ).xyz;
-    vPos = pos;
+   // vec3 pos = texture2D( t_pos , position.xy ).xyz;
+    //vPos = pos;
     
     //vPos = position.xyz;
-    vUv = position.xy;
+   // vUv = position.xy;
 
+    vec3 pos = texture2D( t_pos , position.xy ).xyz;
+
+    vPos = pos;
+    vUv = position.xy;
+    
+    vec2 uvL = vUv;
+    uvL.x -= size;
+    if( uvL.x < 0. ){
+        uvL.x = 1. - hSize;
+    }
+    vec4 posL = texture2D( t_pos , uvL ); 
+
+    vec2 uvR = vUv;
+    uvR.x += size;
+
+    if( uvR.x > 1. ){
+        uvR.x = 0. + hSize;
+    }
+    vec4 posR = texture2D( t_pos , uvR ); 
+     
+    
+    vec2 uvU = vUv;
+    uvU.y -= size;
+    if( uvU.y < 0. ){
+        uvU.y = vUv.y;
+    }
+    vec4 posU = texture2D( t_pos , uvU ); 
+
+    vec2 uvD = vUv;
+    uvD.y += size;
+
+    if( uvD.y > 1. ){
+        uvD.y = vUv.y;
+    }
+    vec4 posD = texture2D( t_pos , uvD ); 
+
+
+    vec3 difX = posL.xyz - posR.xyz;
+    vec3 difY = posD.xyz - posU.xyz;
+
+    vec3 normal = normalize( cross( difX , difY ) );
     
     //vec3 actual = newCoord( pos , vUv );
 
@@ -75,7 +94,7 @@
    // vPos = position;// + normal * vDisplacement * distanceToEdge * 4.;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4( vPos , 1.0 );
-    vUv = uv;
+    //vUv = uv;
     vPos = position;
     vView = modelViewMatrix[3].xyz;
     vNormal = normalMatrix *  normal ;
