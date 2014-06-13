@@ -246,6 +246,10 @@
           new THREE.MeshNormalMaterial()
         );
 
+        var light=  new THREE.DirectionalLight( 0xffffff , 1 );
+        light.position.set( 0 , 0 , -1 );
+        scene.add( light );
+
 
 
         /*
@@ -253,14 +257,13 @@
            Leap Stuff!
         
         */
+           var mesh = new THREE.Mesh(
+          new THREE.IcosahedronGeometry( 30 , 0 ),
+          new THREE.MeshLambertMaterial({color:0xffffff})
+        );
         controller = new Leap.Controller();
         controller.connect();
-        initRiggedSkeleton();
-
-        var mesh = new THREE.Mesh(
-          new THREE.IcosahedronGeometry( 30 , 0 ),
-          new THREE.MeshLambertMaterial()
-        );
+        initRiggedSkeleton(mesh);
 
         objectControls = new ObjectControls( 
           camera , 
@@ -271,7 +274,7 @@
             indicator : mesh     
           }
         );
-        objectControls.addIndicator();
+        //objectControls.addIndicator();
 
 
         // Text Particles!

@@ -19,7 +19,7 @@
       },
 
       leader: new THREE.Mesh(
-      new THREE.IcosahedronGeometry( 100 , 0 ),
+      new THREE.IcosahedronGeometry( .00001 , 0 ),
       new THREE.MeshNormalMaterial({
         wireframe:true,
         blending: THREE.AdditiveBlending

@@ -1,5 +1,40 @@
  var textCreator;
 
+ var speechText = [
+  "Hello, my name is Isaac",
+  "and I work at Leap.",
+  "",
+  "I am here today to talk to you about the future",
+  "Because the future is all there really is",
+  "",
+  "The Past is a beast. It will consume all in its",
+  "Decadent claws. But the future is love. It is",
+  "Beauty, and it is all we can hope for.",
+  "",
+  "",
+  "Hello, my name is Isaac",
+  "and I work at Leap.",
+  "",
+  "I am here today to talk to you about the future",
+  "Because the future is all there really is",
+  "",
+  "The Past is a beast. It will consume all in its",
+  "Decadent claws. But the future is love. It is",
+  "Beauty, and it is all we can hope for.",
+  "",
+  "",
+  "Hello, my name is Isaac",
+  "and I work at Leap.",
+  "",
+  "I am here today to talk to you about the future",
+  "Because the future is all there really is",
+  "",
+  "The Past is a beast. It will consume all in its",
+  "Decadent claws. But the future is love. It is",
+  "Beauty, and it is all we can hope for.",
+
+ ].join("\n");
+
 function initTextParticles(){
 
   var vs  = shaders.vertexShaders.text;
@@ -13,7 +48,7 @@ function initTextParticles(){
 
     
   var speedUniform = { type:"v3" , value: new THREE.Vector3(0 , .1 , 0) } 
-  vs_particles = creator.createTextParticles( vs );
+  vs_particles = creator.createTextParticles( speechText );
   sim_particles = creator.createTextParticles( fs );
   fs_particles = creator.createTextParticles(sim);
 
@@ -55,7 +90,7 @@ function initTextParticles(){
   vsTextPosShader.setUniform( 'timer' , timer );
   vsTextPosShader.setUniform( 'cameraMat' , cameraMat );
   vsTextPosShader.setUniform( 'cameraPos' , cameraPos );
-  vsTextPosShader.setUniform( 'offsetPos' , { type:"v3" , value: new THREE.Vector3( -100 , 200 , 0 ) } );
+  vsTextPosShader.setUniform( 'offsetPos' , { type:"v3" , value: new THREE.Vector3( 200 , 200 , 0 ) } );
   vsTextPosShader.setUniform( 'handPos' , { type:"v3" , value: riggedSkeleton.hand.position } );
 
   vsTextPosShader.addBoundTexture( vs_particles , 't_lookup' , 'output' );
