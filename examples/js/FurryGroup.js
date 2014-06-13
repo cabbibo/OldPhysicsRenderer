@@ -18,6 +18,13 @@
         baitPower:           .0002,
       },
 
+      leader: new THREE.Mesh(
+      new THREE.IcosahedronGeometry( 100 , 0 ),
+      new THREE.MeshNormalMaterial({
+        wireframe:true,
+        blending: THREE.AdditiveBlending
+      })),
+
       color1: new THREE.Vector3( 120 /255 , 0 , 255/255 ),    
       color2: new THREE.Vector3( 255/255 , 190/255 , 30/255),    
       color3: new THREE.Vector3( 240/255 , 80/255 ,58/255 ),    
@@ -230,18 +237,11 @@
 
     */
 
-    var mesh = new THREE.Mesh(
-      new THREE.IcosahedronGeometry( 10 , 0 ),
-      new THREE.MeshNormalMaterial()
-    );
-
-    console.log( mesh );
-
     for( var i = 0; i < numOf; i++ ){
 
-      var nMesh = mesh.clone();
-      console.log( nMesh );
-      console.log( 'asa');
+
+     
+      var nMesh = this.createSelectable( this.leader );
       var furryTail = new FurryTail( this , {
         type:title,
         simulationUniforms:allUniforms,
@@ -274,6 +274,51 @@
   FurryGroup.prototype.updateBrethren = function(){
 
     this.brethren = groups;
+
+  }
+
+  
+  FurryGroup.prototype.createSelectable = function( oMesh ){
+    var hoverOver = function(){
+
+      console.log( 'hoverOver' );
+      this.material.opacity = 1;
+      this.material.color = new THREE.Color( '#c0ffee' );
+      this.material.transparent = true;
+
+    }
+
+    var hoverOut = function(){
+
+      console.log( 'hoverOut' );
+      console.log( this.uuid );
+      this.material.opacity = .3;
+      this.material.transparent = true;
+
+    }
+
+    var select = function(){
+
+      this.material.wireframe = true;
+
+    }
+
+    var deselect = function(){
+
+      this.material.wireframe = false;
+
+    }
+
+
+    var mesh = oMesh.clone();
+
+    mesh.hoverOver = hoverOver;
+    mesh.hoverOut = hoverOut;
+    mesh.select = select;
+    mesh.deselect = deselect;
+
+    objectControls.add( mesh );
+    return mesh;
 
   }
 

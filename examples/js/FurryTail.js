@@ -45,7 +45,7 @@
     });
     this.setParams( this.params );
 
-    //scene.add( this.leader );
+    scene.add( this.leader );
 
     this.lineUniforms = {
       t_pos:{ type:"t" , value:null },
@@ -154,7 +154,7 @@
     
     this.applyUniforms();
 
-    this.cloth = new Cloth( this.leader , this.iriLookup );
+    this.cloth = new Cloth( this.leader , this.iriLookup , this.color1 , this.color2 , this.color3 , this.color4  );
     this.physicsRenderer.addBoundTexture( this.cloth.physicsRenderer , 't_column' , 'output' );
 
   /* this.cloth.physicsRenderer.addDebugScene( scene );

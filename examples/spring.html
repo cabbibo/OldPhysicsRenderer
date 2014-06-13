@@ -28,11 +28,18 @@
     <script src="../ParticleUtils.js"></script>
     <script src="../PhysicsRenderer.js"></script>
 
+    <script src="js/initTextParticles.js"></script>
+    <script src="js/initRiggedSkeleton.js"></script>
+    <script src="js/showDebugScenes.js"></script>
     <script src="js/createLineGeo.js"></script>
     <script src="js/FurryGroup.js"></script>
     <script src="js/FurryTail.js"></script>
     <script src="js/Cloth.js"></script>
 
+
+    <script src="../lib/TextParticles.js"></script>
+
+    <script src="../lib/ObjectControls.js"></script>
     <script src="../lib/RiggedSkeleton.js"></script>
 
     <script>
@@ -97,7 +104,7 @@
         new THREE.Color( '#d90404' ),
         THREE.ImageUtils.loadTexture('../img/iriLookupRed.png'),
         0
-      ],*/
+      ],
 
       [ 
         new THREE.Color( '#ffa400' ),
@@ -116,10 +123,26 @@
         new THREE.Color( '#78ffc7' ),
         THREE.ImageUtils.loadTexture('../img/iriLookupGreenBluePurp.png'),
         10
+      ],*/
+
+      [ 
+        new THREE.Color( '#1157ff' ),
+        new THREE.Color( '#00a4ff' ),
+        new THREE.Color( '#5e2dff' ),
+        new THREE.Color( '#00fff0' ),
+        THREE.ImageUtils.loadTexture('../img/iriLookupPinkRed.png'),
+        1 
       ],
 
 
-
+      [ 
+        new THREE.Color( '#fa0202' ),
+        new THREE.Color( '#faef42' ),
+        new THREE.Color( '#ff0000' ),
+        new THREE.Color( '#ff7800' ),
+        THREE.ImageUtils.loadTexture('../img/iriLookupGreenBluePurp.png'),
+        10
+      ],
 
       ]
 
@@ -129,19 +152,18 @@
       
       
       
-      //audioController.mute.gain.value = 0.0;
+      audioController.mute.gain.value = 0.0;
 
-      /*var userAudio = new UserAudio( audioController );
+      var userAudio = new UserAudio( audioController );
       
       userAudio.onStreamCreated = function(){
         init();
         animate();
-      }*/
+      }
 
-      var stream = new Stream( '../audio/phuphuphu.mp3' , audioController );
+      //var stream = new Stream( '../audio/phuphuphu.mp3' , audioController );
       
       var t_audio = audioController.texture;
-      console.log( t_audio );
       
       var camera, renderer, scene , controls , clock;
 
@@ -165,9 +187,9 @@
       var shaders = new ShaderLoader('../shaders');
 
       shaders.shaderSetLoaded = function(){
-        init();
-        animate();
-        stream.play();
+        //init();
+        //animate();
+        //stream.play();
       }
 
       shaders.load( 'fs-spring' , 'render'  , 'fragment'    );
@@ -182,6 +204,10 @@
       shaders.load( 'fs-jelly' , 'jelly' , 'fragment' );
 
 
+      // TEXT
+      shaders.load( 'vs-text' , 'text'         , 'vertex'    );
+      shaders.load( 'fs-text' , 'text'         , 'fragment'  );
+      shaders.load( 'fs-textSim'  , 'textPhysics'  , 'simulation');
       
       function init(){
 
@@ -195,8 +221,8 @@
         var h = window.innerHeight;
 
         camera = new THREE.PerspectiveCamera( 65 , w/h , 1 , 200000 );
-        camera.position.z = -1000;
-        camera.position.x = -1000;
+        camera.position.z = 1000;
+        //camera.position.x = -1000;
 
         //controls = new THREE.TrackballControls( camera );
         scene = new THREE.Scene();
@@ -223,32 +249,38 @@
 
         controller = new Leap.Controller();
         controller.connect();
-        riggedSkeleton = new RiggedSkeleton( controller , {
-
-          movementSize: 1000,
-          handSize: 100
-          
-        });
+        initRiggedSkeleton();
 
         var mesh = new THREE.Mesh(
-          new THREE.BoxGeometry( 30 , 30  , 100 ),
-          new THREE.MeshNormalMaterial({color:0xcc9999})
+          new THREE.IcosahedronGeometry( 30 , 0 ),
+          new THREE.MeshLambertMaterial()
         );
 
-        riggedSkeleton.addScaledJointMesh( mesh , 'metacarpal' );
-        riggedSkeleton.addScaledJointMesh( mesh , 'distal' );
-        riggedSkeleton.addScaledJointMesh( mesh , 'intermediate' );
-        riggedSkeleton.addScaledJointMesh( mesh , 'proximal' );
+        objectControls = new ObjectControls( 
+          camera , 
+          riggedSkeleton.hand , 
+          riggedSkeleton1.hand , 
+          controller , 
+          {
+            indicator : mesh     
+          }
+        );
+
+        console.log( objectControls );
+        objectControls.addIndicator();
+
+
+        initTextParticles();
+       
         ///riggedSkeleton.addScaledJointMesh( mesh , 'distal' );
 
-        riggedSkeleton.addToScene( scene );
-        
         groups = [];
+
 
         for( var i = 0; i < colorSchemes.length; i++ ){
 
           var bait = center.clone();
-          bait.scale.multiplyScalar( .3 );
+          bait.scale.multiplyScalar( 5.3 );
           //scene.add( bait );
 
           var c = colorSchemes[i];
@@ -276,7 +308,10 @@
           groups[i].updateBrethren();
 
         }
-      
+
+        showDebugScenes();
+        
+        
         window.addEventListener( 'resize', onResize , false );
         
         document.addEventListener( 'keydown' , function(e){
@@ -300,8 +335,6 @@
 
           }
 
-
-
         });
       }
 
@@ -317,14 +350,25 @@
 
         audioController.update();
 
-        riggedSkeleton.update();
+        riggedSkeleton.update(0);
+        riggedSkeleton1.update(1);
 
+        objectControls.update();
+        
+        vsTextPosShader.update();
+        vs_particles.material.uniforms.t_lookup.value = vsTextPosShader.output;
+
+        fsTextPosShader.update();
+        fs_particles.material.uniforms.t_lookup.value = fsTextPosShader.output;
+         
+        simTextPosShader.update();
+        sim_particles.material.uniforms.t_lookup.value = simTextPosShader.output;
 
         if( !allPaused ){
           if( !centerPaused ){
 
             if( controller.frame().hands[0] ){
-              center.position.copy( riggedSkeleton.hand.position );
+              //center.position.copy( riggedSkeleton.hand.position );
             }else{
               center.position.sub( center.position.clone().multiplyScalar( .1 ) );
             }

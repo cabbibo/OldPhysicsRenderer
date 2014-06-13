@@ -1,9 +1,7 @@
 
-  function Cloth( leader , iriLookup ){
+  function Cloth( leader , iriLookup , color1 , color2 , color3 , color4 ){
 
 
-    console.log('AIAS');
-    console.log( iriLookup );
     this.size = 32;
     this.sim = shaders.simulationShaders.jellySim;
     this.leader = leader;
@@ -62,6 +60,10 @@
       t_pos:{ type:"t" , value:null },
       t_oPos:{ type:"t" , value:null },
       t_ooPos:{ type:"t" , value:null },
+      color1:{ type:"v3" , value:color1 },
+      color2:{ type:"v3" , value:color2 },
+      color3:{ type:"v3" , value:color3 },
+      color4:{ type:"v3" , value:color4 },
       time:timer
 
     }
