@@ -83,7 +83,7 @@
 
 
 
-     gl_FragColor.rgb = lookup_table_color * audioColor +sC;
+     gl_FragColor.rgb = lookup_table_color * (vec3(.3) + audioColor*.7) +sC;
      gl_FragColor.a = 1.;//vDisplacement*.1 + .9;
 
      /*gl_FragColor += texture2D( tNormal , vUv );

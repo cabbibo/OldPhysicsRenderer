@@ -82,11 +82,21 @@
 
     this.position.set(
 
-        (Math.random() - .5 ) * 10,
-        (Math.random() - .5 ) * 10,
-        (Math.random() - .5 ) * 10
+        (Math.random() - .5 ) * 100,
+        (Math.random() - .5 ) * 100,
+        (Math.random() - .5 ) * 100
 
     );
+
+    this.velocity.set(
+
+        (Math.random() - .5 ) * .1,
+        (Math.random() - .5 ) * .1,
+        (Math.random() - .5 ) * .1
+
+    );
+
+
 
     this.renderer     = renderer; 
 
@@ -172,6 +182,7 @@
 
   FurryTail.prototype.updatePhysics = function(){
 
+
     var force = new THREE.Vector3();
 
     // attract to bait    *from group*
@@ -183,51 +194,144 @@
     var pp = this.physicsParams
 
     this.position.add( new THREE.Vector3( 0 , 0 , 0 ) );
-  
-    //console.log( this.group.position );
-    var baitDif = center.position.clone().sub( this.position );
-    force.add( baitDif.multiplyScalar( .001 ));
+
 
     //console.log( baitDif );
    // force.add( baitDif.clone().multiplyScalar( .9 ));
 
 
+    if( this.type == 'PUPPY 0' ){
 
-    for( var i = 0; i < furryTails.length; i++ ){
+       var baitDif = center.position.clone().sub( this.position );
+    var static = l - 0;
+    baitDif.normalize();
+    force.add( baitDif.multiplyScalar( 5.) );
 
-      var otherTail = furryTails[i];
+      var avePos = new THREE.Vector3();
+      var num = 0;
+      for( var  i= 0; i < furryTails.length; i++ ){
 
-      if( i !== this ){
+        var otherTail = furryTails[i];
+        
+        if( otherTail.type != 'PUPPY 0' ){
 
-        var dif = otherTail.position.clone().sub( this.position );
-        var l = dif.length();
+          avePos.add( otherTail.position );
+          num ++;
 
-        var static = l - 0;
-        dif.normalize();
-        //console.log( this.repelRadius );
-        //if( l < 390 ){
-          force.sub( dif.multiplyScalar( .05 ) );
-        //}else{
-         // force.add( dif.multiplyScalar( .05 ) );
-        //}
+        }
+
 
       }
-    
+
+      //avePos.multiplyScalar( 1/num );
+      //
+      if( !this.oldAvePos ){
+        this.oldAvePos = new THREE.Vector3();
+      }
+
+      var aveVel = this.oldAvePos.clone().sub( avePos );
+
+      var newPos = avePos.clone().add( aveVel );
+      var dif = newPos.sub( this.position.clone() );
+      //this.velocity.copy( dif.multiplyScalar( .4 ) );
+      force.add( dif.normalize().multiplyScalar( 50. ) );
+
+      if( dif.length() > 10000 ){
+
+        //this.velocity.multiplyScalar( -.1 );
+
+
+      }
+
+      this.oldAvePos = avePos;
+
+      var baitDif = center.position.clone().sub( this.position );
+     // this.velocity.add( baitDif.multiplyScalar( .001 ));
+
+
+
+    }else{
+
+       //console.log( this.group.position );
+    var baitDif = center.position.clone().sub( this.position );
+    var static = l - 0;
+    baitDif.normalize();
+    force.add( baitDif.multiplyScalar( 5.) );
+
+
+    //force.add( baitDif.multiplyScalar( .03 ));
+
+
+      for( var i = 0; i < furryTails.length; i++ ){
+
+        var otherTail = furryTails[i];
+
+        if( i !== this ){
+
+          if( otherTail.type == 'PUPPY 0' ){
+
+            //console.log( otherTail.type );
+            //console.log( 'asdb');
+            var dif = otherTail.position.clone().sub( this.position );
+            var l = dif.length();
+
+            var static = l - 0;
+            dif.normalize();
+            force.sub( dif.multiplyScalar( 100./l) );
+
+          }else{
+
+            var dif = otherTail.position.clone().sub( this.position );
+            var l = dif.length();
+
+            var static = l - 300;
+
+
+            if( l > 200 ){
+
+            dif.normalize().multiplyScalar( static * .1 );
+            force.add( dif.multiplyScalar( .01 ) );
+
+            }else{
+
+              dif.normalize().multiplyScalar( -10000. );
+              force.add(dif);
+  
+
+            }
+
+
+          }
+
+        }
+      
+      }
+
     }
 
     //console.log( force.x );
-
-    this.velocity.add( force );
+    var maxVel = 5;
+    if( this.type == 'PUPPY 0' ){
+      maxVel = 10
+      this.velocity.add( force.multiplyScalar( .01 ) );
+      this.velocity.multiplyScalar( .93 )
    // this.leader.position.add( this.velocity );
 
-    if( this.velocity.length()  > 5 ){
+    }else{
+
+      this.velocity.add( force.multiplyScalar( .01 ) );
+
+
+    }
+
+    if( this.velocity.length()  > maxVel ){
 
       this.velocity.normalize();
-      this.velocity.multiplyScalar( 5 )
+      this.velocity.multiplyScalar( maxVel )
 //      console.log( 'no' );
 
     }
-    this.position.add( this.velocity );
+    this.position.add( this.velocity);
     //this.velocity.multiplyScalar(.99); // turn to vector dampening
 
   }

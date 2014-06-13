@@ -243,7 +243,7 @@
       console.log( nMesh );
       console.log( 'asa');
       var furryTail = new FurryTail( this , {
-        type:'title',
+        type:title,
         simulationUniforms:allUniforms,
         physicsParams: physicsParams,
         particleSize: this.particleSize,
