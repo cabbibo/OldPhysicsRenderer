@@ -48,7 +48,7 @@ void main(){
   vec3 lightDir = normalize( lightPos -  (modelViewMatrix * vec4( vPos.xyz , 1.0 )).xyz );
 
 
-  gl_PointSize =  particleSize * 1000. / length( mvPos.xyz );
+  gl_PointSize =  particleSize * vUv.y * 2. * 1000. / length( mvPos.xyz );
 
   if( mI.x < 1. ){
     gl_PointSize *= 3.;

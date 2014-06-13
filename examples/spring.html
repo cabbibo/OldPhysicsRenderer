@@ -11,6 +11,7 @@
     <div id="container"></div>
 
 
+    <script src="../lib/leap.js"></script>
     <script src="../lib/three.js"></script>
     <script src="../lib/jquery.min.js"></script>
     <script src="../lib/TrackballControls.js"></script>
@@ -32,10 +33,97 @@
     <script src="js/FurryTail.js"></script>
     <script src="js/Cloth.js"></script>
 
+    <script src="../lib/RiggedSkeleton.js"></script>
+
     <script>
 
 
-      var centerPaused, movementPaused , physicsPaused = false;
+      var colorSchemes = [
+
+     /* [ 
+        new THREE.Color( '#e85454' ),
+        new THREE.Color( '#00b3ff' ),
+        new THREE.Color( '#00ffd1' ),
+        new THREE.Color( '#ff16ba' ),
+        THREE.ImageUtils.loadTexture('../img/iriLookupTurquoise.png'),
+        0
+      ],
+
+      
+
+      [ 
+        new THREE.Color( '#e3ff14' ),
+        new THREE.Color( '#fc2597' ),
+        new THREE.Color( '#773eff' ),
+        new THREE.Color( '#59bbff' ),
+        THREE.ImageUtils.loadTexture('../img/iriLookupNeonYellowPurp.png'),
+        0
+      ],
+
+
+      [ 
+        new THREE.Color( '#ff0c0c' ),
+        new THREE.Color( '#ffdd41' ),
+        new THREE.Color( '#cfb27c' ),
+        new THREE.Color( '#00fff0' ),
+        THREE.ImageUtils.loadTexture('../img/iriLookupOrangeTurq.png'),
+        0
+      ],
+
+      [ 
+        new THREE.Color( '#f0e48f' ),
+        new THREE.Color( '#f7cd09' ),
+        new THREE.Color( '#cfb27c' ),
+        new THREE.Color( '#e3bb00' ),
+        THREE.ImageUtils.loadTexture('../img/iriLookupGold.png'),
+        0
+      ],
+
+         
+      [ 
+        new THREE.Color( '#0269de' ),
+        new THREE.Color( '#0a8fac' ),
+        new THREE.Color( '#aaebe7' ),
+        new THREE.Color( '#0049fa' ),
+        THREE.ImageUtils.loadTexture('../img/iriLookupBlue.png'),
+        0
+      ],
+
+
+      [ 
+        new THREE.Color( '#f50707' ),
+        new THREE.Color( '#f56767' ),
+        new THREE.Color( '#ff9b9b' ),
+        new THREE.Color( '#d90404' ),
+        THREE.ImageUtils.loadTexture('../img/iriLookupRed.png'),
+        0
+      ],*/
+
+      [ 
+        new THREE.Color( '#ffa400' ),
+        new THREE.Color( '#ee3700' ),
+        new THREE.Color( '#fce05e' ),
+        new THREE.Color( '#ff70cc' ),
+        THREE.ImageUtils.loadTexture('../img/iriLookupPinkRed.png'),
+        1
+      ],
+
+
+      [ 
+        new THREE.Color( '#5f5fff' ),
+        new THREE.Color( '#61a2ff' ),
+        new THREE.Color( '#52fff4' ),
+        new THREE.Color( '#78ffc7' ),
+        THREE.ImageUtils.loadTexture('../img/iriLookupGreenBluePurp.png'),
+        10
+      ],
+
+
+
+
+      ]
+
+      var centerPaused, movementPaused , allPaused ,  physicsPaused = false;
 
       var audioController = new AudioController();
       
@@ -60,7 +148,7 @@
       
       var camera, renderer, scene , controls , clock;
 
-      var center;
+      var center , riggedSkeleton;
 
       var colors = [];
       var gui = new dat.GUI({});
@@ -109,7 +197,7 @@
         var h = window.innerHeight;
 
         camera = new THREE.PerspectiveCamera( 65 , w/h , 1 , 200000 );
-        camera.position.z = 100;
+        camera.position.z = 1000;
 
         //controls = new THREE.TrackballControls( camera );
         scene = new THREE.Scene();
@@ -132,23 +220,51 @@
         );
 
 
-        scene.add( center );
+        //scene.add( center );
 
-        //cloth = new Cloth();
+        controller = new Leap.Controller();
+        controller.connect();
+        riggedSkeleton = new RiggedSkeleton( controller , {
 
+          movementSize: 1000,
+          handSize: 100
+          
+        });
+
+        var mesh = new THREE.Mesh(
+          new THREE.BoxGeometry( 30 , 30  , 100 ),
+          new THREE.MeshNormalMaterial({color:0xcc9999})
+        );
+
+        riggedSkeleton.addScaledJointMesh( mesh , 'metacarpal' );
+        riggedSkeleton.addScaledJointMesh( mesh , 'distal' );
+        riggedSkeleton.addScaledJointMesh( mesh , 'intermediate' );
+        riggedSkeleton.addScaledJointMesh( mesh , 'proximal' );
+        ///riggedSkeleton.addScaledJointMesh( mesh , 'distal' );
+
+        riggedSkeleton.addToScene( scene );
+        
         groups = [];
 
-        for( var i = 0; i < 1; i++ ){
+        for( var i = 0; i < colorSchemes.length; i++ ){
 
           var bait = center.clone();
           bait.scale.multiplyScalar( .3 );
-          scene.add( bait );
+          //scene.add( bait );
 
-          var numOf = 1 //+ Math.floor( Math.random() * 10 );
+          var c = colorSchemes[i];
+          
+          var numOf = c[5]; //+ Math.floor( Math.random() * 10 );
+
           var f = new FurryGroup( 'PUPPY '+i , numOf, {
 
             center: center,
-            bait: bait
+            bait: bait,
+            color1: new THREE.Vector3( c[0].r , c[0].g , c[0].b ),
+            color2: new THREE.Vector3( c[1].r , c[1].g , c[1].b ),
+            color3: new THREE.Vector3( c[2].r , c[2].g , c[2].b ),
+            color4: new THREE.Vector3( c[3].r , c[3].g , c[3].b ),
+            iriLookup: c[4]
 
           });
 
@@ -169,7 +285,7 @@
           console.log( e.which );
           if( e.which == 32 ){
 
-            centerPaused = !centerPaused;
+            allPaused = !allPaused;
 
           }
 
@@ -202,45 +318,47 @@
 
         audioController.update();
 
-        //cloth.update();
+        riggedSkeleton.update();
 
 
-        if( !centerPaused ){
+        if( !allPaused ){
+          if( !centerPaused ){
 
-          center.position.x = Math.sin( timer.value /20 ) * 120;
-          center.position.y = Math.cos( timer.value /10 ) * 120;
-          center.position.z = Math.cos( timer.value / 15.542) * 100;
-
-        }
-
-        if( !physicsPaused ){
-
-
-          for( var i = 0; i < furryTails.length; i++ ){
-
-            var furryTail = furryTails[i];
-            furryTail.updateTail();
+            if( controller.frame().hands[0] ){
+              center.position.copy( riggedSkeleton.hand.position );
+            }else{
+              center.position.sub( center.position.clone().multiplyScalar( .1 ) );
+            }
+            /*center.position.x = Math.sin( timer.value /2 ) * 120;
+            center.position.y = Math.cos( timer.value /1 ) * 120;
+            center.position.z = Math.cos( timer.value / 1.5542) * 100;*/
 
           }
 
-        }
-
-        if( !movementPaused ){
-
-          for( var i = 0; i < groups.length; i++ ){
-
-            groups[i].updatePhysics();
+          if( !physicsPaused ){
 
 
-          }
+            for( var i = 0; i < furryTails.length; i++ ){
 
-          for( var i = 0; i < furryTails.length; i++ ){
+              var furryTail = furryTails[i];
+              furryTail.updateTail();
 
-            var furryTail = furryTails[i];
-            furryTail.updatePhysics();
+            }
 
           }
 
+          if( !movementPaused ){
+
+
+            for( var i = 0; i < furryTails.length; i++ ){
+
+              var furryTail = furryTails[i];
+              furryTail.updatePhysics();
+
+            }
+
+
+          }
 
         }
 

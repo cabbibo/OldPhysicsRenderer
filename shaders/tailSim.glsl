@@ -42,7 +42,7 @@ varying vec2 vUv;
 const float size = 1. / 32.;
 const float hSize = size / 2.;
 
-const float maxVel = 200.;
+const float maxVel = 150.;
 
 vec3 springForce( vec3 toPos , vec3 fromPos , float staticLength ){
 
@@ -59,6 +59,16 @@ vec3 springForce( vec3 toPos , vec3 fromPos , float staticLength ){
 $simplex
 
 void main(){
+
+
+  // Making sure the tails don't go outside the heads
+  float f_dist_spineAttract   = dist_spineAttract   ;
+  float f_dist_subSubAttract  = dist_subSubAttract  * vUv.y;
+  float f_dist_subSubRepel    = dist_subSubRepel    * vUv.y;
+  float f_dist_subAttract     = dist_subAttract     * vUv.y;
+  float f_dist_subRepel       = dist_subRepel       * vUv.y;
+  float f_dist_bundleAttract  = dist_bundleAttract  * vUv.y;
+  float f_dist_bundleRepel    = dist_bundleRepel    * vUv.y;
 
   vec4 oPos = texture2D( t_oPos , vUv );
   vec4 pos  = texture2D( t_pos , vUv );
@@ -103,7 +113,7 @@ void main(){
     // We are connected to the leader
     if( mI.y < 1.){
 
-      vec3 attract = springForce( leader.xyz , pos.xyz , dist_spineAttract );
+      vec3 attract = springForce( leader.xyz , pos.xyz , f_dist_spineAttract );
       force += attract * force_spineAttract;
 
     
@@ -113,7 +123,7 @@ void main(){
 
       vec4 otherPos = texture2D( t_pos , vec2( vUv.x , vUv.y - size ) ); 
       
-      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_spineAttract );
+      vec3 attract = springForce( otherPos.xyz , pos.xyz , f_dist_spineAttract );
       force += attract * force_spineAttract;
 
     }
@@ -128,7 +138,7 @@ void main(){
       vec4 otherPos = texture2D( t_pos , vec2( hSize , vUv.y ) );
  
       // Attract to the column
-      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_subAttract * aF );
+      vec3 attract = springForce( otherPos.xyz , pos.xyz , f_dist_subAttract * aF );
       force += attract * force_subAttract;
 
       // Get the 'index' of this verta 
@@ -148,7 +158,7 @@ void main(){
 
           vec4 otherPos = texture2D( t_pos , vec2( lookup , vUv.y ) );
 
-          vec3 attract = springForce(  pos.xyz , otherPos.xyz , dist_subRepel * aF );
+          vec3 attract = springForce(  pos.xyz , otherPos.xyz , f_dist_subRepel * aF );
 
           force -= attract * force_subRepel;  
         
@@ -170,7 +180,7 @@ void main(){
 
       vec4 otherPos = texture2D( t_pos , vec2( lookup , vUv.y ) );
 
-      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_subSubAttract * aF  );
+      vec3 attract = springForce( otherPos.xyz , pos.xyz , f_dist_subSubAttract * aF  );
 
       force += attract * force_subSubAttract;
 
@@ -184,7 +194,7 @@ void main(){
 
           vec4 otherPos = texture2D( t_pos , vec2( lookup , vUv.y ) );
 
-          vec3 attract = springForce( pos.xyz , otherPos.xyz  , dist_subSubRepel * aF  );
+          vec3 attract = springForce( pos.xyz , otherPos.xyz  , f_dist_subSubRepel * aF  );
 
           force -= attract * force_subSubRepel;           
         }
@@ -200,7 +210,7 @@ void main(){
        vec4 otherPos = texture2D( t_pos , vec2( hSize , vUv.y ) );
 
 
-      vec3 attract = springForce( otherPos.xyz , pos.xyz , dist_bundleAttract * aF  );
+      vec3 attract = springForce( otherPos.xyz , pos.xyz , f_dist_bundleAttract * aF  );
 
       force +=  attract * force_bundleAttract;
 
@@ -215,7 +225,7 @@ void main(){
 
           vec4 otherPos = texture2D( t_pos , vec2( lookup , vUv.y ) );
 
-          vec3 attract = springForce( pos.xyz , otherPos.xyz  , dist_bundleRepel * aF  );
+          vec3 attract = springForce( pos.xyz , otherPos.xyz  , f_dist_bundleRepel * aF  );
 
           force -= attract * force_bundleRepel;  
 

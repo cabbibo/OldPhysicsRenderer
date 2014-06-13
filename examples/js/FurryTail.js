@@ -39,14 +39,13 @@
         baitPower:           .0001,
       },
     
-      particleSize: 1
+      particleSize: 4.,
+      iriLookup: THREE.ImageUtils.loadTexture('../img/iriLookup.png')
 
     });
-
     this.setParams( this.params );
-    
 
-    this.cloth = new Cloth( this.leader );
+    //scene.add( this.leader );
 
     this.lineUniforms = {
       t_pos:{ type:"t" , value:null },
@@ -74,7 +73,7 @@
 
     
     this.brethren = [];
-    
+  
     this.position       = this.leader.position;
     this.velocity       = new THREE.Vector3();  
 
@@ -83,9 +82,9 @@
 
     this.position.set(
 
-        (Math.random() - .5 ) * 100,
-        (Math.random() - .5 ) * 100,
-        (Math.random() - .5 ) * 100
+        (Math.random() - .5 ) * 10,
+        (Math.random() - .5 ) * 10,
+        (Math.random() - .5 ) * 10
 
     );
 
@@ -96,7 +95,6 @@
       this.sim,
       renderer 
     );
-
    
     this.particleUniforms.t_sprite.value = this.particleSprite;
 
@@ -146,6 +144,14 @@
     
     this.applyUniforms();
 
+    this.cloth = new Cloth( this.leader , this.iriLookup );
+    this.physicsRenderer.addBoundTexture( this.cloth.physicsRenderer , 't_column' , 'output' );
+
+  /* this.cloth.physicsRenderer.addDebugScene( scene );
+   this.cloth.physicsRenderer.debugScene.scale.multiplyScalar( .3 );
+   this.cloth.physicsRenderer.debugScene.position.y = 30;*/
+
+
   }
 
 
@@ -175,31 +181,35 @@
     //
     //
     var pp = this.physicsParams
+
+    this.position.add( new THREE.Vector3( 0 , 0 , 0 ) );
   
     //console.log( this.group.position );
-    var baitDif = this.group.position.clone().sub( this.position );
-    //force.sub( baitDif.multiplyScalar( 10 ));
+    var baitDif = center.position.clone().sub( this.position );
+    force.add( baitDif.multiplyScalar( .001 ));
 
     //console.log( baitDif );
-    force.add( baitDif.clone().multiplyScalar( pp.baitPower ));
+   // force.add( baitDif.clone().multiplyScalar( .9 ));
 
 
 
-    for( var i = 0; i < this.brethren.length; i++ ){
+    for( var i = 0; i < furryTails.length; i++ ){
 
-      var otherTail = this.brethren[i];
+      var otherTail = furryTails[i];
 
       if( i !== this ){
 
         var dif = otherTail.position.clone().sub( this.position );
         var l = dif.length();
 
+        var static = l - 0;
+        dif.normalize();
         //console.log( this.repelRadius );
-        if( l < pp.repelRadius ){
-          force.sub( dif.multiplyScalar( pp.repelPower ) );
-        }else{
-          force.add( dif.multiplyScalar( pp.attractPower ) );
-        }
+        //if( l < 390 ){
+          force.sub( dif.multiplyScalar( .05 ) );
+        //}else{
+         // force.add( dif.multiplyScalar( .05 ) );
+        //}
 
       }
     
@@ -208,9 +218,17 @@
     //console.log( force.x );
 
     this.velocity.add( force );
-    this.position.add( this.velocity );
+   // this.leader.position.add( this.velocity );
 
-    this.velocity.multiplyScalar( pp.dampening ); // turn to vector dampening
+    if( this.velocity.length()  > 5 ){
+
+      this.velocity.normalize();
+      this.velocity.multiplyScalar( 5 )
+//      console.log( 'no' );
+
+    }
+    this.position.add( this.velocity );
+    //this.velocity.multiplyScalar(.99); // turn to vector dampening
 
   }
 

@@ -1,7 +1,9 @@
 
-  function Cloth( leader ){
+  function Cloth( leader , iriLookup ){
 
 
+    console.log('AIAS');
+    console.log( iriLookup );
     this.size = 32;
     this.sim = shaders.simulationShaders.jellySim;
     this.leader = leader;
@@ -17,16 +19,22 @@
       value:audioController.texture
     });
 
+    this.physicsRenderer.setUniform( 't_column' , {
+      type:"t",
+      value:null
+    });
+
 
     this.physicsRenderer.setUniform( 'leader' , { 
       type:"v3" , 
       value:this.leader.position
     });
 
-    this.physicsRenderer.setUniform( 'dT' , { 
-      type:"f" , 
-      value:dT
-    });
+    this.physicsRenderer.setUniform( 'dT' , dT );
+
+    this.physicsRenderer.setUniform( 'timer' , timer );
+
+
 
 
     var path = "../img/skybox/";
@@ -40,7 +48,7 @@
     var tReflection = THREE.ImageUtils.loadTextureCube( urls );
 
     var tNoise  = THREE.ImageUtils.loadTexture( '../img/noiseLookup.jpg' ); 
-    var tIri    = THREE.ImageUtils.loadTexture( '../img/iriLookup.png' );
+    var tIri    = iriLookup;
     var tNormal = THREE.ImageUtils.loadTexture( '../img/normals/moss_normal_map.jpg' );
     var uniforms = {
 
@@ -48,8 +56,9 @@
       tReflection:{ type:"t" , value: tReflection },
       tNoise:{ type:"t" , value: tNoise }, 
       tIri:{ type:"t" , value: tIri },
-      lightPos: { type:"v3" , value: new THREE.Vector3( 1 , 1 , 1 ) },
+      lightPos: { type:"v3" , value: center.position },
       tNormal:{type:"t",value:tNormal},
+      t_audio:{type:"t",value:audioController.texture},
       t_pos:{ type:"t" , value:null },
       t_oPos:{ type:"t" , value:null },
       t_ooPos:{ type:"t" , value:null },
@@ -82,48 +91,11 @@
     var pTexture = this.createPosTexture( this.size );
     this.physicsRenderer.reset( pTexture );
    
-   
-    console.log( this );
-
- 
   }
 
   Cloth.prototype.update = function(){
 
     this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    /*this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();
-    this.physicsRenderer.update();*/
-
   }
 
 
@@ -146,7 +118,6 @@
           var x = (i+.5) / size;
           var y = (j+.5) / size;
         }else{
-          console.log('asd');
           var x = 10000; //.5 / size;
           var y = (j+.5) / size;
         }

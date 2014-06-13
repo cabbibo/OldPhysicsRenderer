@@ -11,19 +11,19 @@
       centerForce: 1,
       center: new THREE.Object3D(),
       physicsParams:      {
-        repelRadius:         50,
+        repelRadius:         100,
         dampening:           .99,
         attractPower:        .0001,
         repelPower:          .003,
         baitPower:           .0002,
       },
 
-      color1: new THREE.Vector3( mR() , mR() , mR() ),    
-      color2: new THREE.Vector3( mR() , mR() , mR() ),    
-      color3: new THREE.Vector3( mR() , mR() , mR() ),    
-      color4: new THREE.Vector3( mR() , mR() , mR() ),    
-   
-      particleSize:1
+      color1: new THREE.Vector3( 120 /255 , 0 , 255/255 ),    
+      color2: new THREE.Vector3( 255/255 , 190/255 , 30/255),    
+      color3: new THREE.Vector3( 240/255 , 80/255 ,58/255 ),    
+      color4: new THREE.Vector3( 37/255 , 1 , 178/255 ),
+      iriLookup: THREE.ImageUtils.loadTexture('../img/iriLookup.png'), 
+      particleSize:5
 
     });
 
@@ -40,38 +40,33 @@
 
     var folder = gui.addFolder( title );
 
-    var upperForces = folder.addFolder( 'Group Interaction' );
+    /*var upperForces = folder.addFolder( 'Group Interaction' );
 
     upperForces.add( this.physicsParams , 'repelRadius' , 0 , 100 );
     upperForces.add( this.physicsParams , 'dampening' , .8 , 1   );
     upperForces.add( this.physicsParams , 'attractPower' , .0 , .01   );
     upperForces.add( this.physicsParams , 'repelPower' , .0 , .01   );
-    upperForces.add( this.physicsParams , 'baitPower' , .0 , .01   );
+    upperForces.add( this.physicsParams , 'baitPower' , .0 , .01   );*/
 
     /*
 
        Forces
 
     */
+    var p = this.params.physicsParams;    
+    var physicsParams = p;
 
-    var interactionParams = folder.addFolder( 'Interaction' );
+    /*var interactionParams = folder.addFolder( 'Interaction' );
 
-    var p = {
-      repelRadius:        5,
-      dampening:           .95,
-      attractPower:        .0001,
-      repelPower:          .01,
-      baitPower:           .001,
-    }
-
+    var p = this.params.physicsParams;
 
     var physicsParams = p;
  
-    interactionParams.add( p , 'repelRadius' , 0 , 100 );
+    interactionParams.add( p , 'repelRadius' , 0 , 1000 );
     interactionParams.add( p , 'dampening' , .7 , .99999 );
     interactionParams.add( p , 'attractPower' , 0 , .01 );
     interactionParams.add( p , 'repelPower' , 0 , .01 );
-    interactionParams.add( p , 'baitPower' , 0 , .01 );
+    interactionParams.add( p , 'baitPower' , 0 , .01 );*/
     
     /*
 
@@ -81,30 +76,30 @@
 
     var tailParams = folder.addFolder( 'Tail Physics' );
       
-    var audioAmount = { type:"f" , value: .5 };
-    var audioPower = { type:"f" , value: 3 };
+    var audioAmount = { type:"f" , value: .2 };
+    var audioPower = { type:"f" , value: 1 };
 
 
-    var d_spA = { type:"f" , value: 1.1 }
+    var d_spA = { type:"f" , value: .9 }
     var f_spA = { type:"f" , value: .1  }
 
-    var d_bA = { type:"f" , value: .1 }
-    var f_bA = { type:"f" , value: .4  }
+    var d_bA = { type:"f" , value: 21.1 }
+    var f_bA = { type:"f" , value: .1  }
   
-    var d_bR = { type:"f" , value: 10.1 }
-    var f_bR = { type:"f" , value: .01  }
+    var d_bR = { type:"f" , value: 100.1 }
+    var f_bR = { type:"f" , value: .018  }
     
-    var d_sA = { type:"f" , value: 1.1 }
-    var f_sA = { type:"f" , value: .1  }
+    var d_sA = { type:"f" , value: 58.1 }
+    var f_sA = { type:"f" , value: .5  }
     
-    var d_sR = { type:"f" , value: 3.1 }
-    var f_sR = { type:"f" , value: .01  }
+    var d_sR = { type:"f" , value: 88.1 }
+    var f_sR = { type:"f" , value: .3  }
     
-    var d_sSA = { type:"f" , value: 1.1 }
-    var f_sSA = { type:"f" , value: .1  }
+    var d_sSA = { type:"f" , value: 12.1 }
+    var f_sSA = { type:"f" , value: .5  }
     
-    var d_sSR = { type:"f" , value: 3.1 }
-    var f_sSR = { type:"f" , value: .01  }
+    var d_sSR = { type:"f" , value: 100.1 }
+    var f_sSR = { type:"f" , value: .2  }
 
 
     var allUniforms = {
@@ -135,25 +130,25 @@
     tailParams.add( d_spA, 'value' , 0 , 10  ).name( 'dist_spineAttract' );
     tailParams.add( f_spA, 'value' , -0.1 , .5  ).name( 'force_spineAttract' );
     
-    tailParams.add( d_bA,  'value' , 0 , 10  ).name( 'dist_bundleAttract' );
+    tailParams.add( d_bA,  'value' , 0 , 100  ).name( 'dist_bundleAttract' );
     tailParams.add( f_bA,  'value' , -0.1, .5  ).name( 'force_bundleAttract' );
-    tailParams.add( d_bR,  'value' , 0 , 10  ).name( 'dist_bundleRepel' );
+    tailParams.add( d_bR,  'value' , 0 , 100  ).name( 'dist_bundleRepel' );
     tailParams.add( f_bR,  'value' , -0.1 , .05 ).name( 'force_bundleRepel' );
     
-    tailParams.add( d_sA,  'value' , 0 , 10  ).name( 'dist_subAttract' );
+    tailParams.add( d_sA,  'value' , 0 , 100  ).name( 'dist_subAttract' );
     tailParams.add( f_sA,  'value' , -0.1 , .5  ).name( 'force_subAttract' );
-    tailParams.add( d_sR,  'value' , 0 , 10  ).name( 'dist_subRepel' );
+    tailParams.add( d_sR,  'value' , 0 , 100  ).name( 'dist_subRepel' );
     tailParams.add( f_sR,  'value' , -0.1 , .2  ).name( 'force_subRepel' );
     
-    tailParams.add( d_sSA, 'value' , 0 , 10  ).name( 'dist_subSubAttract' );
+    tailParams.add( d_sSA, 'value' , 0 , 100  ).name( 'dist_subSubAttract' );
     tailParams.add( f_sSA, 'value' , -0.1 , .5  ).name( 'force_subSubAttract' );
-    tailParams.add( d_sSR, 'value' , 0 , 10  ).name( 'dist_subSubRepel' );
+    tailParams.add( d_sSR, 'value' , 0 , 100  ).name( 'dist_subSubRepel' );
     tailParams.add( f_sSR, 'value' , -0.1 , .2  ).name( 'force_subSubRepel' );
 
 
     var tailColor = folder.addFolder( 'Render Tail / Particles' );
 
-    tailColor.add( this , 'particleSize' , 0 , 5 ).onChange( function(v){
+    tailColor.add( this , 'particleSize' , 0 , 10 ).onChange( function(v){
       for( var i = 0; i < this.tails.length; i++ ){
         var fT = this.tails[i];
         fT.particleUniforms.particleSize.value = v;
@@ -235,17 +230,29 @@
 
     */
 
+    var mesh = new THREE.Mesh(
+      new THREE.IcosahedronGeometry( 10 , 0 ),
+      new THREE.MeshNormalMaterial()
+    );
+
+    console.log( mesh );
+
     for( var i = 0; i < numOf; i++ ){
 
+      var nMesh = mesh.clone();
+      console.log( nMesh );
+      console.log( 'asa');
       var furryTail = new FurryTail( this , {
         type:'title',
         simulationUniforms:allUniforms,
         physicsParams: physicsParams,
         particleSize: this.particleSize,
+        leader:       nMesh,
         color1:       this.color1,
         color2:       this.color2,
         color3:       this.color3,
-        color4:       this.color4
+        color4:       this.color4,
+        iriLookup:    this.iriLookup
       });
 
       furryTails.push( furryTail );
@@ -272,7 +279,7 @@
 
   FurryGroup.prototype.updatePhysics = function(){
 
-    var force = new THREE.Vector3();
+    /*var force = new THREE.Vector3();
 
     // attract to bait    *from group*
     // attract to center  *all flagella*
@@ -287,7 +294,7 @@
     //force.sub( baitDif.multiplyScalar( 10 ));
 
     //console.log( baitDif );
-    force.add( baitDif.clone().multiplyScalar( pp.baitPower ));
+    force.add( baitDif.clone().multiplyScalar( .3 ));
 
 
 
@@ -302,19 +309,19 @@
 
         //console.log( this.repelRadius );
         if( l < pp.repelRadius ){
-          force.sub( dif.multiplyScalar( pp.repelPower ) );
+          force.sub( dif.multiplyScalar( .01 ) );
         }else{
-          force.add( dif.multiplyScalar( pp.attractPower ) );
+          force.add( dif.multiplyScalar( .001 ) );
         }
 
       }
     
-    }
+    }*/
 
-    this.velocity.add( force );
+    /*this.velocity.add( force );
 
     this.position.add( this.velocity );
-    this.velocity.multiplyScalar( .99 );
+    this.velocity.multiplyScalar( .99 );*/
 
     //this.bait.position.x += Math.sin( d
 

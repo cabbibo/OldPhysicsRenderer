@@ -3,6 +3,8 @@
   uniform sampler2D   tIri;
   uniform sampler2D   tNoise;
   uniform sampler2D tNormal;
+  uniform sampler2D t_audio;
+  uniform vec3 lightPos;
  
   uniform float time;
 
@@ -14,6 +16,7 @@
   varying float vDisplacement;
 
   varying vec3 vLightDir;
+  varying vec3 vLightPos;
   varying mat3 vNormalMat;
 
   const float noise_strength = .2;
@@ -48,31 +51,44 @@
     vec3 newNormal = normalize( vNormal + tNorm );
 
      vec3 nNormal = normalize( vNormalMat * newNormal  );
-     vec3 nWiew = normalize(vView);
+     vec3 nView = normalize(vView);
      vec3 nReflection = normalize( reflect( vView , nNormal )); 
 
-    float s1 = snoise( vUv * 50.1);
-    float s2 = snoise( vUv * 240.1);
-    float s3 = snoise( vUv * 100.9 );
-    vec3 noise_vector = ( vec3( s1 , s2 , s3 ) ) * noise_strength ;
+   // float s1 = snoise( vUv * 50.1);
+   // float s2 = snoise( vUv * 240.1);
 
       //fr = dot(vNormal, vWiew);							    //facing ratio
 
      vec3 refl = reflect( vLightDir , nNormal );
     float facingRatio = abs( dot(  nNormal, refl) );
 
-     float newDot = dot( normalize( nNormal + noise_vector ), nWiew );
+      vec3 a1 = texture2D( t_audio , vec2( abs( nReflection.x ) , 0.0 ) ).xyz;
+     vec3 a2 = texture2D( t_audio , vec2( abs( nReflection.y ) , 0.0 ) ).xyz;
+     vec3 a3 = texture2D( t_audio , vec2( abs( nReflection.z ) , 0.0 ) ).xyz;
+
+     vec3 aP = a1 + a2 + a3 ;
+
+     float newDot = dot( normalize( nNormal ), nView );
      float inverse_dot_view = 1.0 - max( newDot  , 0.0);
      vec3 lookup_table_color = texture2D( tIri , vec2( inverse_dot_view * facingRatio , 0.0)).rgb;
 
-    vec3 colorRefl = abs(nReflection * .5 + vec3( .5 ));
-    vec3 colorNorm =abs( nNormal * .5 + vec3( .5 ));
-     gl_FragColor.rgb = textureCube( tReflection , nReflection ).rgb * textureCube( tReflection , nReflection ).rgb *textureCube( tReflection , nReflection ).rgb * 1.5 * lookup_table_color * lookup_table_color *  lookup_table_color ;
+
+     vec3 audioColor = texture2D( t_audio , vec2(  inverse_dot_view * facingRatio , 0. ) ).xyz;
+
+     vec3 halfv = normalize( vLightDir + nView ); 
+     float specDot = max( 0. , dot( nNormal , halfv ));
+     float specularity = pow( specDot , 50. );
+
+     vec3 sC = vec3( 1. , 1. , 1. ) * specularity;
+
+
+
+     gl_FragColor.rgb = lookup_table_color * audioColor +sC;
      gl_FragColor.a = 1.;//vDisplacement*.1 + .9;
 
      /*gl_FragColor += texture2D( tNormal , vUv );
 
      gl_FragColor = normalize( gl_FragColor );*/
 
-     gl_FragColor.rgb *= vec3( 2. , .7, 2. );//abs(nNormal);
+     //gl_FragColor.rgb *= vec3( 2. , .7, 2. );//abs(nNormal);
   } 

@@ -31,7 +31,8 @@ function PhysicsRenderer( size , shader , renderer ){
   
   // WHERE THE MAGIC HAPPENS
   this.simulation = this.createSimulationProgram( shader );
-  
+  this.material = this.simulation;
+
   this.boundTextures = [];
 
   /*
