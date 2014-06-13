@@ -55,6 +55,8 @@ function initTextParticles(){
   vsTextPosShader.setUniform( 'timer' , timer );
   vsTextPosShader.setUniform( 'cameraMat' , cameraMat );
   vsTextPosShader.setUniform( 'cameraPos' , cameraPos );
+  vsTextPosShader.setUniform( 'offsetPos' , { type:"v3" , value: new THREE.Vector3( -100 , 200 , 0 ) } );
+  vsTextPosShader.setUniform( 'handPos' , { type:"v3" , value: riggedSkeleton.hand.position } );
 
   vsTextPosShader.addBoundTexture( vs_particles , 't_lookup' , 'output' );
 /*
