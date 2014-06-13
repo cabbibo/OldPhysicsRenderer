@@ -26,9 +26,25 @@ function showDebugScenes( tails ){
     var z = 0;
 
     subScene.position.set( x , y  , z);
+    fT.fullDebugScene = subScene;
 
     scene.add( subScene );
 
   }
+
+}
+
+function removeDebugScenes(){
+
+  for( var i = 0; i< furryTails.length; i ++ ){
+
+    var fT = furryTails[i];
+
+    scene.remove( fT.fullDebugScene );
+
+
+  }
+
+
 
 }

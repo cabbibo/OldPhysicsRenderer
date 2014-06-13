@@ -4,6 +4,8 @@ uniform sampler2D t_pos;
 
 uniform float timer;
 uniform vec3 speed;
+uniform mat4 cameraMat;
+uniform vec3 cameraPos;
 
 varying vec2 vUv;
 
@@ -19,8 +21,17 @@ void main(){
   float displace = snoise( (to.xy + offset ) * .01 );
   //float displace = snoise( to.xy * .1 );
 
-  vec3 newTo = to.xyz; //+ vec3( 0. , 0. , displace * 20. );
+//  vec4 rotPos = vec4( to.x , to.y , -5. 
+  
+  //vec3 newTo = ( cameraMat * vec4( to.xyz-cameraPos , 1. )  ).xyz; //+ vec3( 0. , 0. , displace * 20. );
 
+  vec3 newTo = (cameraMat * vec4(to.xyz-cameraPos,1.)).xyz + vec3( 0. , 0.,  -50. );
+  //newTo -= vec3( 0. , 0. , -10. );
+  newTo = (cameraMat * vec4( cameraPos, 1.)).xyz;
+
+  newTo = -(normalize(cameraPos.xyz) * 200. ) + (cameraMat * vec4( to.xyz , 1. )).xyz;
+
+  //newTo += cameraPos;
   vec3 vel = pos.xyz - oPos.xyz;
   vec3 dif = newTo.xyz - pos.xyz;
  
@@ -38,6 +49,6 @@ void main(){
   vec3 newPos = pos.xyz + vel * (( displace + 5.)/10.);
   newPos.z = displace * 5.;
 
-  gl_FragColor= vec4( newPos , displace );
+  gl_FragColor= vec4( newTo , displace );
 
 }

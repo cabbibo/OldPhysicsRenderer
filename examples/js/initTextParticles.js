@@ -11,14 +11,14 @@ function initTextParticles(){
     fragmentShader: fs
   });
 
-    var speedUniform = { type:"v3" , value: new THREE.Vector3() } 
-  console.log( creator );
+    
+  var speedUniform = { type:"v3" , value: new THREE.Vector3(0 , .1 , 0) } 
   vs_particles = creator.createTextParticles( vs );
   sim_particles = creator.createTextParticles( fs );
   fs_particles = creator.createTextParticles(sim);
 
-  vs_particles.position.x = -350;
-  vs_particles.position.y = 250;
+  vs_particles.position.x =0; //-350;
+  vs_particles.position.y =0; //250;
   
   fs_particles.position.x = -350;
   fs_particles.position.y = -50;
@@ -26,14 +26,18 @@ function initTextParticles(){
   sim_particles.position.x = -350;
   sim_particles.position.y = -400;
 
+  //vs_particles.position.z = -100;
   scene.add( vs_particles );
-  scene.add( fs_particles );
-  scene.add( sim_particles );
+ // scene.add( fs_particles );
+ // scene.add( sim_particles );
 
+  console.log( 'VS PARTICLES' , vs_particles , vs_particles.material.uniforms.t_lookup.value );
   var s = vs_particles.size;
   var simShader = shaders.simulationShaders.textPhysics;
 
   var speedUniform = { type:"v3" , value:new THREE.Vector3() }
+  var cameraMat = { type:"m4" , value:camera.matrixWorld}
+  var cameraPos = { type:"v3" , value:camera.position } 
 
   vsTextPosShader = new PhysicsRenderer( s , simShader , renderer );
   vsTextPosShader.setUniform( 't_to' , {
@@ -41,10 +45,19 @@ function initTextParticles(){
     value:vs_particles.material.uniforms.t_lookup.value
   });
 
+
+  vsTextPosShader.createDebugScene();
+  vsTextPosShader.addDebugScene( scene );
+  vsTextPosShader.debugScene.position.y = 0;
+
+
   vsTextPosShader.setUniform( 'speed' , speedUniform );
   vsTextPosShader.setUniform( 'timer' , timer );
-  vs_particles.material.uniforms.t_lookup.value = vsTextPosShader.output;
+  vsTextPosShader.setUniform( 'cameraMat' , cameraMat );
+  vsTextPosShader.setUniform( 'cameraPos' , cameraPos );
 
+  vsTextPosShader.addBoundTexture( vs_particles , 't_lookup' , 'output' );
+/*
 
   var s = fs_particles.size;
 
@@ -56,23 +69,21 @@ function initTextParticles(){
 
   fsTextPosShader.setUniform( 'speed' , speedUniform );
   fsTextPosShader.setUniform( 'timer' , timer );
-    fs_particles.material.uniforms.t_lookup.value = fsTextPosShader.output;
+  fs_particles.material.uniforms.t_lookup.value = fsTextPosShader.output;
 
 
-    var s = sim_particles.size;
+  var s = sim_particles.size;
 
-    simTextPosShader = new PhysicsRenderer( s , simShader , renderer );
-    simTextPosShader.setUniform( 't_to' , {
-      type:"t",
-      value:sim_particles.material.uniforms.t_lookup.value
-    });
+  simTextPosShader = new PhysicsRenderer( s , simShader , renderer );
+  simTextPosShader.setUniform( 't_to' , {
+    type:"t",
+    value:sim_particles.material.uniforms.t_lookup.value
+  });
 
-    simTextPosShader.setUniform( 'speed' , speedUniform );
-    simTextPosShader.setUniform( 'timer' , timer );
+  simTextPosShader.setUniform( 'speed' , speedUniform );
+  simTextPosShader.setUniform( 'timer' , timer );
 
-
-    
-    sim_particles.material.uniforms.t_lookup.value = simTextPosShader.output;
-
+  sim_particles.material.uniforms.t_lookup.value = simTextPosShader.output;
+*/
 
 }

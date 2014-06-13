@@ -227,6 +227,8 @@
         //controls = new THREE.TrackballControls( camera );
         scene = new THREE.Scene();
 
+        scene.add( camera );
+
         clock = new THREE.Clock();
 
 
@@ -245,8 +247,12 @@
         );
 
 
-        //scene.add( center );
 
+        /*
+          
+           Leap Stuff!
+        
+        */
         controller = new Leap.Controller();
         controller.connect();
         initRiggedSkeleton();
@@ -265,11 +271,10 @@
             indicator : mesh     
           }
         );
-
-        console.log( objectControls );
         objectControls.addIndicator();
 
 
+        // Text Particles!
         initTextParticles();
        
         ///riggedSkeleton.addScaledJointMesh( mesh , 'distal' );
@@ -277,7 +282,7 @@
         groups = [];
 
 
-        for( var i = 0; i < colorSchemes.length; i++ ){
+        for( var i = 0; i < 0;i++){//colorSchemes.length; i++ ){
 
           var bait = center.clone();
           bait.scale.multiplyScalar( 5.3 );
@@ -356,14 +361,7 @@
         objectControls.update();
         
         vsTextPosShader.update();
-        vs_particles.material.uniforms.t_lookup.value = vsTextPosShader.output;
-
-        fsTextPosShader.update();
-        fs_particles.material.uniforms.t_lookup.value = fsTextPosShader.output;
-         
-        simTextPosShader.update();
-        sim_particles.material.uniforms.t_lookup.value = simTextPosShader.output;
-
+      
         if( !allPaused ){
           if( !centerPaused ){
 

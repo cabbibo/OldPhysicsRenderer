@@ -377,7 +377,7 @@
 
     for( var i = 0; i < this.tails.length; i++ ){
 
-      this.tails[i].addToScene();
+      this.tails[i].activate();
 
     }
 

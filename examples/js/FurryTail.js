@@ -43,9 +43,10 @@
       iriLookup: THREE.ImageUtils.loadTexture('../img/iriLookup.png')
 
     });
-    this.setParams( this.params );
 
-    scene.add( this.leader );
+    this.active = false;
+
+    this.setParams( this.params );
 
     this.lineUniforms = {
       t_pos:{ type:"t" , value:null },
@@ -172,10 +173,35 @@
   }
 
 
-  FurryTail.prototype.addToScene = function(){
+  FurryTail.prototype.activate = function(){
 
     scene.add( this.physicsParticles );
     scene.add( this.line );
+    scene.add( this.leader );
+    scene.add( this.cloth.mesh );    
+
+    this.active = true;
+
+  }
+
+  FurryTail.prototype.deactivate = function(){
+
+    scene.add( this.physicsParticles );
+    scene.add( this.line );
+    scene.add( this.leader );
+    scene.add( this.cloth.mesh );    
+
+    this.active = false;
+
+  }
+
+  FurryTail.prototype.deactivate = function(){
+
+
+  }
+
+  FurryTail.prototype.updatePhysics = function(){
+
 
 
   }
