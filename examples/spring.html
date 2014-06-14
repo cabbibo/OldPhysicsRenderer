@@ -152,16 +152,16 @@
       
       
       
-      audioController.mute.gain.value = 0.0;
+      /*audioController.mute.gain.value = 0.0;
 
       var userAudio = new UserAudio( audioController );
       
       userAudio.onStreamCreated = function(){
         init();
         animate();
-      }
+      }*/
 
-      //var stream = new Stream( '../audio/phuphuphu.mp3' , audioController );
+      var stream = new Stream( '../audio/phuphuphu.mp3' , audioController );
       
       var t_audio = audioController.texture;
       
@@ -187,9 +187,9 @@
       var shaders = new ShaderLoader('../shaders');
 
       shaders.shaderSetLoaded = function(){
-        //init();
-        //animate();
-        //stream.play();
+        init();
+        animate();
+        stream.play();
       }
 
       shaders.load( 'fs-spring' , 'render'  , 'fragment'    );
@@ -242,14 +242,14 @@
         var lineGeo = createLineGeo(); 
 
         center = new THREE.Mesh( 
-          new THREE.IcosahedronGeometry( 10 , 0 ),
+          new THREE.IcosahedronGeometry( 10.1 , 0 ),
           new THREE.MeshNormalMaterial()
         );
+        scene.add( center );
 
         var light=  new THREE.DirectionalLight( 0xffffff , 1 );
         light.position.set( 0 , 0 , -1 );
         scene.add( light );
-
 
 
         /*
@@ -274,11 +274,7 @@
             indicator : mesh     
           }
         );
-        //objectControls.addIndicator();
 
-
-        // Text Particles!
-        initTextParticles();
        
         ///riggedSkeleton.addScaledJointMesh( mesh , 'distal' );
 
@@ -344,6 +340,13 @@
           }
 
         });
+
+
+        //objectControls.addIndicator();
+
+
+        // Text Particles!
+        initTextParticles();
       }
 
 
@@ -368,11 +371,24 @@
         if( !allPaused ){
           if( !centerPaused ){
 
-            if( controller.frame().hands[0] ){
+            //if( controller.frame().hands[0] ){
               //center.position.copy( riggedSkeleton.hand.position );
-            }else{
-              center.position.sub( center.position.clone().multiplyScalar( .1 ) );
-            }
+           // }else{
+
+            var target = new THREE.Vector3();
+            var dir = camera.position.clone().normalize().multiplyScalar( -1 );
+            var up = camera.up.clone();
+            var right = dir.clone().cross( up );
+            
+            right.normalize();
+
+            target.add( right.multiplyScalar( -250 ) );
+            target.add( camera.position );
+            target.add( dir.multiplyScalar( 1000 ));
+
+              center.position.sub( center.position.clone().sub( target ).multiplyScalar( .1 ) );
+
+           // }
             /*center.position.x = Math.sin( timer.value /2 ) * 120;
             center.position.y = Math.cos( timer.value /1 ) * 120;
             center.position.z = Math.cos( timer.value / 1.5542) * 100;*/

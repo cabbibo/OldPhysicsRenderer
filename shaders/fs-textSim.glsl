@@ -9,6 +9,9 @@ uniform vec3 cameraPos;
 uniform vec3 offsetPos;
 uniform vec3 handPos;
 
+uniform vec3 friendPos[11];
+uniform vec3 friendVel[11];
+
 varying vec2 vUv;
 
 $simplex
@@ -45,10 +48,15 @@ void main(){
 
   vel += dif * .2 ;
 
-  vec3 toHand = handPos - pos.xyz;
+  vec3 toHand = pos.xyz-handPos;
   float distToHand = length( toHand );
 
-  vel += normalize((pos.xyz - handPos )) * 100000. / (distToHand*distToHand);
+  vel += normalize(toHand) * 1000. / (distToHand);
+  
+  for( int i = 0; i < 11; i++ ){
+    vec3 toFriend = friendPos[i] - pos.xyz;
+    vel -= normalize(toFriend) * 100000. / (length( toFriend * toFriend));
+  }
   //vel.y += abs( displace ) * speed.y;
   //vel.y += (((displace * .4)+.5)/5.) * ( speed.y ) ;
   //vel.y += (((abs(displace) * .2)+.1)/3.) * speed.y;

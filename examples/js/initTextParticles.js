@@ -1,37 +1,15 @@
  var textCreator;
 
  var speechText = [
-  "Hello, my name is Isaac",
-  "and I work at Leap.",
-  "",
-  "I am here today to talk to you about the future",
-  "Because the future is all there really is",
-  "",
-  "The Past is a beast. It will consume all in its",
-  "Decadent claws. But the future is love. It is",
-  "Beauty, and it is all we can hope for.",
+
+  "   The ecstasy that Loki felt could not be described with mortal words. There was not just one more of him. There were Hundreds. The Lonliness that he had felt earlier in his journey had vanished, and the only thing left was comfort. Ecstasy.",
   "",
   "",
-  "Hello, my name is Isaac",
-  "and I work at Leap.",
-  "",
-  "I am here today to talk to you about the future",
-  "Because the future is all there really is",
-  "",
-  "The Past is a beast. It will consume all in its",
-  "Decadent claws. But the future is love. It is",
-  "Beauty, and it is all we can hope for.",
+  "He watched the way they swam, following their iridescent wanderings. Although he had been to this place before, it somehow felt different. Each color a bit more defined, each star that much more bright.",
   "",
   "",
-  "Hello, my name is Isaac",
-  "and I work at Leap.",
-  "",
-  "I am here today to talk to you about the future",
-  "Because the future is all there really is",
-  "",
-  "The Past is a beast. It will consume all in its",
-  "Decadent claws. But the future is love. It is",
-  "Beauty, and it is all we can hope for.",
+  "He still did not know why he had risen. Where his new found friends were going to. The darkness surrounding them was still overbearing, and stars did not do enough to make him forget it. But there, in that moment. They swam together, and that was enough."
+
 
  ].join("\n");
 
@@ -43,7 +21,8 @@ function initTextParticles(){
 
   var creator = new TextParticles({
     vertexShader:   vs,
-    fragmentShader: fs
+    fragmentShader: fs,
+    lineLength:     50
   });
 
     
@@ -81,17 +60,38 @@ function initTextParticles(){
   });
 
 
-  vsTextPosShader.createDebugScene();
+  /*vsTextPosShader.createDebugScene();
   vsTextPosShader.addDebugScene( scene );
-  vsTextPosShader.debugScene.position.y = 0;
+  vsTextPosShader.debugScene.position.y = 0;*/
+
+  var friendPosArray = [];
+  var friendVelArray = [];
+  for( var i =0; i < furryTails.length; i++ ){
+
+    friendPosArray.push( furryTails[i].position );
+    friendVelArray.push( furryTails[i].velocity );
+
+
+  }
+  var friendPos = {
+    type:"v3v",
+    value: friendPosArray
+  }
+
+  var friendVel = {
+    type:"v3v",
+    value: friendVelArray
+  }
 
 
   vsTextPosShader.setUniform( 'speed' , speedUniform );
   vsTextPosShader.setUniform( 'timer' , timer );
   vsTextPosShader.setUniform( 'cameraMat' , cameraMat );
   vsTextPosShader.setUniform( 'cameraPos' , cameraPos );
-  vsTextPosShader.setUniform( 'offsetPos' , { type:"v3" , value: new THREE.Vector3( 200 , 200 , 0 ) } );
-  vsTextPosShader.setUniform( 'handPos' , { type:"v3" , value: riggedSkeleton.hand.position } );
+  vsTextPosShader.setUniform( 'offsetPos' , { type:"v3" , value: new THREE.Vector3( 00 , 150 , 0 ) } );
+  vsTextPosShader.setUniform( 'handPos'   , { type:"v3" , value: riggedSkeleton.hand.position } );
+  vsTextPosShader.setUniform( 'friendPos' , friendPos );
+  vsTextPosShader.setUniform( 'friendVel' , friendVel );
 
   vsTextPosShader.addBoundTexture( vs_particles , 't_lookup' , 'output' );
 /*

@@ -228,10 +228,20 @@
 
     if( this.type == 'PUPPY 0' ){
 
-       var baitDif = center.position.clone().sub( this.position );
-    var static = l - 0;
-    baitDif.normalize();
-    force.add( baitDif.multiplyScalar( 5.) );
+      var baitDif = center.position.clone().sub( this.position );
+      var l = baitDif.length();
+
+      baitDif.normalize();
+      
+      var staticL = baitDif.length() - 100;
+      baitDif.normalize();
+      if( l > 100 ){
+      force.add( baitDif.multiplyScalar( 40 ) );
+      }else{
+      force.sub( baitDif.multiplyScalar( 100 ) );
+
+
+      }
 
       var avePos = new THREE.Vector3();
       var num = 0;
@@ -338,7 +348,7 @@
     //console.log( force.x );
     var maxVel = 5;
     if( this.type == 'PUPPY 0' ){
-      maxVel = 10
+      maxVel = 10;
       this.velocity.add( force.multiplyScalar( .01 ) );
       this.velocity.multiplyScalar( .93 )
    // this.leader.position.add( this.velocity );
