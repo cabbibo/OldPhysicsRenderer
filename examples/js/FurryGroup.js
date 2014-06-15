@@ -62,6 +62,7 @@
     var p = this.params.physicsParams;    
     var physicsParams = p;
 
+
     /*var interactionParams = folder.addFolder( 'Interaction' );
 
     var p = this.params.physicsParams;
@@ -73,7 +74,8 @@
     interactionParams.add( p , 'attractPower' , 0 , .01 );
     interactionParams.add( p , 'repelPower' , 0 , .01 );
     interactionParams.add( p , 'baitPower' , 0 , .01 );*/
-    
+
+
     /*
 
       Setting up attraction / repulsion uniforms

@@ -12,6 +12,7 @@ uniform float alive;
 
 uniform vec3 friendPos[11];
 uniform vec3 friendVel[11];
+uniform vec3 planetPos[11];
 
 varying vec2 vUv;
 
@@ -57,6 +58,24 @@ void main(){
   for( int i = 0; i < 11; i++ ){
     vec3 toFriend = friendPos[i] - pos.xyz;
     vel -= normalize(toFriend) * 100000. / (length( toFriend * toFriend));
+  }
+
+  for( int i = 0; i < 4; i++ ){
+
+    vec3 toPlanet = planetPos[i] - pos.xyz;
+    
+    float d = length( toPlanet );
+
+    vec3 planetDir = normalize( toPlanet );
+
+    vel -= normalize(toPlanet) * 400000. / (length(toPlanet * toPlanet));
+    
+    if( d < 100. ){
+      pos.xyz = planetPos[i] - planetDir * 102.;
+
+    }
+
+
   }
   //vel.y += abs( displace ) * speed.y;
   //vel.y += (((displace * .4)+.5)/5.) * ( speed.y ) ;

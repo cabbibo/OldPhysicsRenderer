@@ -84,6 +84,21 @@ function initTextParticles(){
   }
 
 
+
+  var planetPosArray = [];
+
+  for( var i =0; i < planets.length; i++ ){
+
+    planetPosArray.push( planets[i].position );
+
+  }
+
+  var planetPos = {
+    type:"v3v",
+    value: planetPosArray
+  }
+
+
   vsTextPosShader.setUniform( 'speed' , speedUniform );
   vsTextPosShader.setUniform( 'timer' , timer );
   vsTextPosShader.setUniform( 'cameraMat' , cameraMat );
@@ -92,6 +107,7 @@ function initTextParticles(){
   vsTextPosShader.setUniform( 'handPos'   , { type:"v3" , value: riggedSkeleton.hand.position } );
   vsTextPosShader.setUniform( 'friendPos' , friendPos );
   vsTextPosShader.setUniform( 'friendVel' , friendVel );
+  vsTextPosShader.setUniform( 'planetPos' , planetPos );
   vsTextPosShader.setUniform( 'alive' , { type:"f", value:1 });
 
   vsTextPosShader.addBoundTexture( vs_particles , 't_lookup' , 'output' );

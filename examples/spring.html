@@ -35,6 +35,7 @@
     <script src="js/FurryGroup.js"></script>
     <script src="js/FurryTail.js"></script>
     <script src="js/Cloth.js"></script>
+    <script src="js/Planet.js"></script>
 
 
     <script src="../lib/TextParticles.js"></script>
@@ -190,6 +191,7 @@
 
       var center , riggedSkeleton;
 
+
       var colors = [];
       var gui = new dat.GUI({});
 
@@ -203,6 +205,8 @@
       var timer = { type:"f" , value:0 };
 
       var furryTails = [];
+      var planets = [];
+      var groups = [];
       var cloth;
 
       var shaders = new ShaderLoader('../shaders');
@@ -223,6 +227,9 @@
       shaders.load( 'fs-iri' , 'iri' , 'fragment' );
       shaders.load( 'vs-jelly' , 'jelly' , 'vertex' );
       shaders.load( 'fs-jelly' , 'jelly' , 'fragment' );
+
+      shaders.load( 'fs-planet' , 'planet' , 'fragment' );
+      shaders.load( 'vs-planet' , 'planet' , 'vertex' );
 
 
       // TEXT
@@ -305,84 +312,33 @@
 
         */
         
-        var planets = [];
-
-        var planet1 = new THREE.Mesh(
-          new THREE.IcosahedronGeometry(100,3),
-          new THREE.MeshBasicMaterial({wireframe:true,color:0x0000ff})
-        );
-
-        planet1.position = new THREE.Vector3( 100 , 300 , -500 );
-        planet1.type = 'Loki'
-        scene.add( planet1 );
-
-        planets.push( planet1 );
-
-
-        var planet2 = new THREE.Mesh(
-          new THREE.IcosahedronGeometry(100,3),
-          new THREE.MeshBasicMaterial({wireframe:true,color:0xffaa55})
-        );
-
-        planet2.position = new THREE.Vector3( -100 , -300, -500 );
-        planet2.type = 'Friend1'
-        scene.add( planet2 );
-
-        planets.push( planet2 );
-        
-
-        var planet3 = new THREE.Mesh(
-          new THREE.IcosahedronGeometry(100,3),
-          new THREE.MeshBasicMaterial({wireframe:true,color:0xaa00ff})
-        );
-
-        planet3.position = new THREE.Vector3( -300 , -300, 500 );
-        planet3.type = 'Friend2'
-        scene.add( planet3 );
-        planets.push( planet3 );
-        
-
-        var planet4 = new THREE.Mesh(
-          new THREE.IcosahedronGeometry(100,3),
-          new THREE.MeshBasicMaterial({wireframe:true,color:0x00ff00})
-        );
-
-        planet4.position = new THREE.Vector3( 300 , 300, 500 );
-        planet4.type = 'Friend3'
-        scene.add( planet4 );
-        planets.push( planet4 );
-
-        objectControls.add( planet1 );
-        objectControls.add( planet2 );
-        objectControls.add( planet3 );
-        objectControls.add( planet4 );
-
-
-
-
-        ///riggedSkeleton.addScaledJointMesh( mesh , 'distal' );
-
-        groups = [];
-
-
         for( var i = 0; i < colorSchemes.length; i++ ){
-          
+
           var bait = center.clone();
           bait.scale.multiplyScalar( 5.3 );
           //scene.add( bait );
 
           var c = colorSchemes[i];
-          
+
           var numOf = c[1]; //+ Math.floor( Math.random() * 10 );
+
+          var col1 = new THREE.Vector3( c[2].r , c[2].g , c[2].b );
+          var col2 = new THREE.Vector3( c[3].r , c[3].g , c[3].b );
+          var col3 = new THREE.Vector3( c[4].r , c[4].g , c[4].b );
+          var col4 = new THREE.Vector3( c[5].r , c[5].g , c[5].b );
+
+          var planet = new Planet( c[0] , col1 , col2 , col3 , col4 );
+
+          planets.push( planet );
 
           var f = new FurryGroup( c[0] , numOf, {
             
             center: center,
             bait: bait,
-            color1: new THREE.Vector3( c[2].r , c[2].g , c[2].b ),
-            color2: new THREE.Vector3( c[3].r , c[3].g , c[3].b ),
-            color3: new THREE.Vector3( c[4].r , c[4].g , c[4].b ),
-            color4: new THREE.Vector3( c[5].r , c[5].g , c[5].b ),
+            color1: col1,
+            color2: col2,
+            color3: col3,
+            color4: col4,
 
           });
 
