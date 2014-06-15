@@ -3,25 +3,18 @@
   uniform sampler2D tNormal;
   uniform float time;
 
-  uniform sampler2D   tNoise;
-  
   uniform sampler2D t_pos;
-  uniform sampler2D t_oPos;
-  uniform sampler2D t_ooPos;
   
 
   varying vec3 vView;
   varying vec3 vNormal;
   varying vec2 vUv;
-  varying vec3 vPos;
-
-  varying float fr;
 
   varying mat3 vNormalMat;
   varying vec3 vLightDir;
   varying float vDisplacement;
 
-    const float size = 1. / 32.;
+  const float size = 1. / 32.;
   const float hSize = size / 2.;
 
 
@@ -29,15 +22,9 @@
   void main(void)
   {
 
-   // vec3 pos = texture2D( t_pos , position.xy ).xyz;
-    //vPos = pos;
-    
-    //vPos = position.xyz;
-   // vUv = position.xy;
 
     vec3 pos = texture2D( t_pos , position.xy ).xyz;
 
-    vPos = pos;
     vUv = position.xy;
     
     vec2 uvL = vUv;
@@ -77,33 +64,15 @@
 
     vec3 normal = normalize( cross( difX , difY ) );
     
-    //vec3 actual = newCoord( pos , vUv );
 
-   // vec3 tPos = texture2D( tNoise , position.xy ).xyz;
-    //vec3 nPos = normalize( vec3( position.xy , length( tPos )));
-
-
-
-    //normal = nPos;
-
-   // vDisplacement = fractNoise( vUv ) * 4.;
-
-    //float distanceToEdge = pow( (.5 -  abs(vUv.x - .5 ) ) * (.5 -  abs(vUv.y - .5 ) ) , .5 );
-
-    //vPos = nPos;
-   // vPos = position;// + normal * vDisplacement * distanceToEdge * 4.;
-
-    gl_Position = projectionMatrix * modelViewMatrix * vec4( vPos , 1.0 );
-    //vUv = uv;
-    vPos = position;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( pos , 1.0 );
+    
     vView = modelViewMatrix[3].xyz;
     vNormal = normalMatrix *  normal ;
     vNormalMat = normalMatrix;
 
-    vec3 lightDir = normalize( lightPos -  (modelViewMatrix * vec4( vPos , 1.0 )).xyz );
+    vec3 lightDir = normalize( lightPos -  (modelViewMatrix * vec4( pos , 1.0 )).xyz );
 
     vLightDir = lightDir;
-    vec3 refl = reflect( lightDir , vNormal );
-    fr = dot(  vNormal, refl);							    //facing ratio
     
   }

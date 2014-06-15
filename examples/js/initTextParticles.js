@@ -92,6 +92,7 @@ function initTextParticles(){
   vsTextPosShader.setUniform( 'handPos'   , { type:"v3" , value: riggedSkeleton.hand.position } );
   vsTextPosShader.setUniform( 'friendPos' , friendPos );
   vsTextPosShader.setUniform( 'friendVel' , friendVel );
+  vsTextPosShader.setUniform( 'alive' , { type:"f", value:1 });
 
   vsTextPosShader.addBoundTexture( vs_particles , 't_lookup' , 'output' );
 /*

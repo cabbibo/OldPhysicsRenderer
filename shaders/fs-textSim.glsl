@@ -8,6 +8,7 @@ uniform mat4 cameraMat;
 uniform vec3 cameraPos;
 uniform vec3 offsetPos;
 uniform vec3 handPos;
+uniform float alive;
 
 uniform vec3 friendPos[11];
 uniform vec3 friendVel[11];
@@ -62,7 +63,13 @@ void main(){
   //vel.y += (((abs(displace) * .2)+.1)/3.) * speed.y;
 
 
-  vec3 newPos = pos.xyz + vel * (( displace *displace+ 2.)/10.);
+   vec3 newPos = vec3(1.);
+  if( alive > .5 ){
+   newPos = pos.xyz + vel * (( displace *displace+ 2.)/10.);
+  }else{
+    newPos = pos.xyz - vel * .1 *(( displace *displace+ 2.)/10.);
+
+  }
   //newPos.z = displace * 5.;
 
   gl_FragColor= vec4( newPos , displace );

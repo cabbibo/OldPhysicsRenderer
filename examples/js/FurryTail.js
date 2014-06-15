@@ -32,11 +32,9 @@
       
       // Interaction with other tails
       physicsParams:      {
-        repelRadius:         20,
-        dampening:           .95,
-        attractPower:        .001,
-        repelPower:          .01,
-        baitPower:           .0001,
+        forceMultiplier:  1,
+        maxVel:           2,
+        dampening:      .99
       },
     
       particleSize: 4.,
@@ -72,14 +70,15 @@
       color4: { type:"v3" , value:this.color4 },
     }
 
-    
+   
+    // Other Tails of the same type
     this.brethren = [];
   
-    this.position       = this.leader.position;
-    this.velocity       = new THREE.Vector3();  
+    // Physics
+    this.position   = this.leader.position;
+    this.velocity   = new THREE.Vector3();  
+    this.force      = new THREE.Vector3();  
 
-    //this.leader.position = this.position;
-   
 
     this.position.set(
 
@@ -97,6 +96,11 @@
 
     );
 
+    this.distanceForces = [];
+    this.distanceSquaredForces = [];
+    this.normalForces = [];
+    this.springForces = [];
+    this.collisionForces = [];
 
 
     this.renderer     = renderer; 
@@ -155,12 +159,14 @@
     
     this.applyUniforms();
 
-    this.cloth = new Cloth( this.leader , this.iriLookup , this.color1 , this.color2 , this.color3 , this.color4  );
+    this.cloth = new Cloth( 
+      this.leader , 
+      this.color1 , 
+      this.color2 , 
+      this.color3 , 
+      this.color4  
+    );
     this.physicsRenderer.addBoundTexture( this.cloth.physicsRenderer , 't_column' , 'output' );
-
-  /* this.cloth.physicsRenderer.addDebugScene( scene );
-   this.cloth.physicsRenderer.debugScene.scale.multiplyScalar( .3 );
-   this.cloth.physicsRenderer.debugScene.position.y = 30;*/
 
 
   }
@@ -209,8 +215,6 @@
   FurryTail.prototype.updatePhysics = function(){
 
 
-    var force = new THREE.Vector3();
-
     // attract to bait    *from group*
     // attract to center  *all flagella*
     // attract to breathren 
@@ -219,156 +223,65 @@
     //
     var pp = this.physicsParams
 
-    this.position.add( new THREE.Vector3( 0 , 0 , 0 ) );
+    for( var i = 0; i < this.distanceForces; i++ ){
 
-
-    //console.log( baitDif );
-   // force.add( baitDif.clone().multiplyScalar( .9 ));
-
-
-    if( this.type == 'PUPPY 0' ){
-
-      var baitDif = center.position.clone().sub( this.position );
-      var l = baitDif.length();
-
-      baitDif.normalize();
-      
-      var staticL = baitDif.length() - 100;
-      baitDif.normalize();
-      if( l > 100 ){
-      force.add( baitDif.multiplyScalar( 40 ) );
-      }else{
-      force.sub( baitDif.multiplyScalar( 100 ) );
-
-
-      }
-
-      var avePos = new THREE.Vector3();
-      var num = 0;
-      for( var  i= 0; i < furryTails.length; i++ ){
-
-        var otherTail = furryTails[i];
-        
-        if( otherTail.type != 'PUPPY 0' ){
-
-          avePos.add( otherTail.position );
-          num ++;
-
-        }
-
-
-      }
-
-      //avePos.multiplyScalar( 1/num );
-      //
-      if( !this.oldAvePos ){
-        this.oldAvePos = new THREE.Vector3();
-      }
-
-      var aveVel = this.oldAvePos.clone().sub( avePos );
-
-      var newPos = avePos.clone().add( aveVel );
-      var dif = newPos.sub( this.position.clone() );
-      //this.velocity.copy( dif.multiplyScalar( .4 ) );
-      force.add( dif.normalize().multiplyScalar( 50. ) );
-
-      if( dif.length() > 10000 ){
-
-        //this.velocity.multiplyScalar( -.1 );
-
-
-      }
-
-      this.oldAvePos = avePos;
-
-      var baitDif = center.position.clone().sub( this.position );
-     // this.velocity.add( baitDif.multiplyScalar( .001 ));
-
-
-
-    }else{
-
-       //console.log( this.group.position );
-    var baitDif = center.position.clone().sub( this.position );
-    var static = l - 0;
-    baitDif.normalize();
-    force.add( baitDif.multiplyScalar( 5.) );
-
-
-    //force.add( baitDif.multiplyScalar( .03 ));
-
-
-      for( var i = 0; i < furryTails.length; i++ ){
-
-        var otherTail = furryTails[i];
-
-        if( i !== this ){
-
-          if( otherTail.type == 'PUPPY 0' ){
-
-            //console.log( otherTail.type );
-            //console.log( 'asdb');
-            var dif = otherTail.position.clone().sub( this.position );
-            var l = dif.length();
-
-            var static = l - 0;
-            dif.normalize();
-            force.sub( dif.multiplyScalar( 100./l) );
-
-          }else{
-
-            var dif = otherTail.position.clone().sub( this.position );
-            var l = dif.length();
-
-            var static = l - 300;
-
-
-            if( l > 200 ){
-
-            dif.normalize().multiplyScalar( static * .1 );
-            force.add( dif.multiplyScalar( .01 ) );
-
-            }else{
-
-              dif.normalize().multiplyScalar( -10000. );
-              force.add(dif);
-  
-
-            }
-
-
-          }
-
-        }
-      
-      }
+      var pos = this.distanceForces[i][0];
+      var force = this.distanceForces[i][1];
+      this.applyDistanceForce( pos , force ); 
 
     }
 
-    //console.log( force.x );
-    var maxVel = 5;
-    if( this.type == 'PUPPY 0' ){
-      maxVel = 10;
-      this.velocity.add( force.multiplyScalar( .01 ) );
-      this.velocity.multiplyScalar( .93 )
-   // this.leader.position.add( this.velocity );
+    for( var i = 0; i < this.distanceSquaredForces; i++ ){
 
-    }else{
-
-      this.velocity.add( force.multiplyScalar( .01 ) );
-
+      var pos = this.distanceSquaredForces[i][0];
+      var force = this.distanceSquaredForces[i][1];
+      this.applyDistanceSquaredForce( pos , force ); 
 
     }
 
-    if( this.velocity.length()  > maxVel ){
+    for( var i = 0; i < this.normalForces; i++ ){
+
+      var pos = this.normalForces[i][0];
+      var force = this.normalForces[i][1];
+      this.applyNormalForce( pos , force ); 
+
+    }
+
+    for( var i = 0; i < this.springForces; i++ ){
+
+      var pos = this.springForces[i][0];
+      var force = this.springForces[i][1];
+      var length = this.springForces[i][2];
+      this.applySpringForce( pos , force , length ); 
+
+    }
+
+    for( var i = 0; i < this.collisionForces; i++ ){
+
+      var pos = this.collisionForces[i][0];
+      var radius = this.collisionForces[i][1];
+      this.applySpringForce( pos , radius ); 
+
+    }
+
+
+
+    var finalForce = this.force.multiplyScalar( pp.forceMultiplier );
+    this.velocity.add( finalForce );
+
+    if( this.velocity.length() > pp.maxVel ){
 
       this.velocity.normalize();
-      this.velocity.multiplyScalar( maxVel )
-//      console.log( 'no' );
+      this.velocity.multiplyScalar( pp.maxVel );
 
     }
+
+
+
     this.position.add( this.velocity);
-    //this.velocity.multiplyScalar(.99); // turn to vector dampening
+    this.velocity.multiplyScalar( pp.dampening ); // turn to vector dampening
+
+    this.force.set( 0 , 0 , 0);
 
   }
 
@@ -440,5 +353,111 @@
 
     this.brethren = this.group.tails;
 
+  }
+
+  FurryTail.prototype.addDistanceForce = function( pos , power ){
+
+    this.distanceForces.push( [ pos , power ] );
 
   }
+
+
+  FurryTail.prototype.applyDistanceForce = function( pos , power ){
+
+    var dif = pos.clone().sub( this.position );
+    var l   = dif.length();
+    
+    dif.normalize();
+    dif.multiplyScalar( l * power );
+
+    this.force.add( dif );
+    
+
+  }
+
+
+  FurryTail.prototype.addDistanceSquaredForce = function( pos , power ){
+
+    this.distanceSquaredForces.push( [ pos , power ] );
+
+
+  }
+
+  FurryTail.prototype.applyDistanceSquaredForce = function( pos , power ){
+
+    var dif = pos.clone().sub( this.position );
+    var l   = dif.length();
+    
+    dif.normalize();
+    dif.multiplyScalar( l * l * power );
+
+    this.force.add( dif );
+
+
+  }
+
+
+  FurryTail.prototype.addNormalForce = function( pos , power ){
+
+    this.normalForces.push( [ pos , power ] );
+
+  }
+
+  FurryTail.prototype.applyNormalForce = function( pos , power ){
+
+     var dif = pos.clone().sub( this.position );
+    var l   = dif.length();
+    
+    dif.normalize();
+    dif.multiplyScalar(  power );
+
+    this.force.add( dif );
+
+
+  }
+
+
+  FurryTail.prototype.addSpringForce = function( pos , power , length ){
+
+    this.springForces.push( [ pos , power , length ] );
+
+  }
+
+  FurryTail.prototype.applySpringForce = function( pos , power , length ){
+
+    var dif = pos.clone().sub( this.position );
+    var l   = dif.length();
+
+    var lDif = l - length;
+    
+    dif.normalize();
+    dif.multiplyScalar( lDif * power );
+
+    this.force.add( dif );
+
+
+  }
+
+  FurryTail.prototype.addCollisionForce = function( pos , radius ){
+
+    this.springForces.push([ pos , radius ]);
+
+  }
+
+  FurryTail.prototype.applyCollisionForce = function( pos , radius ){
+
+    var dif = pos.clone().sub( this.position );
+    var l   = dif.length();
+
+    if( l < radius ){
+
+      this.velocity.multiplyScalar(-1); 
+      this.position.add( this.velocity );
+
+    }
+
+
+  }
+
+
+

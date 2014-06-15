@@ -1,5 +1,5 @@
 
-  function Cloth( leader , iriLookup , color1 , color2 , color3 , color4 ){
+  function Cloth( leader ,  color1 , color2 , color3 , color4 ){
 
 
     this.size = 32;
@@ -34,32 +34,14 @@
 
 
 
-
-    var path = "../img/skybox/";
-    var format = '.jpg';
-    var urls = [
-      path + 'px' + format, path + 'nx' + format,
-      path + 'py' + format, path + 'ny' + format,
-      path + 'pz' + format, path + 'nz' + format
-    ];
-
-    var tReflection = THREE.ImageUtils.loadTextureCube( urls );
-
-    var tNoise  = THREE.ImageUtils.loadTexture( '../img/noiseLookup.jpg' ); 
-    var tIri    = iriLookup;
     var tNormal = THREE.ImageUtils.loadTexture( '../img/normals/moss_normal_map.jpg' );
+    
     var uniforms = {
-
       
-      tReflection:{ type:"t" , value: tReflection },
-      tNoise:{ type:"t" , value: tNoise }, 
-      tIri:{ type:"t" , value: tIri },
       lightPos: { type:"v3" , value: center.position },
       tNormal:{type:"t",value:tNormal},
       t_audio:{type:"t",value:audioController.texture},
       t_pos:{ type:"t" , value:null },
-      t_oPos:{ type:"t" , value:null },
-      t_ooPos:{ type:"t" , value:null },
       color1:{ type:"v3" , value:color1 },
       color2:{ type:"v3" , value:color2 },
       color3:{ type:"v3" , value:color3 },
@@ -86,8 +68,6 @@
     var pR = this.physicsRenderer;
     
     pR.addBoundTexture( this.mesh , 't_pos' , 'output' );
-    pR.addBoundTexture( this.mesh , 't_oPos' , 'oOutput' );
-    pR.addBoundTexture( this.mesh , 't_ooPos' , 'ooOutput' );
 
     var mesh = new THREE.Mesh( new THREE.CubeGeometry( 5 , 5 , 5) );
     var pTexture = this.createPosTexture( this.size );

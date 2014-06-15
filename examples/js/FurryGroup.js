@@ -11,15 +11,13 @@
       centerForce: 1,
       center: new THREE.Object3D(),
       physicsParams:      {
-        repelRadius:         100,
-        dampening:           .99,
-        attractPower:        .0001,
-        repelPower:          .003,
-        baitPower:           .0002,
+        forceMultiplier:  1,
+        maxVel:           2,
+        dampening:      .99
       },
 
       leader: new THREE.Mesh(
-      new THREE.IcosahedronGeometry( .001 , 0 ),
+      new THREE.IcosahedronGeometry( 20 , 0 ),
       new THREE.MeshNormalMaterial({
         wireframe:true,
         blending: THREE.AdditiveBlending

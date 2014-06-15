@@ -152,14 +152,14 @@
       
       
       
-      /*audioController.mute.gain.value = 0.0;
+      audioController.mute.gain.value = 0.0;
 
       var userAudio = new UserAudio( audioController );
       
       userAudio.onStreamCreated = function(){
         init();
         animate();
-      }*/
+      }
 
       var stream = new Stream( '../audio/phuphuphu.mp3' , audioController );
       
@@ -186,11 +186,11 @@
 
       var shaders = new ShaderLoader('../shaders');
 
-      shaders.shaderSetLoaded = function(){
+      /*shaders.shaderSetLoaded = function(){
         init();
         animate();
         stream.play();
-      }
+      }*/
 
       shaders.load( 'fs-spring' , 'render'  , 'fragment'    );
       shaders.load( 'vs-render' , 'render'  , 'vertex'      );
@@ -281,31 +281,55 @@
         groups = [];
 
 
-        for( var i = 0; i < colorSchemes.length; i++ ){
+        var lokiParams = colorSchemes[0];
 
-          var bait = center.clone();
-          bait.scale.multiplyScalar( 5.3 );
-          //scene.add( bait );
+        var bait = center.clone();
+        bait.scale.multiplyScalar( 5.3 );
+        //scene.add( bait );
 
-          var c = colorSchemes[i];
-          
-          var numOf = c[5]; //+ Math.floor( Math.random() * 10 );
+        var c = lokiParams;
+        
+        var numOf = c[5]; //+ Math.floor( Math.random() * 10 );
 
-          var f = new FurryGroup( 'PUPPY '+i , numOf, {
+        var f = new FurryGroup( 'Loki' , numOf, {
 
-            center: center,
-            bait: bait,
-            color1: new THREE.Vector3( c[0].r , c[0].g , c[0].b ),
-            color2: new THREE.Vector3( c[1].r , c[1].g , c[1].b ),
-            color3: new THREE.Vector3( c[2].r , c[2].g , c[2].b ),
-            color4: new THREE.Vector3( c[3].r , c[3].g , c[3].b ),
-            iriLookup: c[4]
+          center: center,
+          bait: bait,
+          color1: new THREE.Vector3( c[0].r , c[0].g , c[0].b ),
+          color2: new THREE.Vector3( c[1].r , c[1].g , c[1].b ),
+          color3: new THREE.Vector3( c[2].r , c[2].g , c[2].b ),
+          color4: new THREE.Vector3( c[3].r , c[3].g , c[3].b ),
+          iriLookup: c[4]
 
-          });
+        });
 
-          groups.push( f );
+        groups.push( f );
 
-        }
+
+
+        var friendParams = colorSchemes[1];
+
+        var bait = center.clone();
+        bait.scale.multiplyScalar( 5.3 );
+        //scene.add( bait );
+
+        var c = friendParams;
+        
+        var numOf = c[5]; //+ Math.floor( Math.random() * 10 );
+
+        var f = new FurryGroup( 'Friends' , numOf, {
+
+          center: center,
+          bait: bait,
+          color1: new THREE.Vector3( c[0].r , c[0].g , c[0].b ),
+          color2: new THREE.Vector3( c[1].r , c[1].g , c[1].b ),
+          color3: new THREE.Vector3( c[2].r , c[2].g , c[2].b ),
+          color4: new THREE.Vector3( c[3].r , c[3].g , c[3].b ),
+          iriLookup: c[4]
+
+        });
+
+        groups.push( f );
 
         for( var i = 0; i < groups.length; i++ ){
 
@@ -323,6 +347,7 @@
           console.log( e.which );
           if( e.which == 32 ){
 
+            vsTextPosShader.material.uniforms.alive.value = 0;
             allPaused = !allPaused;
 
           }

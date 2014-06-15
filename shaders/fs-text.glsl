@@ -20,7 +20,7 @@ void main(){
   float alpha = 1. - lum;
 
   float simplex = abs(vLookup.w);
-  float mult = .5+ simplex * .5;
-  gl_FragColor = vec4(color* mult , alpha );
+  float mult = .7+ simplex * .5;
+  gl_FragColor = vec4( vec3( 1. , 1. , 1. )*mult, alpha );
 
 }
