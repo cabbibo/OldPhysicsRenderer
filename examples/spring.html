@@ -337,6 +337,22 @@
 
         }
 
+        for( var i = 0; i < furryTails.length; i++ ){
+
+          var fT = furryTails[i];
+
+          for( var j = 0; j < furryTails.length; j++ ){
+
+            var oFT = furryTails[j];
+
+            if( i != j ){
+              fT.addDistanceForce( oFT.position , -10000 );
+
+            }
+
+          }
+
+        }
        // showDebugScenes();
         
         
