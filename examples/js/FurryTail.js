@@ -2,12 +2,6 @@
 
   var lineGeo = createLineGeo();
 
-  var color1 = new THREE.Vector3( Math.random() , Math.random() , Math.random() );
-  var color2 = new THREE.Vector3( Math.random() , Math.random() , Math.random() );
-  var color3 = new THREE.Vector3( Math.random() , Math.random() , Math.random() );
-  var color4 = new THREE.Vector3( Math.random() , Math.random() , Math.random() );
-
-
   function FurryTail( group , params ){
 
     this.group = group;
@@ -34,7 +28,7 @@
       physicsParams:      {
         forceMultiplier:  1,
         maxVel:           2,
-        dampening:      .99
+        dampening:      .99999
       },
     
       particleSize: 4.,
@@ -90,15 +84,21 @@
 
     this.velocity.set(
 
-        (Math.random() - .5 ) * .1,
-        (Math.random() - .5 ) * .1,
-        (Math.random() - .5 ) * .1
+        (Math.random() - .5 ) * 4,
+        (Math.random() - .5 ) * 4,
+        (Math.random() - .5 ) * 4
 
     );
 
+    this.velocity.normalize();
+    this.velocity.multiplyScalar( this.physicsParams.maxVel );
+
     this.distanceForces = [];
+    this.distanceInverseForces = [];
+    this.distanceInverseSquaredForces = [];
     this.distanceSquaredForces = [];
     this.normalForces = [];
+    this.steeringForces = [];
     this.springForces = [];
     this.collisionForces = [];
 
@@ -221,9 +221,9 @@
     // attract to group
     //
     //
-    var pp = this.physicsParams
+    var pp = this.physicsParams;
 
-    for( var i = 0; i < this.distanceForces; i++ ){
+    for( var i = 0; i < this.distanceForces.length; i++ ){
 
       var pos = this.distanceForces[i][0];
       var force = this.distanceForces[i][1];
@@ -231,7 +231,23 @@
 
     }
 
-    for( var i = 0; i < this.distanceSquaredForces; i++ ){
+    for( var i = 0; i < this.distanceInverseForces.length; i++ ){
+
+      var pos = this.distanceInverseForces[i][0];
+      var force = this.distanceInverseForces[i][1];
+      this.applyDistanceInverseForce( pos , force ); 
+
+    }
+
+    for( var i = 0; i < this.distanceInverseSquaredForces.length; i++ ){
+
+      var pos = this.distanceInverseSquaredForces[i][0];
+      var force = this.distanceInverseSquaredForces[i][1];
+      this.applyDistanceInverseSquaredForce( pos , force ); 
+
+    }
+
+    for( var i = 0; i < this.distanceSquaredForces.length; i++ ){
 
       var pos = this.distanceSquaredForces[i][0];
       var force = this.distanceSquaredForces[i][1];
@@ -239,7 +255,7 @@
 
     }
 
-    for( var i = 0; i < this.normalForces; i++ ){
+    for( var i = 0; i < this.normalForces.length; i++ ){
 
       var pos = this.normalForces[i][0];
       var force = this.normalForces[i][1];
@@ -247,7 +263,7 @@
 
     }
 
-    for( var i = 0; i < this.springForces; i++ ){
+    for( var i = 0; i < this.springForces.length; i++ ){
 
       var pos = this.springForces[i][0];
       var force = this.springForces[i][1];
@@ -256,13 +272,23 @@
 
     }
 
-    for( var i = 0; i < this.collisionForces; i++ ){
+    for( var i = 0; i < this.collisionForces.length; i++ ){
 
       var pos = this.collisionForces[i][0];
       var radius = this.collisionForces[i][1];
-      this.applySpringForce( pos , radius ); 
+      this.applyCollisionForce( pos , radius ); 
 
     }
+
+    for( var i = 0; i < this.steeringForces.length; i++ ){
+
+      var pos = this.steeringForces[i][0];
+      var radius = this.steeringForces[i][1];
+      this.applySteeringForce( pos , radius ); 
+
+    }
+
+
 
 
 
@@ -357,6 +383,7 @@
 
   FurryTail.prototype.addDistanceForce = function( pos , power ){
 
+    console.log('nanssss');
     this.distanceForces.push( [ pos , power ] );
 
   }
@@ -372,14 +399,52 @@
 
     this.force.add( dif );
     
+  }
+
+  FurryTail.prototype.addDistanceInverseForce = function( pos , power ){
+
+    this.distanceInverseForces.push( [ pos , power ] );
 
   }
+
+
+  FurryTail.prototype.applyDistanceInverseForce = function( pos , power ){
+
+    var dif = pos.clone().sub( this.position );
+    var l   = dif.length();
+    
+    dif.normalize();
+    dif.multiplyScalar( power / l );
+
+    this.force.add( dif );
+    
+  }
+
+  FurryTail.prototype.addDistanceInverseSquaredForce = function( pos , power ){
+
+    this.distanceInverseSquaredForces.push( [ pos , power ] );
+
+  }
+
+
+  FurryTail.prototype.applyDistanceInverseSquaredForce = function( pos , power ){
+
+    var dif = pos.clone().sub( this.position );
+    var l   = dif.length();
+    
+    dif.normalize();
+    dif.multiplyScalar( power / (l*l) );
+
+    this.force.add( dif );
+    
+  }
+
+
 
 
   FurryTail.prototype.addDistanceSquaredForce = function( pos , power ){
 
     this.distanceSquaredForces.push( [ pos , power ] );
-
 
   }
 
@@ -440,7 +505,7 @@
 
   FurryTail.prototype.addCollisionForce = function( pos , radius ){
 
-    this.springForces.push([ pos , radius ]);
+    this.collisionForces.push([ pos , radius ]);
 
   }
 
@@ -451,13 +516,52 @@
 
     if( l < radius ){
 
-      this.velocity.multiplyScalar(-1); 
-      this.position.add( this.velocity );
+      var normal = dif.clone().normalize();
+      normal.multiplyScalar( -1 );
+      var direction = this.velocity.clone();
+
+      var dot = direction.dot( normal );
+      normal.multiplyScalar( -2 * dot );
+      this.velocity.copy( direction.sub( normal ));
+      this.velocity.multiplyScalar( -100000 );
+
+      var newPos = dif.normalize().multiplyScalar( -radius );
+      newPos.add( pos );
+      this.position.copy( newPos );
 
     }
 
+  }
+
+  FurryTail.prototype.addSteeringForce = function( pos , amount ){
+
+    this.steeringForces.push([ pos , amount ]);
 
   }
+
+  FurryTail.prototype.applySteeringForce = function( pos , amount ){
+
+    var dif = pos.clone().sub( this.position );
+    var l   = dif.length();
+
+    if( l > 0 ){
+
+      dif.normalize();
+
+      dif.multiplyScalar( this.physicsParams.maxVel );
+
+      dif.sub( this.velocity );
+
+      this.force.add( dif.multiplyScalar( amount ) );    
+    
+    }else{
+
+
+    }
+
+  }
+
+
 
 
 

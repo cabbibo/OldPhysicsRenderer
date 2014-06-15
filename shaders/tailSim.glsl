@@ -253,7 +253,16 @@ void main(){
 
   vec3 p = pos.xyz + vel * dT ; 
 
-  gl_FragColor = vec4( p , life );
+  if( dT < .5 ){
+  
+    gl_FragColor = vec4( p , life );
+
+  }else{
+
+   gl_FragColor = vec4( pos.xyz , life );
+
+  }
+
 
 
 }

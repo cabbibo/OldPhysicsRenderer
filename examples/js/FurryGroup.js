@@ -13,14 +13,15 @@
       physicsParams:      {
         forceMultiplier:  1,
         maxVel:           2,
-        dampening:      .99
+        dampening:      .999999
       },
 
       leader: new THREE.Mesh(
-      new THREE.IcosahedronGeometry( 20 , 0 ),
+      new THREE.IcosahedronGeometry( 100 , 0 ),
       new THREE.MeshNormalMaterial({
         wireframe:true,
-        blending: THREE.AdditiveBlending
+        blending: THREE.AdditiveBlending,
+        visible: false
       })),
 
       color1: new THREE.Vector3( 120 /255 , 0 , 255/255 ),    

@@ -125,24 +125,45 @@
         10
       ],*/
 
-      [ 
-        new THREE.Color( '#1157ff' ),
-        new THREE.Color( '#00a4ff' ),
-        new THREE.Color( '#5e2dff' ),
-        new THREE.Color( '#00fff0' ),
-        THREE.ImageUtils.loadTexture('../img/iriLookupPinkRed.png'),
-        1 
-      ],
+        [ 
+          'Loki',
+          1,
+          new THREE.Color( '#1157ff' ),
+          new THREE.Color( '#00a4ff' ),
+          new THREE.Color( '#5e2dff' ),
+          new THREE.Color( '#00fff0' ),
+          
+        ],
 
 
-      [ 
-        new THREE.Color( '#fa0202' ),
-        new THREE.Color( '#faef42' ),
-        new THREE.Color( '#ff0000' ),
-        new THREE.Color( '#ff7800' ),
-        THREE.ImageUtils.loadTexture('../img/iriLookupGreenBluePurp.png'),
-        10
-      ],
+        [ 
+          'Friend1',
+          3,
+          new THREE.Color( '#fa0202' ),
+          new THREE.Color( '#faef42' ),
+          new THREE.Color( '#ff0000' ),
+          new THREE.Color( '#ff7800' ),
+        ],
+
+        [
+          'Friend2',
+          3,
+          new THREE.Color( '#5f5fff' ),
+          new THREE.Color( '#61a2ff' ),
+          new THREE.Color( '#52fff4' ),
+          new THREE.Color( '#78ffc7' ),
+        ],
+
+        [ 
+          'Friend3',
+          4,
+          new THREE.Color( '#ffa400' ),
+          new THREE.Color( '#ee3700' ),
+          new THREE.Color( '#fce05e' ),
+          new THREE.Color( '#ff70cc' ),
+        ],
+
+
 
       ]
 
@@ -275,61 +296,100 @@
           }
         );
 
-       
+
+
+        /*
+
+
+            Planets
+
+        */
+        
+        var planets = [];
+
+        var planet1 = new THREE.Mesh(
+          new THREE.IcosahedronGeometry(100,3),
+          new THREE.MeshBasicMaterial({wireframe:true,color:0x0000ff})
+        );
+
+        planet1.position = new THREE.Vector3( 100 , 300 , -500 );
+        planet1.type = 'Loki'
+        scene.add( planet1 );
+
+        planets.push( planet1 );
+
+
+        var planet2 = new THREE.Mesh(
+          new THREE.IcosahedronGeometry(100,3),
+          new THREE.MeshBasicMaterial({wireframe:true,color:0xffaa55})
+        );
+
+        planet2.position = new THREE.Vector3( -100 , -300, -500 );
+        planet2.type = 'Friend1'
+        scene.add( planet2 );
+
+        planets.push( planet2 );
+        
+
+        var planet3 = new THREE.Mesh(
+          new THREE.IcosahedronGeometry(100,3),
+          new THREE.MeshBasicMaterial({wireframe:true,color:0xaa00ff})
+        );
+
+        planet3.position = new THREE.Vector3( -300 , -300, 500 );
+        planet3.type = 'Friend2'
+        scene.add( planet3 );
+        planets.push( planet3 );
+        
+
+        var planet4 = new THREE.Mesh(
+          new THREE.IcosahedronGeometry(100,3),
+          new THREE.MeshBasicMaterial({wireframe:true,color:0x00ff00})
+        );
+
+        planet4.position = new THREE.Vector3( 300 , 300, 500 );
+        planet4.type = 'Friend3'
+        scene.add( planet4 );
+        planets.push( planet4 );
+
+        objectControls.add( planet1 );
+        objectControls.add( planet2 );
+        objectControls.add( planet3 );
+        objectControls.add( planet4 );
+
+
+
+
         ///riggedSkeleton.addScaledJointMesh( mesh , 'distal' );
 
         groups = [];
 
 
-        var lokiParams = colorSchemes[0];
+        for( var i = 0; i < colorSchemes.length; i++ ){
+          
+          var bait = center.clone();
+          bait.scale.multiplyScalar( 5.3 );
+          //scene.add( bait );
 
-        var bait = center.clone();
-        bait.scale.multiplyScalar( 5.3 );
-        //scene.add( bait );
+          var c = colorSchemes[i];
+          
+          var numOf = c[1]; //+ Math.floor( Math.random() * 10 );
 
-        var c = lokiParams;
-        
-        var numOf = c[5]; //+ Math.floor( Math.random() * 10 );
+          var f = new FurryGroup( c[0] , numOf, {
+            
+            center: center,
+            bait: bait,
+            color1: new THREE.Vector3( c[2].r , c[2].g , c[2].b ),
+            color2: new THREE.Vector3( c[3].r , c[3].g , c[3].b ),
+            color3: new THREE.Vector3( c[4].r , c[4].g , c[4].b ),
+            color4: new THREE.Vector3( c[5].r , c[5].g , c[5].b ),
 
-        var f = new FurryGroup( 'Loki' , numOf, {
+          });
 
-          center: center,
-          bait: bait,
-          color1: new THREE.Vector3( c[0].r , c[0].g , c[0].b ),
-          color2: new THREE.Vector3( c[1].r , c[1].g , c[1].b ),
-          color3: new THREE.Vector3( c[2].r , c[2].g , c[2].b ),
-          color4: new THREE.Vector3( c[3].r , c[3].g , c[3].b ),
-          iriLookup: c[4]
+          groups.push( f );
 
-        });
+        }
 
-        groups.push( f );
-
-
-
-        var friendParams = colorSchemes[1];
-
-        var bait = center.clone();
-        bait.scale.multiplyScalar( 5.3 );
-        //scene.add( bait );
-
-        var c = friendParams;
-        
-        var numOf = c[5]; //+ Math.floor( Math.random() * 10 );
-
-        var f = new FurryGroup( 'Friends' , numOf, {
-
-          center: center,
-          bait: bait,
-          color1: new THREE.Vector3( c[0].r , c[0].g , c[0].b ),
-          color2: new THREE.Vector3( c[1].r , c[1].g , c[1].b ),
-          color3: new THREE.Vector3( c[2].r , c[2].g , c[2].b ),
-          color4: new THREE.Vector3( c[3].r , c[3].g , c[3].b ),
-          iriLookup: c[4]
-
-        });
-
-        groups.push( f );
 
         for( var i = 0; i < groups.length; i++ ){
 
@@ -341,13 +401,33 @@
 
           var fT = furryTails[i];
 
+          for( var j = 0; j < planets.length; j++ ){
+
+            fT.addCollisionForce( planets[j].position , 100 );
+            if( fT.type == planets[j].type ){
+              fT.addDistanceForce( planets[j].position , .00001 );  
+            }
+
+          }
+
           for( var j = 0; j < furryTails.length; j++ ){
 
             var oFT = furryTails[j];
 
             if( i != j ){
-              fT.addDistanceForce( oFT.position , -10000 );
 
+
+              if( oFT.type == fT.type ){
+
+                //fT.addDistanceInverseForce( oFT.position , -10 );
+
+              }else{
+
+               // fT.addNormalForce( oFT.position , .1 );
+
+              }
+
+             
             }
 
           }
