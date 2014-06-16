@@ -174,14 +174,14 @@
       
       
       
-      audioController.mute.gain.value = 0.0;
+      /*audioController.mute.gain.value = 0.0;
 
       var userAudio = new UserAudio( audioController );
       
       userAudio.onStreamCreated = function(){
         init();
         animate();
-      }
+      }*/
 
       var stream = new Stream( '../audio/phuphuphu.mp3' , audioController );
       
@@ -194,6 +194,8 @@
 
       var colors = [];
       var gui = new dat.GUI({});
+
+      gui.close();
 
       var particleSystem;
       var physicsRenderer , uniforms;
@@ -211,11 +213,11 @@
 
       var shaders = new ShaderLoader('../shaders');
 
-      /*shaders.shaderSetLoaded = function(){
+      shaders.shaderSetLoaded = function(){
         init();
         animate();
         stream.play();
-      }*/
+      }
 
       shaders.load( 'fs-spring' , 'render'  , 'fragment'    );
       shaders.load( 'vs-render' , 'render'  , 'vertex'      );
@@ -361,7 +363,10 @@
 
             fT.addCollisionForce( planets[j].position , 100 );
             if( fT.type == planets[j].type ){
-              fT.addDistanceForce( planets[j].position , .00001 );  
+              fT.addDistanceForce( planets[j].position , .00004 );  
+            }else{
+              fT.addDistanceForce( planets[j].position , .00001 );
+
             }
 
           }
@@ -372,16 +377,35 @@
 
             if( i != j ){
 
+              var rand = Math.random();
 
-              if( oFT.type == fT.type ){
+                //fT.addCollisionForce( oFT.position , 100 );
+              
+              if( j %2 == 0 ){
+//fT.addDistanceInverseForce( oFT.position , 100 );
 
-                //fT.addDistanceInverseForce( oFT.position , -10 );
+
+              }else{
+//fT.addDistanceInverseForce( oFT.position , -100 );
+
+
+              }
+
+
+                //fT.addDistanceSquaredForce( oFT.position , .000001 );
+                //fT.addDistanceInverseForce( oFT.position , -1000 );
+              
+              /*if( oFT.type == fT.type ){
+
+                fT.addDistanceInverseForce( oFT.position , -100 );
 
               }else{
 
-               // fT.addNormalForce( oFT.position , .1 );
+                fT.addDistanceForce( oFT.position , .0001 );
+                
+                fT.addNormalForce( oFT.position , -.1 );
 
-              }
+              }*/
 
              
             }

@@ -8,13 +8,16 @@ function Planet( type , color1 , color2 , color3 , color4 ){
   this.color4 = color4;
 
   var tNormal = THREE.ImageUtils.loadTexture( '../img/normals/moss_normal_map.jpg' );
-    
+  tNormal.wrapS = THREE.RepeatWrapping; 
+  tNormal.wrapT = THREE.RepeatWrapping; 
+  console.log( 'TNOMAL');
+  console.log( tNormal );
   this.uniforms = {
 
     lightPos: { type:"v3" , value: center.position },
     tNormal:{type:"t",value:tNormal},
     time:timer,
-
+    t_audio:{ type:"t" , value: audioController.texture },
     color1:{ type:"v3" , value: color1 },
     color2:{ type:"v3" , value: color2 },
     color3:{ type:"v3" , value: color3 },
@@ -33,7 +36,7 @@ function Planet( type , color1 , color2 , color3 , color4 ){
 
   });
 
-  this.geometry = new THREE.IcosahedronGeometry( 100 , 4 );
+  this.geometry = new THREE.IcosahedronGeometry( 100 , 5 );
 
   this.mesh = new THREE.Mesh( this.geometry, this.material );
 
