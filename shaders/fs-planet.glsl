@@ -120,20 +120,17 @@ void main(){
   vec3 c4 = p4;
 
   float s  = snoise( vPos * .0001 );
-  float s1 = snoise( vPos * .004 );
-  float s2 = snoise( vPos * .01 );
-  float s3 = snoise( vPos * .001 );
-  float s4 = snoise( vPos * .007 );
+  //float s1 = snoise( vPos * .004 );
   
 
-  float total = s + s1 + s2 + s3 + s4;
+  float total = s;
 
   total = (cos(total) + 1.)/2.;
 
-  vec3 lookup_table_color = cubicCurve( inverse_dot_view * facingRatio *total, c1 , c2 , c3 , c4 );
+  vec3 lookup_table_color = cubicCurve( inverse_dot_view * facingRatio, c1 , c2 , c3 , c4 );
 
 
-  vec3 aColor = texture2D( t_audio , vec2( inverse_dot_view * facingRatio *total ,0. )).xyz;
+  vec3 aColor = texture2D( t_audio , vec2( inverse_dot_view * facingRatio,0. )).xyz;
 
  // float noise = snoise( normalize(vPos) );
   gl_FragColor = vec4( lookup_table_color * aColor * (vDisplacement*.3+.7)  , 1.0 );

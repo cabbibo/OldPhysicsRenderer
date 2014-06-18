@@ -174,14 +174,14 @@
       
       
       
-      /*audioController.mute.gain.value = 0.0;
+      audioController.mute.gain.value = 0.0;
 
       var userAudio = new UserAudio( audioController );
       
       userAudio.onStreamCreated = function(){
         init();
         animate();
-      }*/
+      }
 
       var stream = new Stream( '../audio/phuphuphu.mp3' , audioController );
       
@@ -213,11 +213,11 @@
 
       var shaders = new ShaderLoader('../shaders');
 
-      shaders.shaderSetLoaded = function(){
+      /*shaders.shaderSetLoaded = function(){
         init();
         animate();
         stream.play();
-      }
+      }*/
 
       shaders.load( 'fs-spring' , 'render'  , 'fragment'    );
       shaders.load( 'vs-render' , 'render'  , 'vertex'      );
