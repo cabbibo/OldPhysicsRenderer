@@ -234,8 +234,6 @@ PosVelSimulation.prototype.render = function ( scene, camera, target ) {
 PosVelSimulation.prototype.pass = function ( shader , target ) {
   this.mesh.material = shader;
 
-  console.log( target );
-  console.log( this.mesh.material );
   this.mesh.material.needsUpdate = true;
 
   this.renderer.render( this.scene, this.camera, target, false );

@@ -20,6 +20,7 @@
 
     <script src="../lib/AudioController.js"></script>
     <script src="../lib/AudioTexture.js"></script>
+    <script src="../lib/LoadedAudio.js"></script>
     <script src="../lib/Stream.js"></script>
     <script src="../lib/UserAudio.js"></script>
     <script src="../lib/underscore.js"></script>
@@ -183,7 +184,7 @@
         animate();
       }
 
-      var stream = new Stream( '../audio/phuphuphu.mp3' , audioController );
+      //var stream = new Stream( '../audio/phuphuphu.mp3' , audioController );
       
       var t_audio = audioController.texture;
       
@@ -213,11 +214,7 @@
 
       var shaders = new ShaderLoader('../shaders');
 
-      /*shaders.shaderSetLoaded = function(){
-        init();
-        animate();
-        stream.play();
-      }*/
+
 
       shaders.load( 'fs-spring' , 'render'  , 'fragment'    );
       shaders.load( 'vs-render' , 'render'  , 'vertex'      );
@@ -238,6 +235,15 @@
       shaders.load( 'vs-text' , 'text'         , 'vertex'    );
       shaders.load( 'fs-text' , 'text'         , 'fragment'  );
       shaders.load( 'fs-textSim'  , 'textPhysics'  , 'simulation');
+
+      
+      /*shaders.shaderSetLoaded = function(){
+        init();
+        animate();
+       // stream.play();
+      }*/
+
+
       
       function init(){
 
@@ -329,7 +335,14 @@
           var col3 = new THREE.Vector3( c[4].r , c[4].g , c[4].b );
           var col4 = new THREE.Vector3( c[5].r , c[5].g , c[5].b );
 
-          var planet = new Planet( c[0] , col1 , col2 , col3 , col4 );
+          console.log( col1 );
+          console.log( col2 );
+          console.log( col3 );
+          console.log( col4 );
+
+          var file = '';
+          if( i == 0 ) file =  '../audio/you.mp3' 
+          var planet = new Planet( c[0] ,  file , col1 , col2 , col3 , col4 );
 
           planets.push( planet );
 

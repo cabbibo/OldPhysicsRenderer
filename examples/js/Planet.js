@@ -1,4 +1,4 @@
-function Planet( type , color1 , color2 , color3 , color4 ){
+function Planet( type ,audio , color1 , color2 , color3 , color4 ){
 
   this.type     = type;
 
@@ -7,11 +7,24 @@ function Planet( type , color1 , color2 , color3 , color4 ){
   this.color3 = color3;
   this.color4 = color4;
 
+  this.audio  = new LoadedAudio( audioController, audio );
+
+  this.audio.onLoad = function(){
+
+    console.log('AHSDAB');
+    console.log( this );
+    //this.play();
+
+  }
+
+ // console.log( shaders );
   var tNormal = THREE.ImageUtils.loadTexture( '../img/normals/moss_normal_map.jpg' );
   tNormal.wrapS = THREE.RepeatWrapping; 
   tNormal.wrapT = THREE.RepeatWrapping; 
   console.log( 'TNOMAL');
   console.log( tNormal );
+  
+  
   this.uniforms = {
 
     lightPos: { type:"v3" , value: center.position },
