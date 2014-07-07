@@ -219,16 +219,16 @@
     
     var geo = new THREE.BufferGeometry();
 
-    geo.addAttribute( 'position', new Float32Array( 38400 * 6 * 3 ) , 3); 
+    geo.addAttribute( 'position', new Float32Array(115200  * 6 * 3 ) , 3); 
 
     var positions = geo.getAttribute( 'position' ).array;
 
 
-    var slices = 16;
+    var slices = 23 * 2;
     var sides   = 10;
 
 
-    var totalNum = size * 4 * (slices-1) * (sides-1);
+  //  var totalNum = size * 4 * (slices-1) * (sides-1);
    
     var TOTAL = 0;
 
@@ -257,6 +257,8 @@
           var yUp = (j/4) + ((k+1) / slices )/4;
 
 
+          //y+= 1/( 4*2 *slices)
+          //yUp+= 1/( 4*2 *slices)
           for( var l = 0; l < sides; l++ ){
 
             var sideIndex = l;
