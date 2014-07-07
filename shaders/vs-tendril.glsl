@@ -70,7 +70,7 @@ void main(){
   float whichRow = floor(uv.y * 4.);
 
   // float base
-  float base = ((uv.y-(whichRow/4.))*4.) * (simSize-2.); 
+  float base = ((uv.y-(whichRow/4.))*4.) * (simSize-1.); 
   float baseUp = floor( base );
   float baseDown = ceil( base );
   float amount = base - baseUp;
@@ -184,7 +184,7 @@ void main(){
   if( baseDown > 9. ){
 
     vHead = 1.;
-    radius = 2. * sqrt(( 14. - base ));
+    radius = 3. * max( 0. , sqrt(( 14. - (base) )));
 
   }
   //if( uv.x < 1. / 64. ){

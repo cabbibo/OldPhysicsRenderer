@@ -104,7 +104,9 @@
         var h = window.innerHeight;
 
         camera = new THREE.PerspectiveCamera( 65 , w/h , 1 , 200000 );
-        camera.position.z = 100;
+        camera.position.z = 200;
+        camera.position.y = -200;
+        camera.position.x = -200;
 
         //controls = new THREE.TrackballControls( camera );
         scene = new THREE.Scene();
@@ -125,9 +127,41 @@
         );
 
 
-        var position = new THREE.Vector3( -100 , -100 , 0 );
-        tendrils = new Tendrils(position);
 
+        repelPosition = new THREE.Vector3();
+        var position = new THREE.Vector3( -100 , -100 , 0 );
+       // tendrils = new Tendrils(position, repelPosition);
+
+        var repelMesh = new THREE.Mesh( 
+          new THREE.IcosahedronGeometry( 10 , 3 ),
+          new THREE.MeshNormalMaterial()
+        );
+
+        repelMesh.position = repelPosition;
+        scene.add( repelMesh );
+
+  
+        tendrils = [];
+
+        var width = 300;
+        for( var i = 0; i < 1; i++ ){
+          for( var j = 0; j < 1; j++ ){
+
+            var x = (i - .5)*width;
+            var y = (j - .5)*width;
+
+            var position = new THREE.Vector3( x , y , 0 );
+
+            var r = Math.random();
+            var g = Math.random();
+            var b = Math.random();
+            var color = new THREE.Vector3( r , g , b );
+            var t = new Tendrils( position , repelPosition ,width,width,color);
+            tendrils.push( t );
+
+
+          }
+        }
         window.addEventListener( 'resize', onResize , false );
         
         document.addEventListener( 'keydown' , function(e){
@@ -169,9 +203,16 @@
         audioController.update();
 
         if( !centerPaused ){
-          tendrils.update();
+
+          for( var i= 0; i< tendrils.length; i++ ){
+            tendrils[i].update();
+          }
         }
 
+
+        repelPosition.x =( Math.sin( timer.value *.1 )) * 100;
+        repelPosition.y =( Math.cos( timer.value *.2 )) * 100;
+        repelPosition.z =( Math.cos( timer.value * .9 ) + 1 ) * 50;
        /* if( !centerPaused ){
 
           center.position.x = Math.sin( timer.value * 1.73 ) * 12;

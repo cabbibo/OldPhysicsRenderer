@@ -12,24 +12,20 @@
 
 
   */
-  function Tendrils(position){
+  function Tendrils( position , repelPosition , width , height, color){
 
-    this.position = position || new THREE.Vector3();
+
+    this.position      = position       || new THREE.Vector3();
+    this.repelPosition = repelPosition  || new THREE.Vector3();
+
+    this.color          = color || new THREE.Vector(1,1,1);
+    this.width          = width || 1000;
+    this.height          = height || 1000;
     this.size = 64;
 
     this.sim = shaders.simulationShaders.tendrilSim;
 
     this.flow = new THREE.Vector3();
-    this.repelPoint = new THREE.Vector3();
-
-    this.repelMesh = new THREE.Mesh(
-        new THREE.IcosahedronGeometry(10),
-        new THREE.MeshNormalMaterial()
-    );
-    
-    this.repelMesh.position = this.repelPoint;
-
-    scene.add( this.repelMesh );
 
     this.startingTexture = this.createStartingTexture();
     
@@ -58,13 +54,13 @@
 
     this.physicsRenderer.setUniform( 'repelPoint' , {
       type:"v3",
-      value:this.repelPoint
+      value:this.repelPosition
     });
 
 
     this.physicsRenderer.setUniform( 'repelRadius' , {
       type:"f",
-      value:20
+      value:100
     });
 
 
@@ -77,7 +73,8 @@
     this.physicsRenderer.setUniform( 'timer'  , timer );
 
     var uniforms = {
-      t_pos:{type:"t",value:null}
+      t_pos:{type:"t",value:null},
+      color:{type:"v3",value:this.color}
     }
 
 
@@ -119,7 +116,7 @@
     scene.add( this.mesh );
 
 
-    this.mesh.frustrumCulling = false;
+    this.mesh.frustumCulled = false;
 
     this.flowMarkerGeo = new THREE.Geometry();
     this.flowMarkerGeo.vertices.push( new THREE.Vector3() );
@@ -146,14 +143,7 @@
 
     this.flow.set( x , y , 0 );
 
-    this.repelPoint.x = 20;
-    this.repelPoint.y = 20;
-    this.repelPoint.z = 20;
-
-    this.repelPoint.x =( Math.sin( timer.value *.3 )) * 100;
-    this.repelPoint.y =( Math.cos( timer.value *.3 )) * 100;
-    this.repelPoint.z =( Math.cos( timer.value * .9 ) + 3 ) * 10;
-    //this.flowMarker.geometry.vertices[1] = this.flow;
+      //this.flowMarker.geometry.vertices[1] = this.flow;
     this.flowMarker.geometry.verticesNeedUpdate = true;
 
     this.physicsRenderer.update();
@@ -231,19 +221,13 @@
     
     var geo = new THREE.BufferGeometry();
 
-    geo.addAttribute( 'position', new Float32Array(412160   * 6 * 3 ) , 3); 
+    geo.addAttribute( 'position', new Float32Array(197120   * 6 * 3 ) , 3); 
 
-    geo.boundingBox =  { 
-      min: new THREE.Vector3(100000 , 100000 , 100000 ), 
-      max: new THREE.Vector3(-100000 , -100000 , -100000)
-    }  
-
-    geo.computeBoundingSphere();
-
+   
     var positions = geo.getAttribute( 'position' ).array;
 
 
-    var slices = 81 * 2;
+    var slices = 77;
     var sides   = 10;
 
 
@@ -368,8 +352,8 @@
         z = slice;
 
         z *= 50;
-        x *= 50;
-        y *= 50;
+        x *= this.width/4;
+        y *= this.height/4;
 
         var index = ( i + (j * this.size)) * 4;
 

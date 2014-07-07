@@ -1,4 +1,6 @@
 
+uniform vec3 color;
+
 varying vec3 vNormal;
 varying vec2 vUv;
 varying float vSlice;
@@ -12,7 +14,7 @@ void main(){
 
   vec3 test =  ( vTest * vAmount);
 
-  vec3 c = vNormal * .75 + (vHead * .25);
+  vec3 c = color * (vNormal*.7+.3) * .75 + (vHead * .25);
   gl_FragColor = vec4( c , 1. );
 
 }
