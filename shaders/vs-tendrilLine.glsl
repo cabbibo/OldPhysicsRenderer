@@ -150,7 +150,7 @@ void main(){
 
   vec3 centerPos = texture2D( t_pos , uv ).xyz;
 
-  point = centerPos + .3 * basisX * x  + .3 * basisY * y;
+  point = centerPos;
   
 
   gl_Position = projectionMatrix * modelViewMatrix * vec4( point , 1.0 );

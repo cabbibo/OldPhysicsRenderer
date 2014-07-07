@@ -18,20 +18,6 @@
 
     this.sim = shaders.simulationShaders.tendrilSim;
 
-    this.flow = new THREE.Vector3();
-    this.repelPoint = new THREE.Vector3();
-
-    this.repelMesh = new THREE.Mesh(
-        new THREE.IcosahedronGeometry(10),
-        new THREE.MeshNormalMaterial()
-    );
-    
-    this.repelMesh.position = this.repelPoint;
-
-    scene.add( this.repelMesh );
-
-    this.startingTexture = this.createStartingTexture();
-    
     this.physicsRenderer = new PhysicsRenderer(
       this.size,
       this.sim,
@@ -43,29 +29,6 @@
       value:audioController.texture
     });
 
-    this.physicsRenderer.setUniform( 't_og' , {
-      type:"t",
-      value:this.startingTexture
-    });
-
-
-    this.physicsRenderer.setUniform( 'flow' , {
-      type:"v3",
-      value:this.flow
-    });
-
-
-    this.physicsRenderer.setUniform( 'repelPoint' , {
-      type:"v3",
-      value:this.repelPoint
-    });
-
-
-    this.physicsRenderer.setUniform( 'repelRadius' , {
-      type:"f",
-      value:20
-    });
-
     this.physicsRenderer.setUniform( 'dT'     , dT    );
     this.physicsRenderer.setUniform( 'timer'  , timer );
 
@@ -74,7 +37,7 @@
     }
 
 
-    var materialLine = new THREE.ShaderMaterial({
+    var material = new THREE.ShaderMaterial({
 
       uniforms:uniforms,
       vertexShader: shaders.vertexShaders.tendrilLine,
@@ -83,66 +46,25 @@
 
     });
 
-    var material = new THREE.ShaderMaterial({
-
-      uniforms:uniforms,
-      vertexShader: shaders.vertexShaders.tendril,
-      fragmentShader: shaders.fragmentShaders.tendril,
-      side:THREE.DoubleSide
-
-    });
-
-
 
     console.log('BEGIN GEO CREATE');
-    var geoLine = this.createLineGeo( this.size );
-    var geo = this.createMeshGeo( this.size );
+    var geo = this.createLineGeo( this.size );
+    console.log('END GEO CREATE');
 
-    this.line = new THREE.Line( geoLine , materialLine , THREE.LinePieces );
-    this.mesh = new THREE.Mesh( geo , material );
+    this.mesh = new THREE.Line( geo , material );
 
     this.physicsRenderer.createDebugScene();
-   // this.physicsRenderer.addDebugScene(scene);
+    this.physicsRenderer.addDebugScene(scene);
 
     this.physicsRenderer.addBoundTexture( this.mesh , 't_pos' , 'output' );
-    scene.add( this.line );
+
+
     scene.add( this.mesh );
-
-
-    this.flowMarkerGeo = new THREE.Geometry();
-    this.flowMarkerGeo.vertices.push( new THREE.Vector3() );
-    this.flowMarkerGeo.vertices.push( this.flow );
-
-    this.flowMarker = new THREE.Line( this.flowMarkerGeo , new THREE.LineBasicMaterial() );
-
-
-    this.physicsRenderer.reset( this.startingTexture );
-
-    scene.add( this.flowMarker );
 
   }
 
 
   Tendrils.prototype.update = function(){
-
-    var r = 50 *  Math.abs( Math.cos( timer.value * .01 ) );
-
-    var x = r * Math.cos( timer.value * 1);
-    var y =0;// r * Math.sin( timer.value * 1);
-
-   // console.log( x );
-
-    this.flow.set( x , y , 0 );
-
-    this.repelPoint.x = 20;
-    this.repelPoint.y = 20;
-    this.repelPoint.z = 20;
-
-    this.repelPoint.x =( Math.sin( timer.value  ) + 1 ) * 20;
-    this.repelPoint.y =( Math.cos( timer.value *.7 ) + 1 ) * 20;
-    this.repelPoint.z =( Math.cos( timer.value * .9 ) + 2 ) * 20;
-    //this.flowMarker.geometry.vertices[1] = this.flow;
-    this.flowMarker.geometry.verticesNeedUpdate = true;
 
     this.physicsRenderer.update();
 
@@ -154,7 +76,7 @@
 
     var geo = new THREE.BufferGeometry();
 
-    geo.addAttribute( 'position', new Float32Array( 3840 * 2 * 3 ) , 3); 
+    geo.addAttribute( 'position', new Float32Array( 3840 * 3 ) , 3); 
 
     var positions = geo.getAttribute( 'position' ).array;
 
@@ -181,22 +103,16 @@
 
           // uv.y lookup into pos
           var y = (j / 4 ) + (k / slices)/4;
-          var yUp = (j / 4 ) + ((k+1) / slices)/4;
-
 
           
           var finalIndex = tendrilIndex * (slices-1);   
           finalIndex += k;
 
-          finalIndex *= 3 * 2;
+          finalIndex *= 3;
 
           positions[ finalIndex + 0  ] =  x;
           positions[ finalIndex + 1  ] =  y;
           positions[ finalIndex + 2  ] =  k;
-
-          positions[ finalIndex + 3  ] =  x;
-          positions[ finalIndex + 4  ] =  yUp;
-          positions[ finalIndex + 5  ] =  k;
 
           TOTAL ++;
 
@@ -279,7 +195,53 @@
             finalIndex += sideIndex * 6;
 
             finalIndex *= 3;
+            //console.log( finalIndex );
+
+
+            /* Debugging */
+
+            /*var centerPointX = (i + (j*size))*100;
+            var centerPointY = 0;
             
+            var theta   = (l / sides ) * 2 * Math.PI;
+            var thetaUp = ((l+1)/sides ) * 2 * Math.PI;
+            
+            var x = centerPointX + 40*Math.cos( theta );
+            var y = centerPointY + 40*Math.sin( theta );
+
+            var xUp = centerPointX + 40*Math.cos( thetaUp );
+            var yUp = centerPointY + 40*Math.sin( thetaUp );
+          
+            z = k * 100;
+            zUp = (k+1) * 100;
+
+            positions[ finalIndex + 0  ] =  x  ;
+            positions[ finalIndex + 1  ] =  y  ;
+            positions[ finalIndex + 2  ] =  z  ;
+           
+            positions[ finalIndex + 3  ] =  xUp;
+            positions[ finalIndex + 4  ] =  yUp;
+            positions[ finalIndex + 5  ] =  z;
+
+            positions[ finalIndex + 6  ] =  xUp;
+            positions[ finalIndex + 7  ] =  yUp;
+            positions[ finalIndex + 8  ] =  zUp;
+
+            positions[ finalIndex + 9  ] =  xUp;
+            positions[ finalIndex + 10 ] =  yUp;
+            positions[ finalIndex + 11 ] =  zUp;
+
+            positions[ finalIndex + 12 ] =  x;
+            positions[ finalIndex + 13 ] =  y;
+            positions[ finalIndex + 14 ] =  zUp;
+  
+            positions[ finalIndex + 15 ] =  x;
+            positions[ finalIndex + 16 ] =  y;
+            positions[ finalIndex + 17 ] =  z;*/
+
+
+           // console.log( finalIndex );
+
             positions[ finalIndex + 0  ] =  x  ;
             positions[ finalIndex + 1  ] =  y  ;
             positions[ finalIndex + 2  ] =  z  ;
@@ -320,62 +282,5 @@
     console.log( TOTAL );
 
     return geo;
-
-  }
-
-  Tendrils.prototype.createStartingTexture = function(){
-
-    var data = new Float32Array( this.size * this.size * 4 );
-
-    for( var i = 0; i < this.size; i++ ) {
-
-      for( var j = 0; j < this.size; j++ ){
-
-
-        var preX = (i/this.size)* 16;
-        var x = Math.floor(preX);
-        var y = Math.floor((j/this.size)* 4);
-
-        var slice = 1 - (((j/this.size) * 4) - y );
-        
-        y -= (preX - x );
-        x /= 4;
-
-        y = (4-y)-.875;
-        x = x;
-
-        z = slice;
-
-        z *= 50;
-        x *= 10;
-        y *= 10;
-
-        var index = ( i + (j * this.size)) * 4;
-
-        data[ index + 0 ] = x;
-        data[ index + 1 ] = y;
-        data[ index + 2 ] = z;
-        data[ index + 3 ] = 0;
-
-
-      }
-
-
-    }
-
-    var positionsTexture = new THREE.DataTexture(
-      data, 
-      this.size, 
-      this.size, 
-      THREE.RGBAFormat, 
-      THREE.FloatType 
-    );
-
-    positionsTexture.minFilter = THREE.NearestFilter;
-    positionsTexture.magFilter = THREE.NearestFilter;
-    positionsTexture.generateMipmaps = false;
-    positionsTexture.needsUpdate = true;
-
-    return positionsTexture;
 
   }
