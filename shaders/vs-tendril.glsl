@@ -7,6 +7,7 @@ varying vec3 vNormal;
 
 varying float vSlice;
 varying float vAmount;
+varying vec3 vTest;
 
 vec3 springForce( vec3 toPos , vec3 fromPos , float staticLength ){
 
@@ -60,7 +61,7 @@ void main(){
 
   vec4 pos = texture2D( t_pos , uv );
 
-  float slices = 23. * 2.;
+ // float slices = 23.;// * 2.;
   float sides  = 10.;
 
   float simSize = 16.;
@@ -72,7 +73,7 @@ void main(){
   float baseUp = floor( base );
   float baseDown = ceil( base );
   float amount = base - baseUp;
-  float rowBase = whichRow / 4.;
+  float rowBase =( whichRow / 4.) +  hSize;
 
   //float slice = ( uv.y - ( whichRow / 4. ) * 4. ) * simSize
   
@@ -86,38 +87,45 @@ void main(){
 
   vec3 p2 = vec3(0.);
 
+  vTest = vec3( 0. , 0. , 0. );
+  // Top
   if( baseUp == 0. ){
 
-    p0 = texture2D( t_pos , vec2( uv.x , hSize + rowBase + ( baseUp / simSize ))).xyz;
-    p1 = texture2D( t_pos , vec2( uv.x , hSize + rowBase + ( baseDown / simSize ))).xyz;
-    p2 = texture2D( t_pos , vec2( uv.x , hSize + rowBase + ((baseDown + 1.) / simSize ))).xyz;
+    vTest = vec3( 1. , 0. , 0. );
+    p0 = texture2D( t_pos , vec2( uv.x , rowBase + ( baseUp / simSize )/4.)).xyz;
+    p1 = texture2D( t_pos , vec2( uv.x , rowBase + ( baseDown / simSize )/4.)).xyz;
+    p2 = texture2D( t_pos , vec2( uv.x , rowBase + ((baseDown + 1.) / simSize )/4.)).xyz;
    
     // v0 = 0
     v1 = .5 * ( p2 - p0 );
 
-  }else if( baseDown == simSize ){
+  // bottom
+  }else if( baseDown == 16. ){
 
-    p0 = texture2D( t_pos , vec2( uv.x , hSize +  rowBase + ( baseUp / simSize )) ).xyz;
-    p1 = texture2D( t_pos , vec2( uv.x , hSize +  rowBase + ( baseDown / simSize ) ) ).xyz;
-    p2 = texture2D( t_pos , vec2( uv.x , hSize +  rowBase + (baseUp - 1. ) / simSize )).xyz;
+    vTest = vec3(0. , 0. , 1. );
+    p0 = texture2D( t_pos , vec2( uv.x , rowBase + ( baseUp / simSize )/4.) ).xyz;
+    p1 = texture2D( t_pos , vec2( uv.x , rowBase + ( (baseDown) / simSize )/4. ) ).xyz;
+    p2 = texture2D( t_pos , vec2( uv.x , rowBase + (baseUp - 1. ) / simSize )/4.).xyz;
        
     // v1 = 0;
     v0 = .5 * ( p1 - p2 );
 
   }else{
 
-    p0 = texture2D( t_pos , vec2( uv.x , hSize +  rowBase + ( baseUp / simSize )) ).xyz;
-    p1 = texture2D( t_pos , vec2( uv.x , hSize +  rowBase + ( baseDown / simSize ) ) ).xyz;
+    vTest = vec3( 0. , 1. , 0. );
+
+    p0 = texture2D( t_pos , vec2( uv.x , rowBase + ( baseUp / simSize )/4.) ).xyz;
+    p1 = texture2D( t_pos , vec2( uv.x , rowBase + ( baseDown / simSize )/4. ) ).xyz;
                                          
     // v0 = 0;
 
-    vec3 pMinus;
+    vec3 pM;
 
-    pMinus = texture2D( t_pos, vec2( uv.x , hSize+ rowBase + ((baseUp -1.) / simSize )) ).xyz;
-    p2 = texture2D( t_pos, vec2( uv.x , hSize +rowBase + ((baseDown + 1.)/ simSize ))).xyz;
+    pM = texture2D( t_pos , vec2( uv.x , rowBase + ((baseUp -1.) / simSize )/4.) ).xyz;
+    p2 = texture2D( t_pos , vec2( uv.x , rowBase + ((baseDown + 1.)/ simSize )/4.)).xyz;
     
     v1 = .5 * ( p2 - p0 );
-    v0 = .5 * ( p1 - pMinus );
+    v0 = .5 * ( p1 - pM );
 
   }
 
@@ -149,8 +157,8 @@ void main(){
   vec3 basisX = normalize( upVectorPerp );
   vec3 basisY = cross( dirNorm , basisX );
 
-  basisX = vec3( 1. , 0. , 0. );
-  basisY = vec3( 0. , 1. , 0. );
+  //basisX = vec3( 1. , 0. , 0. );
+  //basisY = vec3( 0. , 1. , 0. );
 
   float theta = position.z * 2. * 3.14195;
  
@@ -167,15 +175,15 @@ void main(){
   vec3 centerPos = texture2D( t_pos , uv ).xyz;
 
   
-  float radius = .3 * (baseDown-baseUp); //( baseDown - baseUp );// * //amount;
+  float radius = 1. ;//(baseDown-baseUp); //( baseDown - baseUp );// * //amount;
   
   if( uv.x < 1. / 64. ){
-    point = centerPos + radius * basisX * x  + radius * basisY * y;
+    point = centerOfCircle + radius * basisX * x  + radius * basisY * y;
   }else{
     point = vec3(0.);
   }
  
-  vNormal = normalize(point - centerPos);
+  vNormal = normalize(point - centerOfCircle);
 
   gl_Position = projectionMatrix * modelViewMatrix * vec4( point , 1.0 );
 

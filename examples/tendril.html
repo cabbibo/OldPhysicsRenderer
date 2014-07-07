@@ -42,12 +42,12 @@
       
       audioController.mute.gain.value = 0.0;
 
-      var userAudio = new UserAudio( audioController );
+      /*var userAudio = new UserAudio( audioController );
       
       userAudio.onStreamCreated = function(){
         init();
         animate();
-      }
+      }*/
 
       var stream = new Stream( '../../audio/saturnStrobe.mp3' , audioController );
       //stream.play();
@@ -79,9 +79,9 @@
       var shaders = new ShaderLoader('../shaders');
 
       shaders.shaderSetLoaded = function(){
-       /* init();
+        init();
         animate();
-        stream.play();*/
+        //stream.play();
       }
 
       shaders.load( 'vs-tendril' , 'tendril' , 'vertex' );

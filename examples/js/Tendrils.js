@@ -109,6 +109,8 @@
     scene.add( this.mesh );
 
 
+    this.mesh.frustrumCulling = false;
+
     this.flowMarkerGeo = new THREE.Geometry();
     this.flowMarkerGeo.vertices.push( new THREE.Vector3() );
     this.flowMarkerGeo.vertices.push( this.flow );
@@ -219,12 +221,19 @@
     
     var geo = new THREE.BufferGeometry();
 
-    geo.addAttribute( 'position', new Float32Array(115200  * 6 * 3 ) , 3); 
+    geo.addAttribute( 'position', new Float32Array(412160   * 6 * 3 ) , 3); 
+
+    geo.boundingBox =  { 
+      min: new THREE.Vector3(100000 , 100000 , 100000 ), 
+      max: new THREE.Vector3(-100000 , -100000 , -100000)
+    }  
+
+    geo.computeBoundingSphere();
 
     var positions = geo.getAttribute( 'position' ).array;
 
 
-    var slices = 23 * 2;
+    var slices = 81 * 2;
     var sides   = 10;
 
 
@@ -249,7 +258,7 @@
           var sliceIndex = k;
 
           // uv.x lookup into
-          var x = i / size; 
+          var x = (i / size) + ((1/size)/2); 
 
           // uv.y lookup into pos
           var y = (j / 4 ) + (k / slices)/4;
