@@ -12,8 +12,9 @@
 
 
   */
-  function Tendrils(){
+  function Tendrils(position){
 
+    this.position = position || new THREE.Vector3();
     this.size = 64;
 
     this.sim = shaders.simulationShaders.tendrilSim;
@@ -66,6 +67,12 @@
       value:20
     });
 
+
+    this.physicsRenderer.setUniform( 'offset' , {
+      type:"v3",
+      value:this.position
+    });
+
     this.physicsRenderer.setUniform( 'dT'     , dT    );
     this.physicsRenderer.setUniform( 'timer'  , timer );
 
@@ -100,6 +107,9 @@
 
     this.line = new THREE.Line( geoLine , materialLine , THREE.LinePieces );
     this.mesh = new THREE.Mesh( geo , material );
+
+    this.mesh.position = this.position;
+    this.line.position = this.position;
 
     this.physicsRenderer.createDebugScene();
    // this.physicsRenderer.addDebugScene(scene);
@@ -140,9 +150,9 @@
     this.repelPoint.y = 20;
     this.repelPoint.z = 20;
 
-    this.repelPoint.x =( Math.sin( timer.value  ) + 1 ) * 20;
-    this.repelPoint.y =( Math.cos( timer.value *.7 ) + 1 ) * 20;
-    this.repelPoint.z =( Math.cos( timer.value * .9 ) + 2 ) * 20;
+    this.repelPoint.x =( Math.sin( timer.value *.3 )) * 100;
+    this.repelPoint.y =( Math.cos( timer.value *.3 )) * 100;
+    this.repelPoint.z =( Math.cos( timer.value * .9 ) + 3 ) * 10;
     //this.flowMarker.geometry.vertices[1] = this.flow;
     this.flowMarker.geometry.verticesNeedUpdate = true;
 
@@ -253,7 +263,7 @@
         var tendrilIndex = i + ( j * size );
 
         // Each part of tendril column
-        for( var k = 0; k < slices-1; k++ ){
+        for( var k = 0; k < slices; k++ ){
            
           var sliceIndex = k;
 
@@ -261,9 +271,9 @@
           var x = (i / size) + ((1/size)/2); 
 
           // uv.y lookup into pos
-          var y = (j / 4 ) + (k / slices)/4;
+          var y = (j / 4 ) + (k / (slices))/4;
 
-          var yUp = (j/4) + ((k+1) / slices )/4;
+          var yUp = (j/4) + ((k+1) / (slices) )/4;
 
 
           //y+= 1/( 4*2 *slices)
@@ -358,8 +368,8 @@
         z = slice;
 
         z *= 50;
-        x *= 10;
-        y *= 10;
+        x *= 50;
+        y *= 50;
 
         var index = ( i + (j * this.size)) * 4;
 

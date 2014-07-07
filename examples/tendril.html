@@ -125,7 +125,8 @@
         );
 
 
-        tendrils = new Tendrils();
+        var position = new THREE.Vector3( -100 , -100 , 0 );
+        tendrils = new Tendrils(position);
 
         window.addEventListener( 'resize', onResize , false );
         

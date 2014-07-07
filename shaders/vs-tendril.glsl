@@ -8,6 +8,7 @@ varying vec3 vNormal;
 varying float vSlice;
 varying float vAmount;
 varying vec3 vTest;
+varying float vHead;
 
 vec3 springForce( vec3 toPos , vec3 fromPos , float staticLength ){
 
@@ -69,7 +70,7 @@ void main(){
   float whichRow = floor(uv.y * 4.);
 
   // float base
-  float base = ((uv.y-(whichRow/4.))*4.) * simSize; 
+  float base = ((uv.y-(whichRow/4.))*4.) * (simSize-2.); 
   float baseUp = floor( base );
   float baseDown = ceil( base );
   float amount = base - baseUp;
@@ -174,14 +175,23 @@ void main(){
 
   vec3 centerPos = texture2D( t_pos , uv ).xyz;
 
+ 
+
+  float radius = 3.;//(baseDown-baseUp); //( baseDown - baseUp );// * //amount;
+
+  vHead = 0.;
   
-  float radius = 1. ;//(baseDown-baseUp); //( baseDown - baseUp );// * //amount;
-  
-  if( uv.x < 1. / 64. ){
-    point = centerOfCircle + radius * basisX * x  + radius * basisY * y;
-  }else{
-    point = vec3(0.);
+  if( baseDown > 9. ){
+
+    vHead = 1.;
+    radius = 2. * sqrt(( 14. - base ));
+
   }
+  //if( uv.x < 1. / 64. ){
+    point = centerOfCircle + radius * basisX * x  + radius * basisY * y;
+  //}else{
+  //  point = vec3(0.);
+  //}
  
   vNormal = normalize(point - centerOfCircle);
 

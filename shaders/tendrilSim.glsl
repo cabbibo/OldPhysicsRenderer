@@ -7,6 +7,7 @@ uniform float dT;
 uniform float timer;
 
 uniform vec3 flow;
+uniform vec3 offset;
 
 uniform vec3 repelPoint;
 uniform float repelRadius;
@@ -65,6 +66,11 @@ void main(){
   vec3 oPos = texture2D( t_oPos , vUv.xy ).xyz;
   vec3 ogPos = texture2D( t_og , vUv.xy ).xyz;
 
+  vec3 fRepelPoint = repelPoint - offset;
+  /*pos   += offset;
+  oPos  += offset;
+  ogPos += offset;*/
+  
   float column = vUv.x;
 
   vec3 vel = pos.xyz - oPos.xyz;
@@ -108,7 +114,7 @@ void main(){
     //vec3 difDown = posDown - pos;
    // force += difDown/12.;
    
-    force += springForce( pos , posDown , 1. ) * 10.;
+    force += springForce( pos , posDown , 1. ) * 40.;
 
     vec3 dif = ogPos - pos;
 
@@ -118,7 +124,7 @@ void main(){
 
     force += floating * 10.;
 
-    vec3 repelDif = repelPoint - pos;
+    vec3 repelDif = fRepelPoint - pos;
 
     float repelLength = length( repelDif );
 
@@ -134,8 +140,8 @@ void main(){
     vec3 posDown = texture2D( t_pos , vUv.xy - vec2( 0. ,  size ) ).xyz;
     vec3 posUp = texture2D( t_pos , vUv.xy + vec2( 0. , size ) ).xyz;
 
-    force += springForce( pos , posDown , 1. ) * 10.;
-    force += springForce( pos , posUp , 1. ) * 10.;
+    force += springForce( pos , posDown , 1. ) * 40.;
+    force += springForce( pos , posUp , 1. ) * 40.;
     
     //force += springForce( pos , posDown , 0. ) * 10.;
    // force += springForce( pos , posUp , 10. ) * 100.;
@@ -152,7 +158,7 @@ void main(){
 
     force += floating* 10.;
 
-    vec3 repelDif = repelPoint - pos;
+    vec3 repelDif = fRepelPoint - pos;
 
     float repelLength = length( repelDif );
 
