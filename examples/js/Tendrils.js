@@ -72,9 +72,21 @@
     this.physicsRenderer.setUniform( 'dT'     , dT    );
     this.physicsRenderer.setUniform( 'timer'  , timer );
 
+
+    this.normalTexture = THREE.ImageUtils.loadTexture('../img/normals/moss_normal_map.jpg');
+    //this.normalTexture
+    
     var uniforms = {
       t_pos:{type:"t",value:null},
-      color:{type:"v3",value:this.color}
+      color:{type:"v3",value:this.color},
+      lightPos:{type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) },
+      texScale:{type:"f",value:.01},
+      normalScale:{type:"f",value:.5},
+      tNormal:{type:"t",value:this.normalTexture},
+      color1:{type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) },
+      color2:{type:"v3",value:new THREE.Vector3( 0 , 1 , 1 ) },
+      color3:{type:"v3",value:new THREE.Vector3( 1 , .3 , 0 ) },
+      color4:{type:"v3",value:new THREE.Vector3( .5 , 0 , 2 ) },
     }
 
 

@@ -1,6 +1,7 @@
 
-
+uniform sampler2D tNormal;
 uniform sampler2D t_pos;
+uniform vec3 lightPos;
 
 varying vec2 vUv;
 varying vec3 vNormal;
@@ -9,6 +10,15 @@ varying float vSlice;
 varying float vAmount;
 varying vec3 vTest;
 varying float vHead;
+
+varying vec3 vView;
+varying mat3 vNormalMat;
+varying vec3 vLightDir;
+varying vec3 vMVPos;
+
+
+varying vec3 vPos;
+
 
 vec3 springForce( vec3 toPos , vec3 fromPos , float staticLength ){
 
@@ -195,7 +205,19 @@ void main(){
  
   vNormal = normalize(point - centerOfCircle);
 
-  gl_Position = projectionMatrix * modelViewMatrix * vec4( point , 1.0 );
+  vView = modelViewMatrix[3].xyz;
+ // vNormal = normalMatrix *  vNormal ;
+  vNormalMat = normalMatrix;
+
+  vPos = point;
+ 
+  vMVPos = (modelViewMatrix * vec4( vPos , 1.0 )).xyz;
+  vec3 lightDir = normalize( lightPos -  vMVPos );
+
+  vLightDir = lightDir;
+
+
+  gl_Position = projectionMatrix * modelViewMatrix * vec4( vPos , 1.0 );
 
 
 }

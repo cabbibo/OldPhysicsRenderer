@@ -66,6 +66,9 @@ void main(){
   vec3 oPos = texture2D( t_oPos , vUv.xy ).xyz;
   vec3 ogPos = texture2D( t_og , vUv.xy ).xyz;
 
+
+  float upwardsForce = 80000. / ( pos.z * pos.z);
+
   vec3 fRepelPoint = repelPoint - offset;
   /*pos   += offset;
   oPos  += offset;
@@ -122,14 +125,15 @@ void main(){
  
     force += flow * slice * 1.;
 
-    force += floating * 50.;
+    force += floating * upwardsForce;
 
     vec3 repelDif = fRepelPoint - pos;
 
     float repelLength = length( repelDif );
 
     if( repelLength < repelRadius ){
-      force -= normalize( repelDif ) * 1000.;
+      float dis = abs(repelLength - repelRadius);
+      force -= normalize( repelDif ) * 400. * dis;
     }
 
     //gl_FragColor = vec4( posDown , 1. );
@@ -156,26 +160,32 @@ void main(){
    // force += vec3( columnDif.xy * 10. , 0. )*10.;
     force += flow * slice * 1.;
 
-    force += floating* 50.;
+    force += floating * upwardsForce;
 
     vec3 repelDif = fRepelPoint - pos;
 
     float repelLength = length( repelDif );
 
     if( repelLength < repelRadius ){
-      force -= normalize( repelDif ) * 1000.;
+
+      float dis = abs(repelLength - repelRadius);
+      force -= normalize( repelDif ) * 400. * dis;
     }
 
   }
 
  
+  float fDT = dT;
+  if( dT > .1 ){
+    fDT = dT;
+  }
   if( slice <= size4 ){ 
 
     gl_FragColor = vec4( newPos , 1. );
 
   }else{
 
-     vel += force * 10. * dT;
+     vel += force * 10. * fDT;
     //vel *= .97;
 
     if( length( vel ) > maxVel ){
@@ -184,7 +194,7 @@ void main(){
 
     }
     
-    newPos = pos + vel * dT;
+    newPos = pos + vel * fDT;
 
     gl_FragColor = vec4( newPos , 1. );
 
