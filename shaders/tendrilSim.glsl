@@ -8,15 +8,20 @@ uniform float timer;
 
 uniform vec3 flow;
 uniform vec3 offset;
+uniform float uFloatForce;  // multiplier
+uniform float uSpringForce; // multiplier
+uniform float uSpringDist; // multiplier
+uniform float maxVel;
 
-uniform vec3 repelPoint;
-uniform float repelRadius;
+uniform vec3 repelPositions[10];
+uniform vec3 repelVelocities[10];
+uniform float repelRadii[10];
+
 uniform float xySpacing;
 uniform float springDistance;
 
 varying vec2 vUv;
 
-const float maxVel = 20.0;
 
 const vec3 floating = vec3( 0. , 0. , 1. );
 
@@ -45,11 +50,38 @@ vec3 springForce( vec3 p1 , vec3 p2 , float dist ){
 
   float springDif = l - dist;
 
-  vec3 force = norm * springDif;
+  vec3 force = norm * springDif * uSpringForce;
 
   return force;
 
 
+}
+
+vec3 getRepelForce( vec3 p ){
+
+  vec3 repelForce = vec3( 0. );
+  
+  for( int i = 0; i < 10; i++ ){
+
+    vec3 repelPosition = repelPositions[i];
+    vec3 repelVelocity = repelVelocities[i];
+    float repelRadius = repelRadii[i];
+
+    vec3 fRepelPoint = repelPosition + offset;
+
+    vec3 repelDif = fRepelPoint - p;
+
+    float repelLength = length( repelDif );
+
+    if( repelLength < repelRadius ){
+      float dis = abs(repelLength - repelRadius);
+      repelForce -= normalize( repelDif ) * 400. * dis;
+    }
+
+  }
+
+
+  return repelForce;
 
 
 }
@@ -69,7 +101,7 @@ void main(){
 
   float upwardsForce = 80000. / ( pos.z * pos.z);
 
-  vec3 fRepelPoint = repelPoint - offset;
+  //vec3 fRepelPoint = repelPoint - offset;
   /*pos   += offset;
   oPos  += offset;
   ogPos += offset;*/
@@ -117,7 +149,7 @@ void main(){
     //vec3 difDown = posDown - pos;
    // force += difDown/12.;
    
-    force += springForce( pos , posDown , 1. ) * 50.;
+    force += springForce( pos , posDown ,uSpringDist  );
 
     vec3 dif = ogPos - pos;
 
@@ -125,16 +157,9 @@ void main(){
  
     force += flow * slice * 1.;
 
-    force += floating * upwardsForce;
+    force += floating * upwardsForce * uFloatForce;
 
-    vec3 repelDif = fRepelPoint - pos;
-
-    float repelLength = length( repelDif );
-
-    if( repelLength < repelRadius ){
-      float dis = abs(repelLength - repelRadius);
-      force -= normalize( repelDif ) * 400. * dis;
-    }
+    force += getRepelForce( pos );
 
     //gl_FragColor = vec4( posDown , 1. );
 
@@ -144,8 +169,8 @@ void main(){
     vec3 posDown = texture2D( t_pos , vUv.xy - vec2( 0. ,  size ) ).xyz;
     vec3 posUp = texture2D( t_pos , vUv.xy + vec2( 0. , size ) ).xyz;
 
-    force += springForce( pos , posDown , 1. ) * 50.;
-    force += springForce( pos , posUp , 1. ) * 50.;
+    force += springForce( pos , posDown ,uSpringDist  );
+    force += springForce( pos , posUp , uSpringDist );
     
     //force += springForce( pos , posDown , 0. ) * 10.;
    // force += springForce( pos , posUp , 10. ) * 100.;
@@ -160,17 +185,9 @@ void main(){
    // force += vec3( columnDif.xy * 10. , 0. )*10.;
     force += flow * slice * 1.;
 
-    force += floating * upwardsForce;
+    force += floating * upwardsForce * uFloatForce;
 
-    vec3 repelDif = fRepelPoint - pos;
-
-    float repelLength = length( repelDif );
-
-    if( repelLength < repelRadius ){
-
-      float dis = abs(repelLength - repelRadius);
-      force -= normalize( repelDif ) * 400. * dis;
-    }
+    force += getRepelForce( pos );
 
   }
 

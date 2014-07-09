@@ -12,6 +12,8 @@
     <div id="container"></div>
 
 
+    <script src="../lib/leap.js"></script>
+    
     <script src="../lib/three.js"></script>
     <script src="../lib/jquery.min.js"></script>
     <script src="../lib/TrackballControls.js"></script>
@@ -24,15 +26,40 @@
     <script src="../lib/UserAudio.js"></script>
     <script src="../lib/underscore.js"></script>
 
+
     <script src="../ParticleUtils.js"></script>
     <script src="../PhysicsRenderer.js"></script>
 
+    <script src="js/createLineGeo.js"></script>
 
+    <script src="js/FurryGroup.js"></script>
+    <script src="js/FurryTail.js"></script>
+    <script src="js/Cloth.js"></script>
     <script src="js/Tendrils.js"></script>
+    <script src="js/Monome.js"></script>
+
+    <script src="js/initTextParticles.js"></script>
+    <script src="js/initRiggedSkeleton.js"></script>
 
 
-     <script>
+    <script src="../lib/TextParticles.js"></script>
 
+    <script src="../lib/ObjectControls.js"></script>
+    <script src="../lib/RiggedSkeleton.js"></script>
+    <script src="../lib/Looper.js"></script>
+
+    <script>
+
+      var colorScheme = [ 
+       
+        'Loki',
+        10,
+        new THREE.Color( '#1157ff' ),
+        new THREE.Color( '#00a4ff' ),
+        new THREE.Color( '#5e2dff' ),
+        new THREE.Color( '#00fff0' ),
+        
+      ];
 
       var centerPaused, movementPaused , physicsPaused = false;
 
@@ -42,14 +69,14 @@
       
       audioController.mute.gain.value = 0.0;
 
-      /*var userAudio = new UserAudio( audioController );
+      var userAudio = new UserAudio( audioController );
       
       userAudio.onStreamCreated = function(){
         init();
         animate();
-      }*/
+      }
 
-      var stream = new Stream( '../../audio/saturnStrobe.mp3' , audioController );
+      //var stream = new Stream( '../../audio/saturnStrobe.mp3' , audioController );
       //stream.play();
 
 
@@ -67,20 +94,39 @@
       var particleSystem;
       var physicsRenderer , uniforms;
 
+      var furryTails = [];
       var leader;
 
       var dT = { type:"f" , value:0 }
 
       var timer = { type:"f" , value:0 };
 
-      var furryTails = [];
-      var cloth;
+      var tendrils;
+
+
+      var looper = new Looper( audioController , timer , {
+
+        beatsPerMinute: 122,
+        beatsPerMeasure: 1,
+        measuresPerLoop: 16
+    
+      });
+
+      looper.onNewMeasure = function(){
+
+       // console.log( this.relativeMeasure );
+       // console.log('hello');
+
+       console.log('asags');
+
+       tendrils.updateBases( this.relativeMeasure );
+      }
 
       var shaders = new ShaderLoader('../shaders');
 
       shaders.shaderSetLoaded = function(){
-        init();
-        animate();
+        //init();
+        //animate();
         //stream.play();
       }
 
@@ -91,6 +137,34 @@
       shaders.load( 'fs-tendrilLine' , 'tendrilLine' , 'fragment' );
 
       shaders.load( 'tendrilSim'  , 'tendrilSim' , 'simulation'  );
+
+      shaders.load( 'fs-spring' , 'render'  , 'fragment'    );
+      shaders.load( 'vs-render' , 'render'  , 'vertex'      );
+      shaders.load( 'tailSim'   , 'tailSim' , 'simulation'  );
+      shaders.load( 'jellySim'  , 'jellySim' , 'simulation'  );
+      shaders.load( 'fs-lineRender' , 'lineRender' , 'fragment' );
+      shaders.load( 'vs-lineRender' , 'lineRender' , 'vertex' );
+      shaders.load( 'vs-iri' , 'iri' , 'vertex' );
+      shaders.load( 'fs-iri' , 'iri' , 'fragment' );
+      shaders.load( 'vs-jelly' , 'jelly' , 'vertex' );
+      shaders.load( 'fs-jelly' , 'jelly' , 'fragment' );
+
+      shaders.load( 'fs-planet' , 'planet' , 'fragment' );
+      shaders.load( 'vs-planet' , 'planet' , 'vertex' );
+
+
+      // TEXT
+      shaders.load( 'vs-text' , 'text'         , 'vertex'    );
+      shaders.load( 'fs-text' , 'text'         , 'fragment'  );
+      shaders.load( 'fs-textSim'  , 'textPhysics'  , 'simulation');
+
+
+      var repelObjects    = [];
+      var repelPositions  = [];
+      var repelVelocities = [];
+      var repelRadii      = [];
+
+      var groups = [];
 
       function init(){
 
@@ -105,8 +179,6 @@
 
         camera = new THREE.PerspectiveCamera( 65 , w/h , 1 , 200000 );
         camera.position.z = 200;
-        camera.position.y = -200;
-        camera.position.x = -200;
 
         //controls = new THREE.TrackballControls( camera );
         scene = new THREE.Scene();
@@ -126,42 +198,88 @@
           new THREE.MeshNormalMaterial()
         );
 
+        controller = new Leap.Controller();
+        controller.connect();
 
-
-        repelPosition = new THREE.Vector3();
-        var position = new THREE.Vector3( -100 , -100 , 0 );
-       // tendrils = new Tendrils(position, repelPosition);
-
-        var repelMesh = new THREE.Mesh( 
-          new THREE.IcosahedronGeometry( 10 , 3 ),
-          new THREE.MeshNormalMaterial()
+        initRiggedSkeleton( center );
+        objectControls = new ObjectControls( 
+          camera , 
+          riggedSkeleton.hand , 
+          riggedSkeleton1.hand , 
+          controller , 
+          {
+            indicator : center     
+          }
         );
 
-        repelMesh.position = repelPosition;
-        scene.add( repelMesh );
 
+
+        for( var i = 0; i< 10; i++ ){
+
+          var repelObject = {}
+
+          repelObject.mesh = center.clone();
+          repelObject.velocity = new THREE.Vector3();
+          repelObject.position = new THREE.Vector3(
+            (Math.random() -.5 ) * 5000,
+            (Math.random() -.5 ) * 5000,
+            Math.random() * 1000
+          );
+          repelObject.mesh.position = repelObject.position;
   
-        tendrils = [];
+          repelObject.radius = 600;
 
-        var width = 300;
-        for( var i = 0; i < 1; i++ ){
-          for( var j = 0; j < 1; j++ ){
+          repelPositions.push(  repelObject.position );
+          repelVelocities.push( repelObject.velocity );
+          repelRadii.push(      repelObject.radius );
 
-            var x = (i - .5)*width;
-            var y = (j - .5)*width;
+          repelObjects.push( repelObject );
 
-            var position = new THREE.Vector3( x , y , 0 );
+          scene.add( repelObject.mesh );
 
-            var r = Math.random();
-            var g = Math.random();
-            var b = Math.random();
-            var color = new THREE.Vector3( r , g , b );
-            var t = new Tendrils( position , repelPosition ,width,width,color);
-            tendrils.push( t );
-
-
-          }
         }
+
+       /* var c = colorScheme;
+
+        var numOf = c[1]; //+ Math.floor( Math.random() * 10 );
+
+        var col1 = new THREE.Vector3( c[2].r , c[2].g , c[2].b );
+        var col2 = new THREE.Vector3( c[3].r , c[3].g , c[3].b );
+        var col3 = new THREE.Vector3( c[4].r , c[4].g , c[4].b );
+        var col4 = new THREE.Vector3( c[5].r , c[5].g , c[5].b );
+
+        furryGroup = new FurryGroup( c[0] , 1 , {
+            
+          center: center,
+          bait:   center.clone(),
+          color1: col1,
+          color2: col2,
+          color3: col3,
+          color4: col4,
+
+        });
+
+        furryGroup.updateBrethren();        
+
+        console.log('ashasss');
+        console.log( furryTails );
+
+        furryTails[0].addDistanceSquaredForce( riggedSkeleton.hand.position , 100 );
+*/
+        tendrils = new Tendrils({
+          position:new THREE.Vector3(),
+          repelPositions: repelPositions,
+          repelVelocities: repelVelocities,
+          repelRadii: repelRadii,
+          width: 5000,
+          height: 5000,
+          girth: 50,
+        });
+
+        tendrils.activate();
+
+        looper.start();
+    
         window.addEventListener( 'resize', onResize , false );
         
         document.addEventListener( 'keydown' , function(e){
@@ -203,16 +321,54 @@
         audioController.update();
 
         if( !centerPaused ){
-
-          for( var i= 0; i< tendrils.length; i++ ){
-            tendrils[i].update();
-          }
+          tendrils.update();
         }
 
 
-        repelPosition.x =( Math.sin( timer.value *.1 )) * 100;
-        repelPosition.y =( Math.cos( timer.value *.2 )) * 100;
-        repelPosition.z =( Math.cos( timer.value * .9 ) + 1 ) * 50;
+        riggedSkeleton.update();
+        riggedSkeleton1.update();
+
+        for( var i = 0; i < furryTails.length; i++ ){
+
+        //  console.log('asas');
+         // var furryTail = furryTails[i];
+        //  furryTail.updateTail();
+
+        //  furryTail.updatePhysics();
+        }
+
+
+
+
+        for( var i = 0; i < repelObjects.length; i++ ){
+
+          var rO = repelObjects[i];
+
+          var force = new THREE.Vector3();
+
+
+          for( var j = 0; j < repelObjects.length; j++ ){
+            if( j != i ){
+
+
+
+
+            }
+          }
+
+
+
+
+
+          rO.velocity.add( force );
+
+          rO.position.add( rO.velocity );
+          rO.velocity.multiplyScalar( .9 );
+
+
+        }
+
+
        /* if( !centerPaused ){
 
           center.position.x = Math.sin( timer.value * 1.73 ) * 12;
@@ -229,7 +385,7 @@
 
       }
 
-       function onResize() {
+      function onResize() {
         windowHalfX = window.innerWidth / 2;
         windowHalfY = window.innerHeight / 2;
         camera.aspect = window.innerWidth / window.innerHeight;

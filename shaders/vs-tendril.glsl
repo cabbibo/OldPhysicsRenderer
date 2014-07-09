@@ -2,6 +2,7 @@
 uniform sampler2D tNormal;
 uniform sampler2D t_pos;
 uniform vec3 lightPos;
+uniform float girth;
 
 varying vec2 vUv;
 varying vec3 vNormal;
@@ -187,14 +188,14 @@ void main(){
 
  
 
-  float radius = 3.;//(baseDown-baseUp); //( baseDown - baseUp );// * //amount;
+  float radius = girth;//(baseDown-baseUp); //( baseDown - baseUp );// * //amount;
 
   vHead = 0.;
   
   if( baseDown > 9. ){
 
     vHead = 1.;
-    radius = 3. * max( 0. , sqrt(( 14. - (base) )));
+    radius = girth * max( 0. , sqrt(( 14. - (base) )));
 
   }
   //if( uv.x < 1. / 64. ){

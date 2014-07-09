@@ -1,5 +1,5 @@
 
-uniform vec3 color;
+//uniform vec3 color;
 
 uniform sampler2D   tIri;
 uniform sampler2D tNormal;
@@ -62,9 +62,9 @@ void main(){
   vec2 coord2 = vPos.zx * texScale;
   vec2 coord3 = vPos.xy * texScale;
 
-  vec3 bump1 = texture2D( tNormal , coord1/* + vec2( time * .1 , time * .2 )   */   ).rgb;  
-  vec3 bump2 = texture2D( tNormal , coord2/* + vec2( time * .13 , time * .083 )*/   ).rgb;  
-  vec3 bump3 = texture2D( tNormal , coord3/* + vec2( time * .05 , time * .15 ) */   ).rgb; 
+  vec3 bump1 = texture2D( tNormal , coord1 ).rgb;  
+  vec3 bump2 = texture2D( tNormal , coord2  ).rgb;  
+  vec3 bump3 = texture2D( tNormal , coord3  ).rgb; 
 
   vec3 blended_bump = bump1 * blend_weights.xxx +  
                       bump2 * blend_weights.yyy +  
@@ -128,14 +128,16 @@ void main(){
   vec3 lookup_table_color = cubicCurve( inverse_dot_view * facingRatio, c1 , c2 , c3 , c4 );
 
 
-  vec3 aColor = texture2D( tNormal , vec2( inverse_dot_view * facingRatio,0. )).xyz;
+  vec3 aColor = texture2D( t_audio , vec2( inverse_dot_view * (1.-facingRatio) ,0. )).xyz;
 
 
   //gl_FragColor = vec4( vAmount , 0. , vSlice / 16. , 1. );
 
   vec3 test =  ( vTest * vAmount);
 
-  vec3 c = color * (vNormal*.7+.3) * .75 + (vHead * .25);
-  gl_FragColor = vec4(  lookup_table_color * aColor  * .75 + (vHead * .25) , 1. );
+  vec3 c =  (vNormal*.7+.3) * .75 + (vHead * .25);
+  gl_FragColor = vec4(  lookup_table_color * aColor * aColor  * .75 + (vHead * .25) , 1. );
+ // gl_FragColor = vec4(  aColor , 1. );
+  //gl_FragColor = vec4(  aColor , 1. );
 
 }
