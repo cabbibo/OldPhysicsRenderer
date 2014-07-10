@@ -4,7 +4,6 @@
 uniform sampler2D   tIri;
 uniform sampler2D tNormal;
 uniform sampler2D t_audio;
-uniform sampler2D t_active;
 uniform vec3 lightPos;
 
 uniform vec3 color1;
@@ -13,7 +12,6 @@ uniform vec3 color3;
 uniform vec3 color4;
 
 
-varying vec2 vActiveLookup;
 varying vec3 vNormal;
 varying vec2 vUv;
 varying float vSlice;
@@ -137,21 +135,9 @@ void main(){
 
   vec3 test =  ( vTest * vAmount);
 
-  vec4 active = texture2D( t_active , vActiveLookup );
   vec3 c =  (vNormal*.7+.3) * .75 + (vHead * .25);
-
-  float hovered = active.z;
-  float selected = active.y;
-  float playing = active.x;
-  float current = active.a;
-
-  c += hovered * color1;
-  c += selected * color2;
-  c += playing * color3;
-  c += current * color4;
-
   //gl_FragColor = vec4( lookup_table_color * aColor  * .75 + (vHead * .25) , 1. );
  // gl_FragColor = vec4(  aColor , 1. );
-  gl_FragColor = vec4( c , 1. );
+  gl_FragColor = vec4( vNormal , 1. );
 
 }

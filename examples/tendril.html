@@ -3,6 +3,8 @@
 
   <head>
     <style>
+      html{background:#000}
+      #loading{ color:#fff; }
       #container{ position:absolute; left:0px; top:0px; z-index:0; width:100%; height:100%; display:block; overflow:hidden}
       body{ margin:0px; }
     </style>
@@ -10,7 +12,8 @@
 
   <body>
     <div id="container"></div>
-
+    <div id="loading"> LOADING</div>
+    
 
     <script src="../lib/leap.js"></script>
     
@@ -22,6 +25,7 @@
 
     <script src="../lib/AudioController.js"></script>
     <script src="../lib/AudioTexture.js"></script>
+    <script src="../lib/LoadedAudio.js"></script>
     <script src="../lib/Stream.js"></script>
     <script src="../lib/UserAudio.js"></script>
     <script src="../lib/underscore.js"></script>
@@ -38,6 +42,7 @@
     <script src="js/Tendrils.js"></script>
     <script src="js/Monome.js"></script>
 
+    <script src="js/mechanics.js"></script>
     <script src="js/initTextParticles.js"></script>
     <script src="js/initRiggedSkeleton.js"></script>
 
@@ -59,28 +64,71 @@
         new THREE.Color( '#5e2dff' ),
         new THREE.Color( '#00fff0' ),
         
-      ];
+        ];
+
+      var TMP_VECTOR = new THREE.Vector3();
+
+      var FLOOR_INTERSECT = new THREE.Vector3();
+
+      var MAX_VEL = 50;
 
       var centerPaused, movementPaused , physicsPaused = false;
 
       var audioController = new AudioController();
       
+
+      var LOADED = 0;
+      var NEEDED_TO_LOAD = 18;
       
-      
-      audioController.mute.gain.value = 0.0;
+      /*audioController.mute.gain.value = 0.0;
 
       var userAudio = new UserAudio( audioController );
       
       userAudio.onStreamCreated = function(){
         init();
         animate();
-      }
+      }*/
 
       //var stream = new Stream( '../../audio/saturnStrobe.mp3' , audioController );
       //stream.play();
 
 
+      var la = LoadedAudio;
+      var ac = audioController;
+
+      var notes = [
+  
+      '../../audio/notes/bolloning/bolloning1.mp3',
+      '../../audio/notes/bolloning/bolloning2.mp3',
+      '../../audio/notes/bolloning/bolloning3.mp3',
       
+      '../../audio/notes/bolloning/wait1.mp3',
+      '../../audio/notes/bolloning/wait2.mp3',
+      '../../audio/notes/bolloning/wait3.mp3',
+      '../../audio/notes/bolloning/wait4.mp3',
+      
+      '../../audio/notes/bolloning/drumz1.mp3',
+      '../../audio/notes/bolloning/drumz2.mp3',
+      '../../audio/notes/bolloning/drumz3.mp3',
+      '../../audio/notes/bolloning/drumz4.mp3',
+      '../../audio/notes/bolloning/drumz5.mp3',
+      '../../audio/notes/bolloning/drumz6.mp3',
+      '../../audio/notes/bolloning/drumz7.mp3',
+      '../../audio/notes/bolloning/drumz8.mp3',
+      '../../audio/notes/bolloning/drumz9.mp3',
+      '../../audio/notes/bolloning/drumz10.mp3',
+
+      ];
+
+      for( var i = 0; i < notes.length; i++ ){
+
+        var note = new la( ac , notes[i] );
+        note.onLoad = function(){ ADD_LOAD(); }
+        MONOME_NOTES.push( note );
+
+      }
+      
+
       var t_audio = audioController.texture;
       console.log( t_audio );
       
@@ -106,28 +154,24 @@
 
       var looper = new Looper( audioController , timer , {
 
-        beatsPerMinute: 122,
+        beatsPerMinute: 280,
         beatsPerMeasure: 1,
         measuresPerLoop: 16
     
       });
 
       looper.onNewMeasure = function(){
-
-       // console.log( this.relativeMeasure );
-       // console.log('hello');
-
-       console.log('asags');
-
        tendrils.updateBases( this.relativeMeasure );
       }
 
       var shaders = new ShaderLoader('../shaders');
 
       shaders.shaderSetLoaded = function(){
-        //init();
-        //animate();
-        //stream.play();
+       // init();
+       // animate();
+       //stream.play();
+
+       ADD_LOAD();
       }
 
       shaders.load( 'vs-tendril' , 'tendril' , 'vertex' );
@@ -178,7 +222,7 @@
         var h = window.innerHeight;
 
         camera = new THREE.PerspectiveCamera( 65 , w/h , 1 , 200000 );
-        camera.position.z = 200;
+        camera.position.z = 1000;
 
         //controls = new THREE.TrackballControls( camera );
         scene = new THREE.Scene();
@@ -189,22 +233,25 @@
         renderer.setSize( window.innerWidth, window.innerHeight );
 
         var container = document.getElementById('container' );
-        controls = new THREE.TrackballControls( camera , container );
+        //controls = new THREE.TrackballControls( camera , container );
         container.appendChild( renderer.domElement );
 
-
-        center = new THREE.Mesh( 
-          new THREE.IcosahedronGeometry( 10 , 0 ),
-          new THREE.MeshNormalMaterial()
-        );
 
         controller = new Leap.Controller();
         controller.connect();
 
+         center = new THREE.Mesh( 
+          new THREE.IcosahedronGeometry( 10 , 0 ),
+          new THREE.MeshNormalMaterial()
+        );
+
+
         initRiggedSkeleton( center );
+        initMechanics();
+
         objectControls = new ObjectControls( 
           camera , 
-          riggedSkeleton.hand , 
+          mouse, 
           riggedSkeleton1.hand , 
           controller , 
           {
@@ -213,8 +260,31 @@
         );
 
 
+        floor = new THREE.Mesh(
+          new THREE.PlaneGeometry( 50000 , 50000 ),
+          new THREE.MeshNormalMaterial()
+        );
 
-        for( var i = 0; i< 10; i++ ){
+        floor.position.z = 500;
+        floor.visible = false;
+        scene.add( floor );
+
+        floorIntersectMarker =  new THREE.Mesh(
+          new THREE.CubeGeometry( 1 , 1 , 100 ),
+          new THREE.MeshBasicMaterial({color:0xffffff})
+        );
+
+        floorIntersectMarker.position = FLOOR_INTERSECT;
+
+        scene.add( floorIntersectMarker );
+
+        center = new THREE.Mesh( 
+          new THREE.IcosahedronGeometry( 50 , 0 ),
+          new THREE.MeshBasicMaterial()
+        );
+
+
+        for( var i = 0; i< 9; i++ ){
 
           var repelObject = {}
 
@@ -227,7 +297,7 @@
           );
           repelObject.mesh.position = repelObject.position;
   
-          repelObject.radius = 600;
+          repelObject.radius = 200;
 
           repelPositions.push(  repelObject.position );
           repelVelocities.push( repelObject.velocity );
@@ -239,7 +309,7 @@
 
         }
 
-       /* var c = colorScheme;
+        var c = colorScheme;
 
         var numOf = c[1]; //+ Math.floor( Math.random() * 10 );
 
@@ -262,18 +332,29 @@
         furryGroup.updateBrethren();        
 
         console.log('ashasss');
-        console.log( furryTails );
+        console.log( furryTails[0] );
 
-        furryTails[0].addDistanceSquaredForce( riggedSkeleton.hand.position , 100 );
-*/
+        furryTails[0].addDistanceSquaredForce( FLOOR_INTERSECT , 100 );
+
+        repelPositions.push(  furryTails[0].position );
+        repelVelocities.push(  furryTails[0].velocity );
+        repelRadii.push(  200 );
+
+
         tendrils = new Tendrils({
           position:new THREE.Vector3(),
           repelPositions: repelPositions,
           repelVelocities: repelVelocities,
           repelRadii: repelRadii,
-          width: 5000,
-          height: 5000,
-          girth: 50,
+          width: 1000,
+          height: 1000,
+          girth: 5,
+          repelMultiplier:10,
+          flowMultiplier:400,
+          floatForce: 100,
+          springDist: 30,
+          maxVel: 600,
+          baseGeo: new THREE.CubeGeometry( 50 , 50, 50 )
         });
 
         tendrils.activate();
@@ -320,24 +401,36 @@
 
         audioController.update();
 
+        updateMechanics( dT.value );
+
+        floorIntersectMarker.lookAt( camera.position );
         if( !centerPaused ){
           tendrils.update();
+
+            for( var i = 0; i < furryTails.length; i++ ){
+
+        //  console.log('asas');
+          var furryTail = furryTails[i];
+          furryTail.updateTail();
+
+          furryTail.updatePhysics();
+        }
+
+
+
         }
 
 
         riggedSkeleton.update();
         riggedSkeleton1.update();
-
-        for( var i = 0; i < furryTails.length; i++ ){
-
-        //  console.log('asas');
-         // var furryTail = furryTails[i];
-        //  furryTail.updateTail();
-
-        //  furryTail.updatePhysics();
-        }
+        objectControls.update();
 
 
+
+
+
+        //TMP_VECTOR.set( 0,0,100);
+        //var attractPoint = FLOOR_INTERSECT.clone().add( TMP_VECTOR );
 
 
         for( var i = 0; i < repelObjects.length; i++ ){
@@ -347,23 +440,43 @@
           var force = new THREE.Vector3();
 
 
+          
           for( var j = 0; j < repelObjects.length; j++ ){
             if( j != i ){
 
 
+              var rO1 = repelObjects[j];
+
+              TMP_VECTOR.copy( rO.position );
+              TMP_VECTOR.sub( rO1.position );
+
+              var l = TMP_VECTOR.length();
+              TMP_VECTOR.normalize();
+
+              TMP_VECTOR.multiplyScalar( l - 400 );
+              force.sub( TMP_VECTOR.multiplyScalar( .001) );
+              //var dif =  
 
 
             }
           }
 
+          TMP_VECTOR.copy( rO.position );
+          TMP_VECTOR.sub( FLOOR_INTERSECT );
+          force.sub(TMP_VECTOR.multiplyScalar( .0001 ) );
 
 
 
 
           rO.velocity.add( force );
 
+          if( rO.velocity.length() > MAX_VEL ){
+
+            rO.velocity.normalize().multiplyScalar( MAX_VEL );
+
+          }
           rO.position.add( rO.velocity );
-          rO.velocity.multiplyScalar( .9 );
+          //rO.velocity.multiplyScalar( .9999 );
 
 
         }
@@ -379,8 +492,10 @@
 
         //physicsRenderer.update();
 
+        
         requestAnimationFrame( animate );
-        controls.update();
+        //controls.update();
+        
         renderer.render( scene , camera );
 
       }
@@ -394,6 +509,24 @@
       }
 
 
+      function ADD_LOAD(){
+
+        LOADED ++;
+
+        console.log( LOADED );
+        console.log( NEEDED_TO_LOAD );
+
+        var div = document.getElementById('loading');
+
+        div.innerHTML = 'LOADING ' + LOADED + ' / ' + NEEDED_TO_LOAD;
+        if( LOADED === NEEDED_TO_LOAD ){
+
+          init();
+          animate();
+
+        }
+
+      }
 
     </script>
 

@@ -16,7 +16,7 @@ varying vec3 vView;
 varying mat3 vNormalMat;
 varying vec3 vLightDir;
 varying vec3 vMVPos;
-
+varying vec2 vActiveLookup;
 
 varying vec3 vPos;
 
@@ -89,6 +89,18 @@ void main(){
 
   //float slice = ( uv.y - ( whichRow / 4. ) * 4. ) * simSize
   
+  float indexRow = floor(( 1. - uv.y) * 4. );
+  float tendrilIndex = floor( uv.x * 64. ) + ( indexRow*64. );
+
+
+ 
+  float lookupX = mod( tendrilIndex , 16. ) / 16.;
+  float lookupY = 1.- ceil( (tendrilIndex+.5) / 16. ) / 16.;
+
+  lookupX += .5/16.;
+  lookupY += .5/16.;
+    
+  vActiveLookup = vec2( lookupX , lookupY );
   vAmount = amount;
   vSlice = base; 
 

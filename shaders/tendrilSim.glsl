@@ -8,9 +8,12 @@ uniform float timer;
 
 uniform vec3 flow;
 uniform vec3 offset;
+uniform float uFlowMultiplier;  // multiplier
 uniform float uFloatForce;  // multiplier
 uniform float uSpringForce; // multiplier
 uniform float uSpringDist; // multiplier
+uniform float uRepelMultiplier; // multiplier
+uniform float uDampening; // multiplier
 uniform float maxVel;
 
 uniform vec3 repelPositions[10];
@@ -75,7 +78,7 @@ vec3 getRepelForce( vec3 p ){
 
     if( repelLength < repelRadius ){
       float dis = abs(repelLength - repelRadius);
-      repelForce -= normalize( repelDif ) * 400. * dis;
+      repelForce -= normalize( repelDif ) * dis * uRepelMultiplier;
     }
 
   }
@@ -155,7 +158,7 @@ void main(){
 
    // force += normalize( dif ) * 30.;
  
-    force += flow * slice * 1.;
+    force += flow * slice * uFlowMultiplier;
 
     force += floating * upwardsForce * uFloatForce;
 
@@ -183,7 +186,7 @@ void main(){
 
 //    vec3 columnDif = vec3( x , y , 0 ) - pos;
    // force += vec3( columnDif.xy * 10. , 0. )*10.;
-    force += flow * slice * 1.;
+    force += flow * slice * uFlowMultiplier;
 
     force += floating * upwardsForce * uFloatForce;
 
@@ -194,7 +197,7 @@ void main(){
  
   float fDT = dT;
   if( dT > .1 ){
-    fDT = dT;
+    fDT = .1;
   }
   if( slice <= size4 ){ 
 
@@ -203,7 +206,7 @@ void main(){
   }else{
 
      vel += force * 10. * fDT;
-    //vel *= .97;
+    vel *= uDampening;
 
     if( length( vel ) > maxVel ){
 

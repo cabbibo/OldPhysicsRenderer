@@ -45,9 +45,12 @@
       height:1000,
       girth: 50,
       floatForce: 1000,
-      springForce: 100.5,
+      springForce: 100,
       springDist: 40,
+      repelMultiplier: 1,
+      flowMultiplier: 0,
       maxVel:200,
+      dampening:.96,
       baseGeo: new THREE.BoxGeometry( 200 , 200 , 200 ),
       baseMat: new THREE.MeshNormalMaterial()
       
@@ -71,9 +74,8 @@
         
     this.bases = this.createBases();
 
-    console.log('ABSSs');
-    console.log( this.bases );
-    this.startingTexture = this.createStartingTexture();
+    this.startingTexture  = this.createStartingTexture();
+    this.activeTexture    = this.createActiveTexture();
     
     this.physicsRenderer = new PhysicsRenderer(
       this.size,
@@ -81,6 +83,8 @@
       renderer
     );
 
+
+    var physicsGui = gui.addFolder('Tendril Sim' );
     this.physicsRenderer.setUniform( 't_audio' ,{
       type:"t",
       value:t_audio
@@ -120,25 +124,32 @@
       value:this.position
     });
 
-    this.physicsRenderer.setUniform( 'uFloatForce' , {
-      type:"f",
-      value:this.params.floatForce
-    });
+    var repelMultiplier = { type:"f" , value: this.params.repelMultiplier }
+    var flowMultiplier = { type:"f" , value: this.params.flowMultiplier }
+    var floatForce ={ type:"f", value:this.params.floatForce }
+    var springForce = { type:"f", value:this.params.springForce  }
+    var springDist = { type:"f",  value:this.params.springDist   }
+    var maxVel = { type:"f" , value:this.params.maxVel }
+    var dampening = { type:"f" , value:this.params.dampening }
+    
+    
+    this.physicsRenderer.setUniform( 'uRepelMultiplier' , repelMultiplier );
+    this.physicsRenderer.setUniform( 'uFlowMultiplier' , flowMultiplier );
+    this.physicsRenderer.setUniform( 'uFloatForce' , floatForce );
+    this.physicsRenderer.setUniform( 'uSpringForce' , springForce);
+    this.physicsRenderer.setUniform( 'uSpringDist' , springDist );
+    this.physicsRenderer.setUniform( 'maxVel' , maxVel );
+    this.physicsRenderer.setUniform( 'uDampening' , dampening );
 
-    this.physicsRenderer.setUniform( 'uSpringForce' , {
-      type:"f",
-      value:this.params.springForce    
-    });
+    physicsGui.add( repelMultiplier , 'value' ).name( 'Repel Multiplier' );
+    physicsGui.add( flowMultiplier , 'value' ).name( 'Flow Multiplier' );
+    physicsGui.add( floatForce , 'value' ).name( 'Float Force' );
+    physicsGui.add( springForce , 'value' ).name( 'Spring Force' )
+    physicsGui.add( springDist , 'value' ).name( 'Spring Dist' );
+    physicsGui.add( maxVel , 'value' ).name( 'Max Vel' );
+    physicsGui.add( dampening , 'value' ).name( 'uDampening' );
 
-    this.physicsRenderer.setUniform( 'uSpringDist' , {
-      type:"f",
-      value:this.params.springDist   
-    });
 
-    this.physicsRenderer.setUniform( 'maxVel' , {
-      type:"f",
-      value:this.params.maxVel
-    });
 
     this.physicsRenderer.setUniform( 'dT'     , dT    );
     this.physicsRenderer.setUniform( 'timer'  , timer );
@@ -149,19 +160,81 @@
     this.normalTexture.wrapS = THREE.RepeatWrapping;
     this.normalTexture.wrapT = THREE.RepeatWrapping;
     //this.normalTexture
+   
+
+    var girth = {type:"f" ,value: this.params.girth }
+
+
+    var renderGui = gui.addFolder( 'Tendril Render');
+
+    renderGui.add( girth , 'value' ).name( 'Girth' );
+
+
+    this.color1 = {type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) }
+    this.color2 = {type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) }
+    this.color3 = {type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) }
+    this.color4 = {type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) }
+
+    var texScale    = { type:"f",value:.01}
+    var normalScale = { type:"f",value:.5}
+
+
+    renderGui.add( texScale , 'value' ).name( 'Texture Scale' );
+    renderGui.add( normalScale , 'value' ).name( 'Normal Scale' );
     
+    var c ={ 
+      c1: '#ff0000',
+      c2:   '#eeaa00',
+      c3:'#0000ff',
+      c4:'#999999' 
+    }
+
+    renderGui.addColor( c , 'c1' ).name('Color 1').onChange( function( value ){
+      var col = new THREE.Color( value );
+      this.color1.value.x = col.r;
+      this.color1.value.y = col.g;
+      this.color1.value.z = col.b;
+    }.bind( this ));
+
+    renderGui.addColor( c , 'c2' ).name('Color 2').onChange( function( value ){
+      var col = new THREE.Color( value );
+      this.color2.value.x = col.r;
+      this.color2.value.y = col.g;
+      this.color2.value.z = col.b;
+    }.bind( this ));
+
+
+    renderGui.addColor( c , 'c3' ).name('Color 3').onChange( function( value ){
+      var col = new THREE.Color( value );
+      this.color3.value.x = col.r;
+      this.color3.value.y = col.g;
+      this.color3.value.z = col.b;
+    }.bind( this ));
+
+
+    renderGui.addColor( c , 'c4' ).name('Color 4').onChange( function( value ){
+      var col = new THREE.Color( value );
+      this.color4.value.x = col.r;
+      this.color4.value.y = col.g;
+      this.color4.value.z = col.b;
+    }.bind( this ));
+
+
+
+
     var uniforms = {
       t_pos:{type:"t",value:null},
       t_audio:{type:"t",value:t_audio},
       lightPos:{type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) },
-      texScale:{type:"f",value:.01},
-      normalScale:{type:"f",value:.5},
+      t_active:{type:"t",value:this.activeTexture},
+      texScale:texScale,
+      normalScale:normalScale,
       tNormal:{type:"t",value:this.normalTexture},
-      color1:{type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) },
-      color2:{type:"v3",value:new THREE.Vector3( 0 , 1 , 1 ) },
-      color3:{type:"v3",value:new THREE.Vector3( 1 , .3 , 0 ) },
-      color4:{type:"v3",value:new THREE.Vector3( .5 , 0 , 2 ) },
-      girth:{type:"f" ,value: this.params.girth }
+      color1:this.color1,
+      color2:this.color2,
+      color3:this.color3,
+      color4:this.color4,
+      girth:girth
     }
 
 
@@ -170,6 +243,9 @@
       uniforms:uniforms,
       vertexShader: shaders.vertexShaders.tendrilLine,
       fragmentShader: shaders.fragmentShaders.tendrilLine,
+      blending:THREE.AdditiveBlending,
+      transparent:true,
+      opacity:.3
       //side:THREE.DoubleSide
 
     });
@@ -179,7 +255,9 @@
       uniforms:uniforms,
       vertexShader: shaders.vertexShaders.tendril,
       fragmentShader: shaders.fragmentShaders.tendril,
-      side:THREE.DoubleSide
+      blending:THREE.AdditiveBlending,
+      transparent:true,
+
 
     });
 
@@ -242,7 +320,7 @@
 
   Tendrils.prototype.update = function(){
 
-    var r = 500 *  Math.abs( Math.cos( timer.value * .01 ) );
+    var r = 1 *  Math.abs( Math.cos( timer.value * .01 ) );
 
     var x = r * Math.cos( timer.value * 1);
     var y =0;// r * Math.sin( timer.value * 1);
@@ -445,6 +523,7 @@
     }
 
   }
+  
   Tendrils.prototype.createBases = function(){
 
     
@@ -466,16 +545,16 @@
       );
 
       var position = new THREE.Vector3(
-        ((x-8)/16)*this.width,
-        ((y-8)/16)*this.height,
+        ((x-7.5)/16)*this.width,
+        ((y-7.5)/16)*this.height,
         0
       );
 
       mesh.position = position;
      
-      mesh.rotation.x = Math.random();
-      mesh.rotation.y = Math.random();
-      mesh.rotation.z = Math.random();
+      //mesh.rotation.x = Math.random();
+      //mesh.rotation.y = Math.random();
+      //mesh.rotation.z = Math.random();
 
       var base = new Monome( x , y , mesh );
 
@@ -487,6 +566,60 @@
     return bases;
 
 
+  }
+
+
+  Tendrils.prototype.createActiveTexture = function(){
+
+    var data = new Float32Array( 16 * 16  * 4 );
+
+    for( var i = 0; i < 16; i++ ){
+      for( var j = 0; j < 16; j++ ){
+
+        var index = (i + (j * 16)) * 4
+
+        data[index] = i/16;
+        data[index+1] = j/16;
+        data[index+2] = 0;//Math.random();
+        data[index+3] = 0;//Math.random();
+
+      }
+
+    }
+    var activeTexture = new THREE.DataTexture(
+      data, 
+      16, 
+      16, 
+      THREE.RGBAFormat, 
+      THREE.FloatType 
+    );
+
+    activeTexture.minFilter = THREE.NearestFilter;
+    activeTexture.magFilter = THREE.NearestFilter;
+    activeTexture.generateMipmaps = false;
+    activeTexture.needsUpdate = true;
+
+    console.log( 'ACTIVE TEXTURE' );
+    console.log( activeTexture );
+    return activeTexture;
+
+  }
+
+  Tendrils.prototype.updateActiveTexture = function( x , y , r , g , b , a ){
+
+    var index = (x + (y * 16))*4;
+
+
+    var d = this.activeTexture.image.data;
+
+    d[ index     ]  = r;
+    d[ index + 1 ]  = g;
+    d[ index + 2 ]  = b;
+    d[ index + 3 ]  = a;
+
+
+    this.activeTexture.needsUpdate = true;
+ 
   }
 
 
