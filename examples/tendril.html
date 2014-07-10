@@ -22,6 +22,7 @@
     <script src="../lib/TrackballControls.js"></script>
     <script src="../lib/ShaderLoader.js"></script>
     <script src="../lib/dat.gui.min.js"></script>
+    <script src="../lib/stats.min.js"></script>
 
     <script src="../lib/AudioController.js"></script>
     <script src="../lib/AudioTexture.js"></script>
@@ -236,6 +237,12 @@
         //controls = new THREE.TrackballControls( camera , container );
         container.appendChild( renderer.domElement );
 
+
+        stats = new Stats();
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.top = '0px';
+        stats.domElement.style.zIndex = 100;
+        container.appendChild( stats.domElement );
 
         controller = new Leap.Controller();
         controller.connect();
@@ -495,7 +502,7 @@
         
         requestAnimationFrame( animate );
         //controls.update();
-        
+       stats.update(); 
         renderer.render( scene , camera );
 
       }
