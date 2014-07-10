@@ -152,6 +152,6 @@ void main(){
 
   //gl_FragColor = vec4( lookup_table_color * aColor  * .75 + (vHead * .25) , 1. );
  // gl_FragColor = vec4(  aColor , 1. );
-  gl_FragColor = vec4( c , 1. );
+  gl_FragColor = vec4( c *lookup_table_color * aColor  * .9 + (vHead * .1)  , 1. );
 
 }

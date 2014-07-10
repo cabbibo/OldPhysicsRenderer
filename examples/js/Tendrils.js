@@ -171,9 +171,9 @@
 
 
     this.color1 = {type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) }
-    this.color2 = {type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) }
-    this.color3 = {type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) }
-    this.color4 = {type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) }
+    this.color2 = {type:"v3",value:new THREE.Vector3( 0 , 0 , 1 ) }
+    this.color3 = {type:"v3",value:new THREE.Vector3( 1 , 1 , 0 ) }
+    this.color4 = {type:"v3",value:new THREE.Vector3( 0 , 1 , 1 ) }
 
     var texScale    = { type:"f",value:.01}
     var normalScale = { type:"f",value:.5}
@@ -255,9 +255,9 @@
       uniforms:uniforms,
       vertexShader: shaders.vertexShaders.tendril,
       fragmentShader: shaders.fragmentShaders.tendril,
-      blending:THREE.AdditiveBlending,
-      transparent:true,
-
+      //blending:THREE.AdditiveBlending,
+      //transparent:true,
+      side: THREE.BackSide
 
     });
 
