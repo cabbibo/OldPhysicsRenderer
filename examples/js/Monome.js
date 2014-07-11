@@ -137,7 +137,7 @@ Monome.prototype.hoverOut = function(){
 Monome.prototype.select = function(){
 
 
-  this.note.play();
+//  this.note.play();
 
 
   if( this.active == true ){
