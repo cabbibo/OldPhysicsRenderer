@@ -136,7 +136,10 @@ Monome.prototype.hoverOut = function(){
 
 Monome.prototype.select = function(){
 
- 
+
+  this.note.play();
+
+
   if( this.active == true ){
     tendrils.updateActiveTexture( this.hit , this.noteIndex , 1 , 1 , 1 , 0 );
   }else{

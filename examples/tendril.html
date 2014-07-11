@@ -328,12 +328,12 @@
         console.log('ashasss');
         console.log( furryTails[0] );
 
-        var mesh = new THREE.Mesh(
+        /*var mesh = new THREE.Mesh(
         new THREE.IcosahedronGeometry( 10 , 1 )
         );
 
         mesh.position = furryTails[0].position;
-        scene.add( mesh );
+        scene.add( mesh );*/
 
         furryTails[0].attractionTimer = 0;
         furryTails[0].attracting = false;
@@ -367,7 +367,7 @@
           springForce: 20,
           springDist: 5,
           maxVel: 100,
-          baseGeo: new THREE.IcosahedronGeometry(30 , 1 )
+          baseGeo: new THREE.IcosahedronGeometry(50 , 1 )
           //baseGeo: new THREE.CubeGeometry( 50 , 50 , 50, 10 , 10 , 10 )
         });
 
