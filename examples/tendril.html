@@ -81,6 +81,9 @@
 
       var LOADED = 0;
       var NEEDED_TO_LOAD = 18;
+
+
+      var controlBool = { value: false }
       
       //audioController.mute.gain.value = 0.0;
 
@@ -141,6 +144,8 @@
       var colors = [];
       var gui = new dat.GUI({});
 
+      gui.add( controlBool , 'value' ).name('Camera Control');
+      
       var particleSystem;
       var physicsRenderer , uniforms;
 
@@ -545,7 +550,19 @@
         requestAnimationFrame(animate); 
         }, 1000 / 30);*/
         requestAnimationFrame( animate );
-        controls.update();
+       
+        if( controlBool.value == true ){
+          controls.update();
+        }else{
+
+          TMP_VECTOR.set( 0 , 0 , 0 );
+          camera.position.x = 0;
+          camera.position.y = 0;
+          camera.position.z = 1000;
+          camera.lookAt( TMP_VECTOR );
+          camera.up.set( 0 , 1 , 0 );
+
+        }
        stats.update(); 
         renderer.render( scene , camera );
 
