@@ -231,7 +231,7 @@
     }.bind( this ));*/
 
 
-    var t_iri = THREE.ImageUtils.loadTexture( '../img/iri/combo6.png' );
+    var t_iri = THREE.ImageUtils.loadTexture( '../img/iri/comboWet.png' );
 
 
     var uniforms = {

@@ -70,6 +70,7 @@
       var TMP_VECTOR = new THREE.Vector3();
 
       var INTERSECT_PLANE_INTERSECT = new THREE.Vector3();
+      var FURRY_ATTRACTOR = new THREE.Vector3();
 
       var MAX_VEL = 50;
 
@@ -81,7 +82,7 @@
       var LOADED = 0;
       var NEEDED_TO_LOAD = 18;
       
-      audioController.mute.gain.value = 0.0;
+      //audioController.mute.gain.value = 0.0;
 
       /*var userAudio = new UserAudio( audioController );
       
@@ -327,7 +328,17 @@
         console.log('ashasss');
         console.log( furryTails[0] );
 
-        furryTails[0].addDistanceSquaredForce( INTERSECT_PLANE_INTERSECT , 100 );
+        var mesh = new THREE.Mesh(
+        new THREE.IcosahedronGeometry( 10 , 1 )
+        );
+
+        mesh.position = furryTails[0].position;
+        scene.add( mesh );
+
+        furryTails[0].attractionTimer = 0;
+        furryTails[0].attracting = false;
+
+        furryTails[0].addDistanceSquaredForce( FURRY_ATTRACTOR , 100 );
 
         repelPositions.push(  furryTails[0].position );
         repelVelocities.push(  furryTails[0].velocity );
@@ -353,9 +364,11 @@
           repelMultiplier:50,
           flowMultiplier:400,
           floatForce: 100,
-          springDist: 30,
-          maxVel: 600,
-          baseGeo: new THREE.IcosahedronGeometry(30 , 5 )
+          springForce: 20,
+          springDist: 5,
+          maxVel: 100,
+          baseGeo: new THREE.IcosahedronGeometry(30 , 1 )
+          //baseGeo: new THREE.CubeGeometry( 50 , 50 , 50, 10 , 10 , 10 )
         });
 
         tendrils.activate();
@@ -398,6 +411,14 @@
 
         dT.value = clock.getDelta();
 
+        if( dT.value >= .2 ){
+
+          dT.value = 0;
+          console.log('SKIP');
+          console.log(dT.value);
+
+        }
+
         timer.value += dT.value;
 
         audioController.update();
@@ -406,18 +427,43 @@
 
         intersectPlaneIntersectMarker.lookAt( camera.position );
         if( !centerPaused ){
+        
           tendrils.update();
 
-            for( var i = 0; i < furryTails.length; i++ ){
+        
+          var furryTail = furryTails[0];
 
-        //  console.log('asas');
-          var furryTail = furryTails[i];
-          furryTail.updateTail();
-
-          furryTail.updatePhysics();
-        }
+          var d = furryTail.position.clone().sub( INTERSECT_PLANE_INTERSECT ).length();
 
 
+          if( furryTail.attracting == true ){
+
+            FURRY_ATTRACTOR.copy( INTERSECT_PLANE_INTERSECT );
+
+          }
+
+          if( (timer.value - furryTail.attractionTimer) > 2.5 ){
+
+            furryTail.attracting = true;
+
+          }
+
+          if( d < 5 ){
+
+            
+            FURRY_ATTRACTOR.x = (Math.random() - .5 ) * 10000;
+            FURRY_ATTRACTOR.y = (Math.random() - .5 ) * 10000;
+            FURRY_ATTRACTOR.z = 10000;
+
+            furryTail.attracting = false;
+
+            furryTail.attractionTimer = timer.value;
+
+          }
+          
+          
+            furryTail.updateTail();
+            furryTail.updatePhysics();
 
         }
 
@@ -493,7 +539,10 @@
 
         //physicsRenderer.update();
 
-        
+
+        /*setTimeout(function() {
+        requestAnimationFrame(animate); 
+        }, 1000 / 30);*/
         requestAnimationFrame( animate );
         //controls.update();
        stats.update(); 

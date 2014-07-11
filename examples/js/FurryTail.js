@@ -153,7 +153,7 @@
     pR.addBoundTexture( this.line , 't_ooPos' , 'ooOutput' );
 
 
-    var mesh = new THREE.Mesh( new THREE.SphereGeometry( 500 ) );
+    var mesh = new THREE.Mesh( new THREE.SphereGeometry( 1 ) );
     var pTexture = ParticleUtils.createPositionsTexture( this.size , mesh );
     this.physicsRenderer.reset( pTexture );
     
@@ -304,7 +304,7 @@
 
 
 
-    this.position.add( this.velocity);
+    this.position.add( this.velocity.clone().multiplyScalar( dT.value * 80 ));
     this.velocity.multiplyScalar( pp.dampening ); // turn to vector dampening
 
     this.force.set( 0 , 0 , 0);

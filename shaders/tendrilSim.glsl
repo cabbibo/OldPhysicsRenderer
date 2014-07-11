@@ -125,10 +125,11 @@ void main(){
 
   vec4 active = texture2D( t_active , lookup );
 
-  float hovered = active.z;
-  float selected = active.y;
-  float playing = active.x;
-  float current = active.a;
+
+  float hovered   = active.x;
+  float selected  = active.y;
+  float current   = active.z;
+  float playing   = current * selected;
 
 
   float column = vUv.x;

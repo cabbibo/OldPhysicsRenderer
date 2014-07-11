@@ -32,7 +32,7 @@ function Monome( whichHit , whichNote , mesh ){
 
 Monome.prototype.createMaterial = function(){
 
-  var t_iri = THREE.ImageUtils.loadTexture( '../img/iri/combo6.png' )
+  var t_iri = THREE.ImageUtils.loadTexture( '../img/iri/comboWet.png' )
 
   this.uniforms = {
 
