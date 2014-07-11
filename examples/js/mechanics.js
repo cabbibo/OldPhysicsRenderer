@@ -1,5 +1,24 @@
 function initMechanics(){
 
+  intersectPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry( 50000 , 50000 ),
+    new THREE.MeshNormalMaterial()
+  );
+
+  intersectPlane.position.z = 300;
+  intersectPlane.visible = false;
+  scene.add( intersectPlane );
+
+  intersectPlaneIntersectMarker =  new THREE.Mesh(
+    new THREE.CubeGeometry( 1 , 1 , 100 ),
+    new THREE.MeshBasicMaterial({color:0xffffff})
+  );
+
+  intersectPlaneIntersectMarker.position = INTERSECT_PLANE_INTERSECT;
+
+  scene.add( intersectPlaneIntersectMarker );
+
+
 
   projector = new THREE.Projector();
   raycaster = new THREE.Raycaster();
@@ -54,7 +73,7 @@ function updateMechanics( delta ){
  // if( !paused ){
    /* intersectPlane.position.copy( camera.position );
 
-    var dT = distanceToIntersectPlane;
+    var dT = di_ustanceToIntersectPlane;
     var m =  ( controls.speed / controls.maxSpeed ); 
     var d = dT + m * m * dT * 3;
     var vector = new THREE.Vector3( 0, 0, -d );
@@ -69,12 +88,12 @@ function updateMechanics( delta ){
 
     raycaster.set( camera.position, vector.sub( camera.position ).normalize() );
 
-    var intersects = raycaster.intersectObject( floor );
+    var intersects = raycaster.intersectObject( intersectPlane );
 
     if( intersects.length > 0 ){
     
-      FLOOR_INTERSECT.copy( intersects[0].point ); 
-      FLOOR_INTERSECT.dirVector = vector;
+      INTERSECT_PLANE_INTERSECT.copy( intersects[0].point ); 
+      INTERSECT_PLANE_INTERSECT.dirVector = vector;
       
      // bait.position.copy( intersects[0].point );
     }

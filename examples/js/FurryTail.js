@@ -18,7 +18,7 @@
       lineGeo:            lineGeo,
       audio:              audioController,
 
-      particleSprite:     THREE.ImageUtils.loadTexture('../img/cabbibo.png'),
+      particleSprite:     THREE.ImageUtils.loadTexture('../img/sprite/cabbibo.png'),
       color1:             new THREE.Vector3( 1 , 1 , 1 ),
       color2:             new THREE.Vector3( 1 , 1 , 1 ),
       color3:             new THREE.Vector3( 1 , 1 , 1 ),
@@ -342,6 +342,7 @@
       value: this.position
     });
 
+    this.physicsRenderer.setUniform( 'dT' , dT );
 
   }
 

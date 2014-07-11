@@ -44,6 +44,7 @@
       width:1000,
       height:1000,
       girth: 50,
+      headMultiplier: 10,
       floatForce: 1000,
       springForce: 100,
       springDist: 40,
@@ -85,10 +86,18 @@
 
 
     var physicsGui = gui.addFolder('Tendril Sim' );
+    
+    this.physicsRenderer.setUniform( 't_active' ,{
+      type:"t",
+      value:this.activeTexture
+    } );
+
     this.physicsRenderer.setUniform( 't_audio' ,{
       type:"t",
       value:t_audio
     } );
+
+
 
     this.physicsRenderer.setUniform( 't_og' , {
       type:"t",
@@ -155,7 +164,7 @@
     this.physicsRenderer.setUniform( 'timer'  , timer );
 
 
-    this.normalTexture = THREE.ImageUtils.loadTexture('../img/normals/moss_normal_map.jpg');
+    this.normalTexture = THREE.ImageUtils.loadTexture('../img/normals/sand.png');
 
     this.normalTexture.wrapS = THREE.RepeatWrapping;
     this.normalTexture.wrapT = THREE.RepeatWrapping;
@@ -163,14 +172,16 @@
    
 
     var girth = {type:"f" ,value: this.params.girth }
+    var headMultiplier = {type:"f" ,value: this.params.headMultiplier}
 
 
     var renderGui = gui.addFolder( 'Tendril Render');
 
     renderGui.add( girth , 'value' ).name( 'Girth' );
+    renderGui.add( headMultiplier , 'value' ).name( 'Head Multiplier' );
 
 
-    this.color1 = {type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) }
+    /*this.color1 = {type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) }
     this.color2 = {type:"v3",value:new THREE.Vector3( 0 , 0 , 1 ) }
     this.color3 = {type:"v3",value:new THREE.Vector3( 1 , 1 , 0 ) }
     this.color4 = {type:"v3",value:new THREE.Vector3( 0 , 1 , 1 ) }
@@ -217,24 +228,27 @@
       this.color4.value.x = col.r;
       this.color4.value.y = col.g;
       this.color4.value.z = col.b;
-    }.bind( this ));
+    }.bind( this ));*/
 
 
+    var t_iri = THREE.ImageUtils.loadTexture( '../img/iri/combo6.png' );
 
 
     var uniforms = {
       t_pos:{type:"t",value:null},
+      t_iri:{type:"t",value:t_iri},
       t_audio:{type:"t",value:t_audio},
-      lightPos:{type:"v3",value:new THREE.Vector3( 1 , 0 , 0 ) },
+      lightPos:{type:"v3",value:INTERSECT_PLANE_INTERSECT },
       t_active:{type:"t",value:this.activeTexture},
-      texScale:texScale,
-      normalScale:normalScale,
-      tNormal:{type:"t",value:this.normalTexture},
-      color1:this.color1,
-      color2:this.color2,
-      color3:this.color3,
-      color4:this.color4,
-      girth:girth
+     // texScale:texScale,
+     // normalScale:normalScale,
+     // tNormal:{type:"t",value:this.normalTexture},
+      //color1:this.color1,
+      //color2:this.color2,
+      //color3:this.color3,
+      //color4:this.color4,
+      girth:girth,
+      headMultiplier:headMultiplier
     }
 
 
@@ -256,7 +270,7 @@
       vertexShader: shaders.vertexShaders.tendril,
       fragmentShader: shaders.fragmentShaders.tendril,
       //blending:THREE.AdditiveBlending,
-      //transparent:true,
+     // transparent:true,
       side: THREE.BackSide
 
     });
@@ -289,14 +303,14 @@
 
     this.physicsRenderer.reset( this.startingTexture );
 
-    scene.add( this.flowMarker );
+    //scene.add( this.flowMarker );
 
   }
 
   Tendrils.prototype.activate = function(){
 
     scene.add( this.mesh );
-    scene.add( this.line );
+   // scene.add( this.line );
 
     for( var i = 0; i < this.bases.length; i++ ){
 

@@ -3,6 +3,9 @@ var MONOME_MESHES = [];
 var MONOME_NOTES  = [];
 
 var MONOME_INTERSECTED;
+
+var MONOME_MAT;
+
 function Monome( whichHit , whichNote , mesh ){
 
   this.active = false;
@@ -13,17 +16,44 @@ function Monome( whichHit , whichNote , mesh ){
   this.mesh.monome = this; // For use in intersections
 
   this.hit = whichHit;
-  this.note = whichNote;
+  this.noteIndex = whichNote;
+
+  this.note = MONOME_NOTES[ this.noteIndex ];
+
+  this.createMaterial();
+
+  this.mesh.material = this.material;
+  this.mesh.material.needsUpdate = true;
 
   MONOME_MESHES.push( mesh );
 
 }
 
-Monome.prototype.hoverMaterial = new THREE.MeshBasicMaterial({color:0xff00ff});
-Monome.prototype.activeMaterial = new THREE.MeshBasicMaterial({color:0x00ff00,wireframe:true});
-Monome.prototype.unactiveMaterial = new THREE.MeshBasicMaterial({color:0xff0000,wireframe:true});
-Monome.prototype.activeSelectedMaterial = new THREE.MeshBasicMaterial({color:0xffff00});
-Monome.prototype.unactiveSelectedMaterial = new THREE.MeshBasicMaterial({color:0x00ffff});
+
+Monome.prototype.createMaterial = function(){
+
+  var t_iri = THREE.ImageUtils.loadTexture( '../img/iri/combo6.png' )
+
+  this.uniforms = {
+
+    hovered:{type:"f" , value:0},
+    active:{type:"f" , value:0},
+    selected:{type:"f" , value:0},
+    t_audio:{ type:"t" , value:this.note.texture},
+    t_iri:{type:"t",value:t_iri},
+    lightPos:{type:"v3",value:INTERSECT_PLANE_INTERSECT}
+
+  }
+
+  this.material = new THREE.ShaderMaterial({
+
+    uniforms:this.uniforms,
+    vertexShader: shaders.vertexShaders.monome,
+    fragmentShader: shaders.fragmentShaders.monome,
+
+  });
+
+}
 
 Monome.prototype.update = function( whichHit ){
 
@@ -50,57 +80,86 @@ Monome.prototype.update = function( whichHit ){
 }
 
 Monome.prototype.hoverOver = function(){
-
-  console.log('HOBEVERS' );
-  tendrils.updateActiveTexture( this.hit , this.note , 0 , 0 , 1 , 0 );
   
   if( !this.selected ){
     
-    this.hovered = true;
-    this.mesh.material =this.hoverMaterial;
-    this.mesh.materialNeedsUpdate = true;
+    if( this.active == true ){
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 1 , 0 , 1 , 0 );
+    }else{
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 1 , 0 , 0 , 0 );
+    }
+
+  }else{
+
+    if( this.active == true ){
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 1 , 1 , 1 , 0 );
+    }else{
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 1 , 1 , 0 , 0 );
+    }
 
   }
+
+  this.hovered = true;
+  this.uniforms.hovered.value = 1;
+
 
 
 
 }
 
 Monome.prototype.hoverOut = function(){
-  console.log('UNHOBEVERS');
-
   
   if( !this.selected ){
 
-    tendrils.updateActiveTexture( this.hit , this.note , 0 , 0 , 0 , 0 );
     
-    this.hovered = false;
-    this.mesh.material =this.unactiveMaterial;
-    this.mesh.materialNeedsUpdate = true;
+    if( this.active == true ){
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 0 , 0 , 1 , 0 );
+    }else{
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 0 , 0 , 0 , 0 );
+    }
+    
+  }else{
+
+    if( this.active == true ){
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 0 , 1 , 1 , 0 );
+    }else{
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 0 , 1 , 0 , 0 );
+    }
 
   }
+
+  this.hovered = false;
+  this.uniforms.hovered.value = 0;
 
 
 }
 
 Monome.prototype.select = function(){
 
-  tendrils.updateActiveTexture( this.hit , this.note , 0 , 1 , 0 , 0 );
+ 
+  if( this.active == true ){
+    tendrils.updateActiveTexture( this.hit , this.noteIndex , 1 , 1 , 1 , 0 );
+  }else{
+    tendrils.updateActiveTexture( this.hit , this.noteIndex , 1 , 1 , 0 , 0 );
+  }
   
   this.selected = true;
-  this.mesh.material =this.unactiveSelectedMaterial;
-  this.mesh.materialNeedsUpdate = true;
+  this.uniforms.selected.value = 1;
 
 }
 
 Monome.prototype.deselect = function(){
   
-  
-  tendrils.updateActiveTexture( this.hit , this.note , 0 , 0 , 1 , 0 );
+
+  if( this.active == true ){
+    tendrils.updateActiveTexture( this.hit , this.noteIndex , 1 , 0 , 1 , 0 );
+  }else{
+    tendrils.updateActiveTexture( this.hit , this.noteIndex , 1 , 0 , 0 , 0 );
+  }
+
 
   this.selected = false;
-  this.mesh.material =this.unactiveMaterial;
-  this.mesh.materialNeedsUpdate = true;
+  this.uniforms.selected.value = 0;
 
 
 }
@@ -113,22 +172,24 @@ Monome.prototype.activate = function(){
   //this.mesh.material =this.activeMaterial;
   //his.mesh.materialNeedsUpdate = true;
 
+  this.uniforms.active.value = 1;
+
   if( this.selected ){
 
-    tendrils.updateActiveTexture( this.hit , this.note , 1 , 0 , 0 , 0 );
-    
-    this.mesh.material =this.activeSelectedMaterial;
-    this.mesh.materialNeedsUpdate = true;
-
-    MONOME_NOTES[ this.note ].play();
+    if( this.hovered == true ){
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 1 , 1 , 1 , 0 );
+    }else{
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 0 , 1 , 1 , 0 );
+    } 
+    this.note.play();
 
   }else{
 
-
-    tendrils.updateActiveTexture( this.hit , this.note , 0 , 0 , 0 , 1 );
-    
-    this.mesh.material =this.activeMaterial;
-    this.mesh.materialNeedsUpdate = true;
+    if( this.hovered == true ){
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 1 , 0 , 1 , 0 );
+    }else{
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 0 , 0 , 1 , 0 );
+    } 
 
 
   }
@@ -138,22 +199,23 @@ Monome.prototype.activate = function(){
 Monome.prototype.deactivate = function(){
 
   this.active = false;
+  this.uniforms.active.value = 0;
 
   if( this.selected ){
 
-    tendrils.updateActiveTexture( this.hit , this.note , 0 , 1 , 0 , 0 );
-    
-
-    this.mesh.material =this.unactiveSelectedMaterial;
-    this.mesh.materialNeedsUpdate = true;
+    if( this.hovered == true ){
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 1 , 1 , 0 , 0 );
+    }else{
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 0 , 1 , 0 , 0 );
+    } 
 
   }else{
 
-    tendrils.updateActiveTexture( this.hit , this.note , 0 , 0 , 0 , 0 );
-    
-    this.mesh.material =this.unactiveMaterial;
-    this.mesh.materialNeedsUpdate = true;
-
+    if( this.hovered == true ){
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 1 , 0 , 0 , 0 );
+    }else{
+      tendrils.updateActiveTexture( this.hit , this.noteIndex , 0 , 0 , 0 , 0 );
+    } 
 
 
   }

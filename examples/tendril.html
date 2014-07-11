@@ -69,7 +69,7 @@
 
       var TMP_VECTOR = new THREE.Vector3();
 
-      var FLOOR_INTERSECT = new THREE.Vector3();
+      var INTERSECT_PLANE_INTERSECT = new THREE.Vector3();
 
       var MAX_VEL = 50;
 
@@ -81,9 +81,9 @@
       var LOADED = 0;
       var NEEDED_TO_LOAD = 18;
       
-      /*audioController.mute.gain.value = 0.0;
+      audioController.mute.gain.value = 0.0;
 
-      var userAudio = new UserAudio( audioController );
+      /*var userAudio = new UserAudio( audioController );
       
       userAudio.onStreamCreated = function(){
         init();
@@ -196,6 +196,9 @@
 
       shaders.load( 'fs-planet' , 'planet' , 'fragment' );
       shaders.load( 'vs-planet' , 'planet' , 'vertex' );
+      
+      shaders.load( 'fs-monome' , 'monome' , 'fragment' );
+      shaders.load( 'vs-monome' , 'monome' , 'vertex' );
 
 
       // TEXT
@@ -213,6 +216,7 @@
 
       function init(){
 
+        console.log('INITS');
         /*
 
           THREE.js Initialization
@@ -223,7 +227,7 @@
         var h = window.innerHeight;
 
         camera = new THREE.PerspectiveCamera( 65 , w/h , 1 , 200000 );
-        camera.position.z = 1000;
+        camera.position.z = 1500;
 
         //controls = new THREE.TrackballControls( camera );
         scene = new THREE.Scene();
@@ -267,39 +271,21 @@
         );
 
 
-        floor = new THREE.Mesh(
-          new THREE.PlaneGeometry( 50000 , 50000 ),
-          new THREE.MeshNormalMaterial()
-        );
-
-        floor.position.z = 500;
-        floor.visible = false;
-        scene.add( floor );
-
-        floorIntersectMarker =  new THREE.Mesh(
-          new THREE.CubeGeometry( 1 , 1 , 100 ),
-          new THREE.MeshBasicMaterial({color:0xffffff})
-        );
-
-        floorIntersectMarker.position = FLOOR_INTERSECT;
-
-        scene.add( floorIntersectMarker );
-
         center = new THREE.Mesh( 
           new THREE.IcosahedronGeometry( 50 , 0 ),
           new THREE.MeshBasicMaterial()
         );
 
 
-        for( var i = 0; i< 9; i++ ){
+        for( var i = 0; i< 7; i++ ){
 
           var repelObject = {}
 
           repelObject.mesh = center.clone();
           repelObject.velocity = new THREE.Vector3();
           repelObject.position = new THREE.Vector3(
-            (Math.random() -.5 ) * 5000,
-            (Math.random() -.5 ) * 5000,
+           10000000, //(Math.random() -.5 ) * 5000,
+            0,//(Math.random() -.5 ) * 5000,
             Math.random() * 1000
           );
           repelObject.mesh.position = repelObject.position;
@@ -341,11 +327,19 @@
         console.log('ashasss');
         console.log( furryTails[0] );
 
-        furryTails[0].addDistanceSquaredForce( FLOOR_INTERSECT , 100 );
+        furryTails[0].addDistanceSquaredForce( INTERSECT_PLANE_INTERSECT , 100 );
 
         repelPositions.push(  furryTails[0].position );
         repelVelocities.push(  furryTails[0].velocity );
         repelRadii.push(  200 );
+
+        repelPositions.push(  INTERSECT_PLANE_INTERSECT );
+        repelVelocities.push(  new THREE.Vector3() );
+        repelRadii.push(  200 );
+
+        repelPositions.push(  camera.position );
+        repelVelocities.push(  new THREE.Vector3() );
+        repelRadii.push(  500 );
 
 
         tendrils = new Tendrils({
@@ -356,12 +350,12 @@
           width: 1000,
           height: 1000,
           girth: 5,
-          repelMultiplier:10,
+          repelMultiplier:50,
           flowMultiplier:400,
           floatForce: 100,
           springDist: 30,
           maxVel: 600,
-          baseGeo: new THREE.CubeGeometry( 50 , 50, 50 )
+          baseGeo: new THREE.IcosahedronGeometry(30 , 5 )
         });
 
         tendrils.activate();
@@ -410,7 +404,7 @@
 
         updateMechanics( dT.value );
 
-        floorIntersectMarker.lookAt( camera.position );
+        intersectPlaneIntersectMarker.lookAt( camera.position );
         if( !centerPaused ){
           tendrils.update();
 
@@ -439,7 +433,7 @@
         //TMP_VECTOR.set( 0,0,100);
         //var attractPoint = FLOOR_INTERSECT.clone().add( TMP_VECTOR );
 
-
+/*
         for( var i = 0; i < repelObjects.length; i++ ){
 
           var rO = repelObjects[i];
@@ -469,8 +463,8 @@
           }
 
           TMP_VECTOR.copy( rO.position );
-          TMP_VECTOR.sub( FLOOR_INTERSECT );
-          force.sub(TMP_VECTOR.multiplyScalar( .0001 ) );
+          TMP_VECTOR.sub( INTERSECT_PLANE_INTERSECT );
+          force.sub(TMP_VECTOR.multiplyScalar( .001 ) );
 
 
 
@@ -488,7 +482,7 @@
 
         }
 
-
+*/
        /* if( !centerPaused ){
 
           center.position.x = Math.sin( timer.value * 1.73 ) * 12;

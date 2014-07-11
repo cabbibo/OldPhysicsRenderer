@@ -1,6 +1,7 @@
 uniform sampler2D t_oPos;
 uniform sampler2D t_pos;
 uniform sampler2D t_audio;
+uniform sampler2D t_active;
 uniform sampler2D t_og;
 
 uniform float dT;
@@ -108,7 +109,28 @@ void main(){
   /*pos   += offset;
   oPos  += offset;
   ogPos += offset;*/
-  
+ 
+  float indexRow = floor(( 1. -vUv.y) * 4. );
+  float tendrilIndex = floor( vUv.x * 64. ) + ( indexRow*64. );
+
+
+ 
+  float lookupX = mod( tendrilIndex , 16. ) / 16.;
+  float lookupY = 1.- ceil( (tendrilIndex+.5) / 16. ) / 16.;
+
+  lookupX += .5/16.;
+  lookupY += .5/16.;
+    
+  vec2 lookup = vec2( lookupX , lookupY );
+
+  vec4 active = texture2D( t_active , lookup );
+
+  float hovered = active.z;
+  float selected = active.y;
+  float playing = active.x;
+  float current = active.a;
+
+
   float column = vUv.x;
 
   vec3 vel = pos.xyz - oPos.xyz;
@@ -158,9 +180,9 @@ void main(){
 
    // force += normalize( dif ) * 30.;
  
-    force += flow * slice * uFlowMultiplier;
+    force += flow * slice * uFlowMultiplier*( ( current * 5.)+1.);
 
-    force += floating * upwardsForce * uFloatForce;
+    force += floating * upwardsForce * uFloatForce * (( selected * 5.)+1.);
 
     force += getRepelForce( pos );
 
@@ -186,9 +208,9 @@ void main(){
 
 //    vec3 columnDif = vec3( x , y , 0 ) - pos;
    // force += vec3( columnDif.xy * 10. , 0. )*10.;
-    force += flow * slice * uFlowMultiplier;
+    force += flow * slice * uFlowMultiplier *( ( current * 5.)+1.);
 
-    force += floating * upwardsForce * uFloatForce;
+    force += floating * upwardsForce * uFloatForce * (( selected * 5.)+1.);
 
     force += getRepelForce( pos );
 
@@ -214,7 +236,7 @@ void main(){
 
     }
     
-    newPos = pos + vel * fDT;
+    newPos = pos + vel * fDT * ((playing * 4.)+1.);
 
     gl_FragColor = vec4( newPos , 1. );
 
