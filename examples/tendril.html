@@ -230,7 +230,7 @@
         camera = new THREE.PerspectiveCamera( 65 , w/h , 1 , 200000 );
         camera.position.z = 1500;
 
-        //controls = new THREE.TrackballControls( camera );
+        //NASSNscontrols = new THREE.TrackballControls( camera );
         scene = new THREE.Scene();
 
         clock = new THREE.Clock();
@@ -239,7 +239,7 @@
         renderer.setSize( window.innerWidth, window.innerHeight );
 
         var container = document.getElementById('container' );
-        //controls = new THREE.TrackballControls( camera , container );
+        controls = new THREE.TrackballControls( camera , container );
         container.appendChild( renderer.domElement );
 
 
@@ -360,7 +360,8 @@
           repelRadii: repelRadii,
           width: 1000,
           height: 1000,
-          girth: 5,
+          girth: 2,
+          headMultiplier: 8,
           repelMultiplier:50,
           flowMultiplier:400,
           floatForce: 100,
@@ -544,7 +545,7 @@
         requestAnimationFrame(animate); 
         }, 1000 / 30);*/
         requestAnimationFrame( animate );
-        //controls.update();
+        controls.update();
        stats.update(); 
         renderer.render( scene , camera );
 

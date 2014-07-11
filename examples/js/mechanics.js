@@ -26,9 +26,10 @@ function initMechanics(){
   mouse = new THREE.Vector2();
   mouse.down = false;
 
-  window.addEventListener( 'mousemove' , onMouseMove , false );
-  window.addEventListener( 'mousedown' , onMouseDown , false );
-  window.addEventListener( 'mouseup' , onMouseUp , false );
+  var container = document.getElementById('container');
+  container.addEventListener( 'mousemove' , onMouseMove , false );
+  container.addEventListener( 'mousedown' , onMouseDown , false );
+  container.addEventListener( 'mouseup' , onMouseUp , false );
 
 
   function onMouseMove( event ) {
@@ -40,6 +41,8 @@ function initMechanics(){
   }
 
   function onMouseDown( event ) {
+
+    console.log('MOUSE DOWN' );
 
     if( MONOME_INTERSECTED ){
 
