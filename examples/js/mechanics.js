@@ -16,7 +16,7 @@ function initMechanics(){
 
   intersectPlaneIntersectMarker.position = INTERSECT_PLANE_INTERSECT;
 
-  scene.add( intersectPlaneIntersectMarker );
+ // scene.add( intersectPlaneIntersectMarker );
 
 
 
@@ -41,8 +41,6 @@ function initMechanics(){
   }
 
   function onMouseDown( event ) {
-
-    console.log('MOUSE DOWN' );
 
     if( MONOME_INTERSECTED ){
 
@@ -118,8 +116,6 @@ function updateMechanics( delta ){
       }else{
 
         if( MONOME_INTERSECTED != firstIntersected ){
-
-          console.log('WSISDS' );
 
           MONOME_INTERSECTED.monome.hoverOut();
 
